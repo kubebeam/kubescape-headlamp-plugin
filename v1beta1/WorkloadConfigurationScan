@@ -1,0 +1,74 @@
+kubectl explain WorkloadConfigurationScan  --recursive 
+---
+
+GROUP:      spdx.softwarecomposition.kubescape.io
+KIND:       WorkloadConfigurationScan
+VERSION:    v1beta1
+
+DESCRIPTION:
+    WorkloadConfigurationScan is a custom resource that describes a
+    configuration scan result of a workload.
+    
+FIELDS:
+  apiVersion	<string>
+  kind	<string>
+  metadata	<ObjectMeta>
+    annotations	<map[string]string>
+    creationTimestamp	<string>
+    deletionGracePeriodSeconds	<integer>
+    deletionTimestamp	<string>
+    finalizers	<[]string>
+    generateName	<string>
+    generation	<integer>
+    labels	<map[string]string>
+    managedFields	<[]ManagedFieldsEntry>
+      apiVersion	<string>
+      fieldsType	<string>
+      fieldsV1	<FieldsV1>
+      manager	<string>
+      operation	<string>
+      subresource	<string>
+      time	<string>
+    name	<string>
+    namespace	<string>
+    ownerReferences	<[]OwnerReference>
+      apiVersion	<string> -required-
+      blockOwnerDeletion	<boolean>
+      controller	<boolean>
+      kind	<string> -required-
+      name	<string> -required-
+      uid	<string> -required-
+    resourceVersion	<string>
+    selfLink	<string>
+    uid	<string>
+  spec	<WorkloadConfigurationScanSpec> -required-
+    controls	<map[string]ScannedControl> -required-
+      controlID	<string> -required-
+      name	<string> -required-
+      rules	<[]ScannedControlRule> -required-
+        appliedIgnoreRules	<[]string> -required-
+        controlConfigurations	<map[string][]string> -required-
+        name	<string> -required-
+        paths	<[]RulePath> -required-
+          failedPath	<string> -required-
+          fixCommand	<string> -required-
+          fixPath	<string> -required-
+          fixPathValue	<string> -required-
+        relatedResourcesIDs	<[]string> -required-
+        status	<RuleStatus> -required-
+          status	<string> -required-
+          subStatus	<string> -required-
+      severity	<ControlSeverity> -required-
+        scoreFactor	<number> -required-
+        severity	<string> -required-
+      status	<ScannedControlStatus> -required-
+        info	<string> -required-
+        status	<string> -required-
+        subStatus	<string> -required-
+    relatedObjects	<[]WorkloadScanRelatedObject> -required-
+      apiGroup	<string> -required-
+      apiVersion	<string> -required-
+      kind	<string> -required-
+      name	<string> -required-
+      namespace	<string> -required-
+

@@ -1,0 +1,165 @@
+kubectl explain SBOMSyft --recursive 
+---
+
+GROUP:      spdx.softwarecomposition.kubescape.io
+KIND:       SBOMSyft
+VERSION:    v1beta1
+
+DESCRIPTION:
+    SBOMSyft is a custom resource that describes an SBOM in the Syft format.
+    
+FIELDS:
+  apiVersion	<string>
+  kind	<string>
+  metadata	<ObjectMeta>
+    annotations	<map[string]string>
+    creationTimestamp	<string>
+    deletionGracePeriodSeconds	<integer>
+    deletionTimestamp	<string>
+    finalizers	<[]string>
+    generateName	<string>
+    generation	<integer>
+    labels	<map[string]string>
+    managedFields	<[]ManagedFieldsEntry>
+      apiVersion	<string>
+      fieldsType	<string>
+      fieldsV1	<FieldsV1>
+      manager	<string>
+      operation	<string>
+      subresource	<string>
+      time	<string>
+    name	<string>
+    namespace	<string>
+    ownerReferences	<[]OwnerReference>
+      apiVersion	<string> -required-
+      blockOwnerDeletion	<boolean>
+      controller	<boolean>
+      kind	<string> -required-
+      name	<string> -required-
+      uid	<string> -required-
+    resourceVersion	<string>
+    selfLink	<string>
+    uid	<string>
+  spec	<SBOMSyftSpec>
+    metadata	<SPDXMeta> -required-
+      report	<ReportMeta> -required-
+        createdAt	<string> -required-
+      tool	<ToolMeta> -required-
+        name	<string> -required-
+        version	<string> -required-
+    syft	<SyftDocument>
+      artifactRelationships	<[]SyftRelationship> -required-
+        child	<string> -required-
+        metadata	<string>
+        parent	<string> -required-
+        type	<string> -required-
+      artifacts	<[]SyftPackage> -required-
+        PackageBasicData	<PackageBasicData> -required-
+          cpes	<[]CPE> -required-
+            cpe	<string> -required-
+            source	<string>
+          foundBy	<string> -required-
+          id	<string> -required-
+          language	<string> -required-
+          licenses	<[]License> -required-
+            locations	<[]Location> -required-
+              LocationData	<LocationData> -required-
+                Coordinates	<Coordinates> -required-
+                  layerID	<string>
+                  path	<string> -required-
+                accessPath	<string> -required-
+              LocationMetadata	<LocationMetadata> -required-
+                annotations	<map[string]string>
+            spdxExpression	<string> -required-
+            type	<string> -required-
+            urls	<[]string> -required-
+            value	<string> -required-
+          locations	<[]Location> -required-
+            LocationData	<LocationData> -required-
+              Coordinates	<Coordinates> -required-
+                layerID	<string>
+                path	<string> -required-
+              accessPath	<string> -required-
+            LocationMetadata	<LocationMetadata> -required-
+              annotations	<map[string]string>
+          name	<string> -required-
+          purl	<string> -required-
+          type	<string> -required-
+          version	<string> -required-
+        PackageCustomData	<PackageCustomData> -required-
+          metadata	<string>
+          metadataType	<string>
+      descriptor	<SyftDescriptor> -required-
+        configuration	<string>
+        name	<string> -required-
+        version	<string> -required-
+      distro	<LinuxRelease> -required-
+        bugReportURL	<string>
+        buildID	<string>
+        cpeName	<string>
+        homeURL	<string>
+        id	<string>
+        idLike	<[]string>
+        imageID	<string>
+        imageVersion	<string>
+        name	<string>
+        prettyName	<string>
+        privacyPolicyURL	<string>
+        supportEnd	<string>
+        supportURL	<string>
+        variant	<string>
+        variantID	<string>
+        version	<string>
+        versionCodename	<string>
+        versionID	<string>
+      files	<[]SyftFile>
+        contents	<string>
+        digests	<[]Digest>
+          algorithm	<string> -required-
+          value	<string> -required-
+        executable	<Executable>
+          elfSecurityFeatures	<ELFSecurityFeatures>
+            cfi	<boolean>
+            dso	<boolean> -required-
+            fortify	<boolean>
+            nx	<boolean> -required-
+            pie	<boolean> -required-
+            relRO	<string> -required-
+            safeStack	<boolean>
+            stackCanary	<boolean>
+            symbolTableStripped	<boolean> -required-
+          format	<string> -required-
+          hasEntrypoint	<boolean> -required-
+          hasExports	<boolean> -required-
+          importedLibraries	<[]string> -required-
+        id	<string> -required-
+        licenses	<[]FileLicense>
+          evidence	<FileLicenseEvidence>
+            confidence	<integer> -required-
+            extent	<integer> -required-
+            offset	<integer> -required-
+          spdxExpression	<string> -required-
+          type	<string> -required-
+          value	<string> -required-
+        location	<Coordinates> -required-
+          layerID	<string>
+          path	<string> -required-
+        metadata	<FileMetadataEntry>
+          groupID	<integer> -required-
+          linkDestination	<string>
+          mimeType	<string> -required-
+          mode	<integer> -required-
+          size	<integer> -required-
+          type	<string> -required-
+          userID	<integer> -required-
+      schema	<Schema> -required-
+        url	<string> -required-
+        version	<string> -required-
+      source	<SyftSource> -required-
+        id	<string> -required-
+        metadata	<string> -required-
+        name	<string> -required-
+        type	<string> -required-
+        version	<string> -required-
+  status	<SBOMSyftStatus>
+
