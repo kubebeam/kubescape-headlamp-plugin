@@ -29,10 +29,14 @@ jobs:
       - run: npx @kinvolk/headlamp-plugin tsc .
       - run: npx @kinvolk/headlamp-plugin test .
       - run: npx @kinvolk/headlamp-plugin build .
+      - name: Create folder
+        run: |
+          mkdir -p kubescape-headlamp-plugin 
+          cp dist/main.js kubescape-headlamp-plugin/
+          cp package.json kubescape-headlamp-plugin/
       - name: Archive artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: dist
+          name: kubescape-headlamp-plugin
           path: |
-            dist/main.js 
-            package.json
+            kubescape-headlamp-plugin/*
