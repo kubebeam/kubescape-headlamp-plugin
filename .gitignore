@@ -4,3 +4,4 @@ dist
 v1beta1/examples 
 hack 
 .eslintcache
+integration-test 

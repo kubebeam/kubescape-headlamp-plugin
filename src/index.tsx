@@ -59,8 +59,15 @@ registerRoute({
 // Image scanning
 registerSidebarEntry({
   parent: kubescape,
-  name: vulnerabilities,
+  name: 'vulnerabilitysummaries',
   label: 'Vulnerabilities',
+  url: '/kubescape/vulnerabilitymanifestsummaries',
+});
+
+registerSidebarEntry({
+  parent: kubescape,
+  name: vulnerabilities,
+  label: 'Vulnerability Manifests',
   url: '/kubescape/vulnerabilities',
 });
 
@@ -69,13 +76,6 @@ registerSidebarEntry({
 //   name: vulnerabilitiesNamespaceSummaries,
 //   label: 'Namespace Vulnerabilities',
 //   url: '/kubescape/vulnerabilitysummaries',
-// });
-
-// registerSidebarEntry({
-//   parent: kubescape,
-//   name: vulnerabilitysummaries,
-//   label: 'Workload Summaries',
-//   url: '/kubescape/vulnerabilitymanifestsummaries',
 // });
 
 import KubescapeVulnerability from './vulnerabilities/Vulnerabilities';

@@ -13,7 +13,7 @@ function VulnerabilityManifestListView() {
   const [resource] = vulnerabilityManifestClass.useList();
 
   return (
-    <SectionBox title="Vulnerabilities">
+    <SectionBox title="Vulnerabilities (Manifests)">
       <Table
         data={resource}
         columns={[

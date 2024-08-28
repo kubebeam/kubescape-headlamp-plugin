@@ -13,7 +13,6 @@ import KubescapeWorkloadConfigurationScanList from './ResourceList';
 export default function ComplianceView() {
   return (
     <>
-      <title>BBBBB</title>
       <div>
         <h1>Compliance</h1>
         <BasicTabs />
