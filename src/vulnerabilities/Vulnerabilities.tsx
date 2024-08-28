@@ -1,7 +1,7 @@
 import { Link, SectionBox, Table } from '@kinvolk/headlamp-plugin/lib/components/common';
-import { vulnerabilityManifestClass } from '../model';
+import { vulnerabilityManifestSummaryClass } from '../model';
 
-export default function KubescapeVulnerability() {
+export default function KubescapeVulnerabilities() {
   return (
     <div>
       <VulnerabilityManifestListView />
@@ -10,10 +10,10 @@ export default function KubescapeVulnerability() {
 }
 
 function VulnerabilityManifestListView() {
-  const [resource] = vulnerabilityManifestClass.useList();
+  const [resource] = vulnerabilityManifestSummaryClass.useList();
 
   return (
-    <SectionBox title="Vulnerabilities (Manifests)">
+    <SectionBox title="Vulnerabilities">
       <Table
         data={resource}
         columns={[
@@ -22,7 +22,7 @@ function VulnerabilityManifestListView() {
             accessorFn: item => {
               return (
                 <Link
-                  routeName={`/kubescape/vulnerabilitymanifests/:namespace/:name`}
+                  routeName={`/kubescape/vulnerabilities/:namespace/:name`}
                   params={{
                     name: item.metadata.name,
                     namespace: item.metadata.namespace,
@@ -72,7 +72,6 @@ function VulnerabilityManifestListView() {
             },
             gridTemplate: 'min-content',
           },
-
           {
             header: 'Image',
             accessorFn: item => item.metadata.annotations['kubescape.io/image-tag'],

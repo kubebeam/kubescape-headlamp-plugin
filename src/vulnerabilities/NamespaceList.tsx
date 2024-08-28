@@ -80,7 +80,7 @@ function makeLinksToVulnerabilitySummaries(vulnerabilitiesRef) {
   return vulnerabilitiesRef.map(ref => (
     <ListItem>
       <Link
-        routeName={`/kubescape/vulnerabilitymanifestsummaries/:namespace/:name`}
+        routeName={`/kubescape/vulnerabilities/:namespace/:name`}
         params={{
           name: ref.name,
           namespace: ref.namespace,

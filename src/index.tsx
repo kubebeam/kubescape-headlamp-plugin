@@ -3,8 +3,6 @@ import { registerRoute, registerSidebarEntry } from '@kinvolk/headlamp-plugin/li
 const kubescape = 'kubescape';
 const vulnerabilities: string = 'vulnerabilities';
 const compliance: string = 'compliance';
-const configurationScanSummaries: string = 'configurationscansummaries';
-const workloadConfigurationscans: string = 'workloadConfigurationscans';
 
 // Kubescape main sidebar
 registerSidebarEntry({
@@ -15,12 +13,18 @@ registerSidebarEntry({
   url: '/kubescape/compliance',
 });
 
-// Configuration scanning
 registerSidebarEntry({
   parent: kubescape,
   name: compliance,
   label: 'Compliance',
   url: '/kubescape/compliance',
+});
+
+registerSidebarEntry({
+  parent: kubescape,
+  name: vulnerabilities,
+  label: 'Vulnerabilities',
+  url: '/kubescape/vulnerabilities',
 });
 
 import KubescapeConfigurationScanSummaryList from './compliance/Namespaces';
@@ -31,7 +35,7 @@ registerRoute({
   sidebar: compliance,
   component: () => <KubescapeConfigurationScanSummaryList />,
   exact: true,
-  name: configurationScanSummaries,
+  name: 'configurationscansummaries',
 });
 
 import KubescapeWorkloadConfigurationScanDetails from './compliance/ScanDetails';
@@ -56,49 +60,35 @@ registerRoute({
   name: compliance,
 });
 
-// Image scanning
-registerSidebarEntry({
-  parent: kubescape,
-  name: 'vulnerabilitysummaries',
-  label: 'Vulnerabilities',
-  url: '/kubescape/vulnerabilitymanifestsummaries',
-});
+import KubescapeVulnerabilities from './vulnerabilities/Vulnerabilities';
 
-registerSidebarEntry({
+registerRoute({
+  path: '/kubescape/vulnerabilities',
   parent: kubescape,
+  sidebar: vulnerabilities,
+  component: () => <KubescapeVulnerabilities />,
+  exact: true,
   name: vulnerabilities,
-  label: 'Vulnerability Manifests',
-  url: '/kubescape/vulnerabilities',
 });
 
+import KubescapeVulnerabilityDetails from './vulnerabilities/VulnerabilityDetails';
+
+registerRoute({
+  path: '/kubescape/vulnerabilities/:namespace/:name',
+  parent: kubescape,
+  sidebar: vulnerabilities,
+  component: () => <KubescapeVulnerabilityDetails />,
+  exact: true,
+  name: 'vulnerabilitymanifestsummary',
+});
+
+// Namespace view is not enabled in sidebar yet
 // registerSidebarEntry({
 //   parent: kubescape,
 //   name: vulnerabilitiesNamespaceSummaries,
 //   label: 'Namespace Vulnerabilities',
 //   url: '/kubescape/vulnerabilitysummaries',
 // });
-
-import KubescapeVulnerability from './vulnerabilities/Vulnerabilities';
-
-registerRoute({
-  path: '/kubescape/vulnerabilities',
-  parent: kubescape,
-  sidebar: vulnerabilities,
-  component: () => <KubescapeVulnerability />,
-  exact: true,
-  name: vulnerabilities,
-});
-
-import KubescapeVulnerabilityManifestSummaryList from './vulnerabilities/SummaryList';
-
-registerRoute({
-  path: '/kubescape/vulnerabilitymanifestsummaries',
-  parent: kubescape,
-  sidebar: vulnerabilities,
-  component: () => <KubescapeVulnerabilityManifestSummaryList />,
-  exact: true,
-  name: 'vulnerabilitymanifestsummaries',
-});
 
 import KubescapeVulnerabilitySummaryList from './vulnerabilities/NamespaceList';
 
@@ -108,27 +98,5 @@ registerRoute({
   sidebar: vulnerabilities,
   component: () => <KubescapeVulnerabilitySummaryList />,
   exact: true,
-  name: 'vulnerabilitysummaries',
-});
-
-import KubescapeVulnerabilityManifestDetails from './vulnerabilities/ManifestDetails';
-
-registerRoute({
-  path: '/kubescape/vulnerabilitymanifests/:namespace/:name',
-  parent: kubescape,
-  sidebar: vulnerabilities,
-  component: () => <KubescapeVulnerabilityManifestDetails />,
-  exact: true,
-  name: 'vulnerabilitymanifest',
-});
-
-import KubescapeVulnerabilityManifestSummaryDetails from './vulnerabilities/SummaryDetails';
-
-registerRoute({
-  path: '/kubescape/vulnerabilitymanifestsummaries/:namespace/:name',
-  parent: kubescape,
-  sidebar: vulnerabilities,
-  component: () => <KubescapeVulnerabilityManifestSummaryDetails />,
-  exact: true,
-  name: 'vulnerabilitymanifestsummary',
+  name: 'vulnerabilitynamespacesummaries',
 });
