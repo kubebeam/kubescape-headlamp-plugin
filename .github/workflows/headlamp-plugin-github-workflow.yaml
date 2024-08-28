@@ -2,17 +2,12 @@ name: Headlamp plugin linting, type checking, and testing
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
-
-
-env:
-  HEADLAMP_PLUGIN_VERSION: latest
+    branches: [main]
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     defaults:
@@ -21,7 +16,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [18.x]
+        node-version: [21.x]
 
     steps:
       - uses: actions/checkout@v3
@@ -29,8 +24,15 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
-      - run: npx @kinvolk/headlamp-plugin@$HEADLAMP_PLUGIN_VERSION format --check .
-      - run: npx @kinvolk/headlamp-plugin@$HEADLAMP_PLUGIN_VERSION lint .
-      - run: npx @kinvolk/headlamp-plugin@$HEADLAMP_PLUGIN_VERSION build .
-      - run: npx @kinvolk/headlamp-plugin@$HEADLAMP_PLUGIN_VERSION test .
-      - run: npx @kinvolk/headlamp-plugin@$HEADLAMP_PLUGIN_VERSION tsc .
+      - run: npx @kinvolk/headlamp-plugin lint .
+      - run: npx @kinvolk/headlamp-plugin format --check .
+      - run: npx @kinvolk/headlamp-plugin tsc .
+      - run: npx @kinvolk/headlamp-plugin test .
+      - run: npx @kinvolk/headlamp-plugin build .
+      - name: Archive artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: |
+            dist/main.js 
+            package.json
