@@ -17,6 +17,13 @@ export const vulnerabilityManifestSummaryClass = makeCustomResourceClass({
   pluralName: 'vulnerabilitymanifestsummaries',
 });
 
+export const vulnerabilitySummaryClass = makeCustomResourceClass({
+  apiInfo: apiGroupVersion,
+  isNamespaced: false,
+  singularName: 'vulnerabilitysummary',
+  pluralName: 'vulnerabilitysummaries',
+});
+
 export const workloadConfigurationScanClass = makeCustomResourceClass({
   apiInfo: apiGroupVersion,
   isNamespaced: true,
@@ -29,6 +36,13 @@ export const workloadConfigurationScanSummaryClass = makeCustomResourceClass({
   isNamespaced: true,
   singularName: 'workloadconfigurationscansummary',
   pluralName: 'workloadconfigurationscansummaries',
+});
+
+export const configurationScanSummaries = makeCustomResourceClass({
+  apiInfo: apiGroupVersion,
+  isNamespaced: false,
+  singularName: 'configurationscansummary',
+  pluralName: 'configurationscansummaries',
 });
 
 // configurationscansummaries will not be retrieved with a UID, so we cannot use useApiList()

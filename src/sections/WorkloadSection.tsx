@@ -1,11 +1,17 @@
-import { SectionBox, NameValueTable, Link } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import { DefaultDetailsViewSection } from '@kinvolk/headlamp-plugin/lib';
+import { Link, NameValueTable, SectionBox } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import { useState } from 'react';
 import { workloadConfigurationScanSummaryClass } from '../model';
+import { getCVESummary } from '../vulnerabilities/Details';
 
-export function addKubescapeDetailSection(resource, sections) {
+export default function addKubescapeWorkloadSection(resource, sections) {
   // Ignore if there is no resource.
   if (!resource) {
+    return sections;
+  }
+
+  if (resource.kind === 'Namespace') {
+    // Return early if we're on the Namespace page
     return sections;
   }
 
@@ -22,8 +28,7 @@ export function addKubescapeDetailSection(resource, sections) {
 
   const detailsHeaderIdx = sections.findIndex(
     section => section.id === DefaultDetailsViewSection.MAIN_HEADER
-  );
-  // There is no header, so we do nothing.
+  ); // There is no header, so we do nothing.
   if (detailsHeaderIdx === -1) {
     return sections;
   }
@@ -33,7 +38,7 @@ export function addKubescapeDetailSection(resource, sections) {
     id: customSectionId,
     section: (
       <>
-        <KubeScapeInfo resource={resource} />
+        <KubescapeInfo resource={resource} />
       </>
     ),
   });
@@ -41,7 +46,7 @@ export function addKubescapeDetailSection(resource, sections) {
   return sections;
 }
 
-function KubeScapeInfo(props) {
+function KubescapeInfo(props) {
   const { resource } = props;
   const resourceName = resource.jsonData.metadata.name;
   const namespace = resource.jsonData.metadata.namespace;
@@ -69,11 +74,10 @@ function KubeScapeInfo(props) {
           <NameValueTable
             rows={[
               {
-                name: 'Compliance',
-                value: (
+                name: (
                   <>
                     <Link
-                      routeName={`/kubescape/workloadconfigurationscans/:namespace/:name`}
+                      routeName={`/kubescape/compliance/:namespace/:name`}
                       params={{
                         name: scanName,
                         namespace: namespace,
@@ -81,9 +85,9 @@ function KubeScapeInfo(props) {
                     >
                       Configuration scan
                     </Link>
-                    &nbsp;({getCVESummary(configurationScan)})
                   </>
                 ),
+                value: getCVESummary(configurationScan.jsonData),
               },
             ]}
           />
@@ -91,16 +95,4 @@ function KubeScapeInfo(props) {
       </>
     )
   );
-}
-
-function getCVESummary(configurationScanSummary) {
-  const severities = configurationScanSummary?.jsonData.spec.severities;
-
-  const criticalCount = severities.critical;
-  const mediumCount = severities.medium;
-  const highCount = severities.high;
-  const lowCount = severities.low;
-  const unknownCount = severities.unknown;
-
-  return `Critical :${criticalCount}, High: ${highCount}, Medium: ${mediumCount}, Low: ${lowCount}, Unknown: ${unknownCount}`;
 }

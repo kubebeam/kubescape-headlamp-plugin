@@ -262,15 +262,14 @@ function isRelevant(relevantManifest, id): string {
   return '';
 }
 
-export function getCVESummary(cr) {
-  const severities = cr?.spec.severities;
+export function getCVESummary(configurationScanSummary) {
+  const severities = configurationScanSummary?.spec.severities;
 
   const criticalCount = severities.critical.all;
   const mediumCount = severities.medium.all;
   const highCount = severities.high.all;
   const lowCount = severities.low.all;
-  const negligibleCount = severities.negligible.all;
   const unknownCount = severities.unknown.all;
 
-  return `Critical :${criticalCount} High: ${highCount} Medium: ${mediumCount}`;
+  return `Critical :${criticalCount}, High: ${highCount}, Medium: ${mediumCount}, Low: ${lowCount}, Unknown: ${unknownCount}`;
 }

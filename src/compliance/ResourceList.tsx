@@ -22,7 +22,7 @@ function WorkloadConfigurationScanListView() {
             accessorFn: item => {
               return (
                 <Link
-                  routeName={`/kubescape/workloadconfigurationscans/:namespace/:name`}
+                  routeName={`/kubescape/compliance/:namespace/:name`}
                   params={{
                     name: item.metadata.name,
                     namespace: item.metadata.namespace,
