@@ -24,14 +24,21 @@ export const workloadConfigurationScanClass = makeCustomResourceClass({
   pluralName: 'workloadconfigurationscans',
 });
 
-// configurationscansummaries are not retrieved with a UID, so we cannot use useApiList()
+export const workloadConfigurationScanSummaryClass = makeCustomResourceClass({
+  apiInfo: apiGroupVersion,
+  isNamespaced: true,
+  singularName: 'workloadconfigurationscansummary',
+  pluralName: 'workloadconfigurationscansummaries',
+});
+
+// configurationscansummaries will not be retrieved with a UID, so we cannot use useApiList()
 export function getAllConfigurationScanSummaries(): Promise<any> {
   return ApiProxy.request(
     `/apis/spdx.softwarecomposition.kubescape.io/v1beta1/configurationscansummaries`
   );
 }
 
-// vulnerabilitysummaries are not retrieved with a UID, so we cannot use useApiList()
+// vulnerabilitysummaries will not be retrieved with a UID, so we cannot use useApiList()
 export function getAllVulnerabilitySummaries(): Promise<any> {
   return ApiProxy.request(
     `/apis/spdx.softwarecomposition.kubescape.io/v1beta1/vulnerabilitysummaries`

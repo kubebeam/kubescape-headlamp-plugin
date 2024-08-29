@@ -1,4 +1,8 @@
-import { registerRoute, registerSidebarEntry } from '@kinvolk/headlamp-plugin/lib';
+import {
+  registerDetailsViewSectionsProcessor,
+  registerRoute,
+  registerSidebarEntry,
+} from '@kinvolk/headlamp-plugin/lib';
 
 const kubescape = 'kubescape';
 const vulnerabilities: string = 'vulnerabilities';
@@ -100,3 +104,7 @@ registerRoute({
   exact: true,
   name: 'vulnerabilitynamespacesummaries',
 });
+
+import { addKubescapeDetailSection } from './compliance/WorkloadPanel';
+
+registerDetailsViewSectionsProcessor(addKubescapeDetailSection);
