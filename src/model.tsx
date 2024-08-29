@@ -63,13 +63,13 @@ export function getAllVulnerabilitySummaries(): Promise<any> {
 export async function fetchWorkloadConfigurationScan() {
   function getAllWorkloadConfigurationScans(): Promise<any> {
     return ApiProxy.request(
-      `/apis/spdx.softwarecomposition.kubescape.io/v1beta1/workloadconfigurationscans`
+      `/apis/spdx.softwarecomposition.kubescape.io/v1beta1/workloadconfigurationscansummaries`
     );
   }
 
   function getWorkloadConfigurationScan(name, namespace): Promise<any> {
     return ApiProxy.request(
-      `/apis/spdx.softwarecomposition.kubescape.io/v1beta1/namespaces/${namespace}/workloadconfigurationscans/${name}`
+      `/apis/spdx.softwarecomposition.kubescape.io/v1beta1/namespaces/${namespace}/workloadconfigurationscansummaries/${name}`
     );
   }
 
