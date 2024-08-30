@@ -67,7 +67,7 @@ Users have different information needs, dependening on their role and task.
 
 ### Notes
 
-- Kubescape uses API aggregation, so there are no CRDs: https://github.com/kubescape/storage. For development purposes the specs are retrieved with `kubectl explain --recursive` and saved in the folder [v1beta1](/v1beta1).
+- Kubescape uses API aggregation: https://github.com/kubescape/storage. There are no CRDs. The API contract can be found in the softwarecomposition [folder](https://github.com/kubescape/storage/tree/main/pkg/apis/softwarecomposition/v1beta1).
 
 - The list queries do not provide details but only metadata. This makes it challenging for the GUI. As a workaround the plugin makes multiple calls to individual resources.
 
