@@ -46,7 +46,7 @@ function ConfigurationScans(props) {
             accessorFn: item => {
               return (
                 <Link
-                  routeName={`/kubescape/compliance/:namespace/:name`}
+                  routeName={`/kubescape/compliance/namespaces/:namespace/:name`}
                   params={{
                     name: item.name,
                     namespace: item.namespace,

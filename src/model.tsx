@@ -60,23 +60,15 @@ export function getAllVulnerabilitySummaries(): Promise<any> {
 }
 
 // List of workloadconfigurationscans does not retrieve detailed info in the spec. We need to fetch each workloadconfigurationscan individually.
-export async function fetchWorkloadConfigurationScan() {
-  function getAllWorkloadConfigurationScans(): Promise<any> {
-    return ApiProxy.request(
-      `/apis/spdx.softwarecomposition.kubescape.io/v1beta1/workloadconfigurationscansummaries`
-    );
-  }
-
-  function getWorkloadConfigurationScan(name, namespace): Promise<any> {
-    return ApiProxy.request(
-      `/apis/spdx.softwarecomposition.kubescape.io/v1beta1/namespaces/${namespace}/workloadconfigurationscansummaries/${name}`
-    );
-  }
-
-  const scanList = await getAllWorkloadConfigurationScans();
+export async function fetchWorkloadConfigurationScan(): Promise<any> {
+  const scanList = await ApiProxy.request(
+    `/apis/spdx.softwarecomposition.kubescape.io/v1beta1/workloadconfigurationscansummaries`
+  );
   const workloadScanData = await Promise.all(
     scanList.items.map(scan =>
-      getWorkloadConfigurationScan(scan.metadata.name, scan.metadata.namespace)
+      ApiProxy.request(
+        `/apis/spdx.softwarecomposition.kubescape.io/v1beta1/namespaces/${scan.metadata.namespace}/workloadconfigurationscansummaries/${scan.metadata.name}`
+      )
     )
   );
 

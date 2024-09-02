@@ -56,12 +56,23 @@ registerRoute({
 import KubescapeWorkloadConfigurationScanDetails from './compliance/Details';
 
 registerRoute({
-  path: '/kubescape/compliance/:namespace/:name',
+  path: '/kubescape/compliance/namespaces/:namespace/:name',
   parent: kubescape,
   sidebar: compliance,
   component: () => <KubescapeWorkloadConfigurationScanDetails />,
   exact: true,
   name: 'Configuration Scan',
+});
+
+import KubescapeControlResults from './compliance/ControlResults';
+
+registerRoute({
+  path: '/kubescape/compliance/controls/:control',
+  parent: kubescape,
+  sidebar: compliance,
+  component: () => <KubescapeControlResults />,
+  exact: true,
+  name: 'Control Configuration Scan',
 });
 
 import KubescapeVulnerabilities from './vulnerabilities/Vulnerabilities';

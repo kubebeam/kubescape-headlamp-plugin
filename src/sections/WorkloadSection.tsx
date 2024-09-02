@@ -77,7 +77,7 @@ function KubescapeInfo(props) {
                 name: (
                   <>
                     <Link
-                      routeName={`/kubescape/compliance/:namespace/:name`}
+                      routeName={`/kubescape/compliance/namespaces/:namespace/:name`}
                       params={{
                         name: scanName,
                         namespace: namespace,
