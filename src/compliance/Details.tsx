@@ -8,7 +8,6 @@ import {
 import { Box, Link } from '@mui/material';
 import React from 'react';
 import { useLocation } from 'react-router';
-import YAML from 'yaml';
 import { workloadConfigurationScanClass } from '../model';
 import controlLibrary from './controlLibrary.js';
 
@@ -84,9 +83,9 @@ function WorkloadConfigurationScanDetailView(props) {
 
       {cr && <Controls controls={cr.jsonData.spec.controls} />}
 
-      <SectionBox title="Details">
+      {/* <SectionBox title="Details">
         <pre>{YAML.stringify(cr?.jsonData)}</pre>
-      </SectionBox>
+      </SectionBox> */}
     </>
   );
 }
