@@ -40,3 +40,12 @@ jobs:
           name: kubescape-headlamp-plugin
           path: |
             kubescape-headlamp-plugin/*
+      - name: Update latest release 
+        uses: pyTooling/Actions/releaser@r0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          rm: true
+          tag: latest 
+          files: |
+            dist/main.js
+            package.json
