@@ -1,9 +1,8 @@
 import { DefaultDetailsViewSection } from '@kinvolk/headlamp-plugin/lib';
 import { Link, NameValueTable, SectionBox } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import { useState } from 'react';
-import { workloadConfigurationScanSummaryClass } from '../model';
-import { getCVESummary } from '../vulnerabilities/CVESummary';
 import { getControlsSummary } from '../compliance/ControlsSummary';
+import { workloadConfigurationScanSummaryClass } from '../model';
 
 export default function addKubescapeWorkloadSection(resource, sections) {
   // Ignore if there is no resource.

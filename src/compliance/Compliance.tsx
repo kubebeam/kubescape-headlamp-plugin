@@ -1,10 +1,10 @@
+import { Link as HeadlampLink } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import {
   SectionBox,
   StatusLabel,
   StatusLabelProps,
   Table,
 } from '@kinvolk/headlamp-plugin/lib/components/common';
-import { Link as HeadlampLink } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import { Box, Link } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { fetchWorkloadConfigurationScan } from '../model';
@@ -18,7 +18,7 @@ export default function ComplianceView() {
   const [, setState] = useState();
 
   useEffect(() => {
-    if (workloadScanData == null) {
+    if (workloadScanData === null) {
       fetchWorkloadConfigurationScan().then(response => {
         workloadScanData = response;
 
@@ -39,7 +39,7 @@ export default function ComplianceView() {
   );
 }
 
-function ConfigurationScanningListView(props) {
+function ConfigurationScanningListView() {
   return (
     <>
       {workloadScanData && (

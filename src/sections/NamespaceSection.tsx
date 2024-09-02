@@ -1,9 +1,9 @@
 import { DefaultDetailsViewSection } from '@kinvolk/headlamp-plugin/lib';
 import { Link, NameValueTable, SectionBox } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import { useState } from 'react';
+import { getControlsSummary } from '../compliance/ControlsSummary';
 import { configurationScanSummaries, vulnerabilitySummaryClass } from '../model';
 import { getCVESummary } from '../vulnerabilities/CVESummary';
-import { getControlsSummary } from '../compliance/ControlsSummary';
 
 export default function addKubescapeNamespaceSection(resource, sections) {
   // Ignore if there is no resource.

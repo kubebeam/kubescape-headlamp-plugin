@@ -1,7 +1,7 @@
 import { Link, SectionBox, Table } from '@kinvolk/headlamp-plugin/lib/components/common';
-import controlLibrary from './controlLibrary.js';
 import { useLocation } from 'react-router';
 import { workloadScanData } from './Compliance';
+import controlLibrary from './controlLibrary.js';
 
 export default function KubescapeControlResults() {
   const location = useLocation();
@@ -71,7 +71,7 @@ function getFailedWorkloads(workloadScanData, controlID: string) {
   const workloads = [];
 
   for (const workload of workloadScanData) {
-    for (const [_, scan] of Object.entries(workload.spec.controls) as any) {
+    for (const [, scan] of Object.entries(workload.spec.controls) as any) {
       if (scan.controlID === controlID && scan.status.status === 'failed') {
         workloads.push(workload);
         break;

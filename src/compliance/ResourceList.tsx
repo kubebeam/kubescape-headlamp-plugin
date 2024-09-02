@@ -1,6 +1,6 @@
 import { Link, SectionBox, Table } from '@kinvolk/headlamp-plugin/lib/components/common';
+import { Box, Stack, Tooltip } from '@mui/material';
 import { workloadScanData } from './Compliance';
-import { Stack, Tooltip, Box } from '@mui/material';
 
 export default function KubescapeWorkloadConfigurationScanList() {
   return (
@@ -54,7 +54,7 @@ function WorkloadConfigurationScanListView() {
             accessorFn: item => {
               let count = 0;
 
-              for (const [_, scan] of Object.entries(item.spec.controls) as any) {
+              for (const [, scan] of Object.entries(item.spec.controls) as any) {
                 if (scan.status.status === 'failed') {
                   count++;
                 }
@@ -75,7 +75,7 @@ function WorkloadConfigurationScanListView() {
 function countScans(workloadScan, severity: string): number {
   let count: number = 0;
 
-  for (const [_, scan] of Object.entries(workloadScan.spec.controls) as any) {
+  for (const [, scan] of Object.entries(workloadScan.spec.controls) as any) {
     if (scan.status.status === 'failed' && scan.severity.severity === severity) {
       count++;
     }
@@ -115,7 +115,7 @@ function resultStack(workloadScan) {
 function getWorkloadsWithFindings(workloadScanData) {
   const workloads = [];
   for (const workload of workloadScanData) {
-    for (const [_, scan] of Object.entries(workload.spec.controls) as any) {
+    for (const [, scan] of Object.entries(workload.spec.controls) as any) {
       if (scan.status.status === 'failed') {
         workloads.push(workload);
         break;

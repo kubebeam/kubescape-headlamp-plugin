@@ -1,4 +1,4 @@
-import { Stack, Tooltip, Box } from '@mui/material';
+import { Box,Stack, Tooltip } from '@mui/material';
 
 export function getCVESummary(configurationScanSummary) {
   const severities = configurationScanSummary?.spec.severities;
