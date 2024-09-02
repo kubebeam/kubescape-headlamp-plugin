@@ -1,4 +1,4 @@
-name: Headlamp plugin linting, type checking, and testing
+name: Kubescape-headlamp-plugin linting, type checking, testing, and pre-release
 
 on:
   push:
@@ -32,17 +32,7 @@ jobs:
       - run: npx @kinvolk/headlamp-plugin tsc .
       - run: npx @kinvolk/headlamp-plugin test .
       - run: npx @kinvolk/headlamp-plugin build .
-      - name: Create folder
-        run: |
-          mkdir -p kubescape-headlamp-plugin 
-          cp dist/main.js kubescape-headlamp-plugin/
-          cp package.json kubescape-headlamp-plugin/
-      - name: Archive artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: kubescape-headlamp-plugin
-          path: |
-            kubescape-headlamp-plugin/*
+    
       - name: Update latest release 
         uses: pyTooling/Actions/releaser@r0
         with:
