@@ -32,7 +32,11 @@ jobs:
       - run: npx @kinvolk/headlamp-plugin tsc .
       - run: npx @kinvolk/headlamp-plugin test .
       - run: npx @kinvolk/headlamp-plugin build .
-    
+
+      - name: Create release info file
+        run: |
+         echo -e "ref: $GITHUB_REF \ncommit: $GITHUB_SHA\nbuild: $(date +"%Y-%m-%dT%H:%M:%SZ")" \
+         > dist/info.txt
       - name: Update latest release 
         uses: pyTooling/Actions/releaser@r0
         with:
@@ -40,5 +44,6 @@ jobs:
           rm: true
           tag: latest 
           files: |
+            dist/info.txt 
             dist/main.js
             package.json
