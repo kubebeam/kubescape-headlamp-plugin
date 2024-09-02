@@ -9,6 +9,7 @@ import {
 import { Box, Link } from '@mui/material';
 import React, { useEffect } from 'react';
 import { useLocation } from 'react-router';
+import { getCVESummary } from './CVESummary';
 
 export default function KubescapeVulnerabilityDetails() {
   const location = useLocation();
@@ -260,16 +261,4 @@ function isRelevant(relevantManifest, id): string {
     }
   }
   return '';
-}
-
-export function getCVESummary(configurationScanSummary) {
-  const severities = configurationScanSummary?.spec.severities;
-
-  const criticalCount = severities.critical.all;
-  const mediumCount = severities.medium.all;
-  const highCount = severities.high.all;
-  const lowCount = severities.low.all;
-  const unknownCount = severities.unknown.all;
-
-  return `Critical :${criticalCount}, High: ${highCount}, Medium: ${mediumCount}, Low: ${lowCount}, Unknown: ${unknownCount}`;
 }

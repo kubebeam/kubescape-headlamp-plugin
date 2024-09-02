@@ -9,6 +9,7 @@ import { Box, Link } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { fetchWorkloadConfigurationScan } from '../model';
 import controlLibrary from './controlLibrary.js';
+import KubescapeWorkloadConfigurationScanList from './ResourceList';
 
 // TODO better https://dev.to/yezyilomo/global-state-management-in-react-with-global-variables-and-hooks-state-management-doesn-t-have-to-be-so-hard-2n2c
 export let workloadScanData: any[] = null;
@@ -32,15 +33,13 @@ export default function ComplianceView() {
     <>
       <div>
         <h1>Compliance</h1>
-        <ConfigurationScanningListView workloadScanData={workloadScanData} />
+        <BasicTabs />
       </div>
     </>
   );
 }
 
 function ConfigurationScanningListView(props) {
-  const { workloadScanData } = props;
-
   return (
     <>
       {workloadScanData && (
@@ -180,7 +179,7 @@ function makeResultsLabel(workloadScanData: any[], item) {
               control: item.controlID,
             }}
           >
-            {failCount} Failed {passedCount} Accepted
+            {failCount} Failed, {passedCount} Accepted
           </HeadlampLink>
         </Box>
       </StatusLabel>
@@ -240,4 +239,63 @@ function countFailedCVE(workloadScanData): number {
     }
   }
   return uniques.length;
+}
+
+// copied from https://mui.com/material-ui/react-tabs/#introduction
+import Tab from '@mui/material/Tab';
+import Tabs from '@mui/material/Tabs';
+import * as React from 'react';
+
+interface TabPanelProps {
+  children?: React.ReactNode;
+  index: number;
+  value: number;
+}
+
+function CustomTabPanel(props: TabPanelProps) {
+  const { children, value, index, ...other } = props;
+
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`simple-tabpanel-${index}`}
+      aria-labelledby={`simple-tab-${index}`}
+      {...other}
+    >
+      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
+    </div>
+  );
+}
+
+function a11yProps(index: number) {
+  return {
+    id: `simple-tab-${index}`,
+    'aria-controls': `simple-tabpanel-${index}`,
+  };
+}
+
+function BasicTabs() {
+  const [value, setValue] = React.useState(0);
+
+  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+    setValue(newValue);
+  };
+
+  return (
+    <Box sx={{ width: '100%' }}>
+      <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+        <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
+          <Tab label="Controls" {...a11yProps(0)} />
+          <Tab label="Resources" {...a11yProps(1)} />
+        </Tabs>
+      </Box>
+      <CustomTabPanel value={value} index={0}>
+        <ConfigurationScanningListView />
+      </CustomTabPanel>
+      <CustomTabPanel value={value} index={1}>
+        <KubescapeWorkloadConfigurationScanList />
+      </CustomTabPanel>
+    </Box>
+  );
 }

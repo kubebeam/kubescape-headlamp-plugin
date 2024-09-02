@@ -1,9 +1,4 @@
-import {
-  Link,
-  MainInfoSection,
-  SectionBox,
-  Table,
-} from '@kinvolk/headlamp-plugin/lib/components/common';
+import { Link, SectionBox, Table } from '@kinvolk/headlamp-plugin/lib/components/common';
 import controlLibrary from './controlLibrary.js';
 import { useLocation } from 'react-router';
 import { workloadScanData } from './Compliance';

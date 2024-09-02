@@ -2,7 +2,8 @@ import { DefaultDetailsViewSection } from '@kinvolk/headlamp-plugin/lib';
 import { Link, NameValueTable, SectionBox } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import { useState } from 'react';
 import { configurationScanSummaries, vulnerabilitySummaryClass } from '../model';
-import { getCVESummary } from '../vulnerabilities/Details';
+import { getCVESummary } from '../vulnerabilities/CVESummary';
+import { getControlsSummary } from '../compliance/ControlsSummary';
 
 export default function addKubescapeNamespaceSection(resource, sections) {
   // Ignore if there is no resource.
@@ -70,7 +71,7 @@ function KubescapeInfo(props) {
                     Configuration scan
                   </Link>
                 ),
-                value: getControlsSummary(configurationScanSummary),
+                value: getControlsSummary(configurationScanSummary.jsonData),
               },
               {
                 name: (
@@ -91,16 +92,4 @@ function KubescapeInfo(props) {
       </>
     )
   );
-}
-
-function getControlsSummary(scanSummary) {
-  const severities = scanSummary?.jsonData.spec.severities;
-
-  const criticalCount = severities.critical;
-  const mediumCount = severities.medium;
-  const highCount = severities.high;
-  const lowCount = severities.low;
-  const unknownCount = severities.unknown;
-
-  return `Critical :${criticalCount}, High: ${highCount}, Medium: ${mediumCount}, Low: ${lowCount}, Unknown: ${unknownCount}`;
 }
