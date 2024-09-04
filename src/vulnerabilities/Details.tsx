@@ -166,6 +166,18 @@ function Matches(props) {
   const { manifest, relevant } = props;
   const results = manifest?.spec.payload.matches;
 
+  if (results) {
+    results.sort((a, b) => {
+      if (a.vulnerability.severity < b.vulnerability.severity) {
+        return -1;
+      }
+      if (a.vulnerability.severity > b.vulnerability.severity) {
+        return 1;
+      }
+      return 0;
+    });
+  }
+
   return (
     <SectionBox title="Findings">
       <Table
@@ -174,7 +186,11 @@ function Matches(props) {
           {
             header: 'CVE',
             accessorFn: item => {
-              return <Link href={item.vulnerability.dataSource}>{item.vulnerability.id}</Link>;
+              return (
+                <Link target="_blank" href={item.vulnerability.dataSource}>
+                  {item.vulnerability.id}
+                </Link>
+              );
             },
             gridTemplate: 'auto',
           },

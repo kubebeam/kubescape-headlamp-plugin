@@ -5,13 +5,12 @@ import {
   StatusLabelProps,
   Table,
 } from '@kinvolk/headlamp-plugin/lib/components/common';
-import { Box, Link } from '@mui/material';
+import { Box, Link, Tooltip } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { fetchWorkloadConfigurationScan } from '../model';
 import controlLibrary from './controlLibrary.js';
 import KubescapeWorkloadConfigurationScanList from './ResourceList';
 
-// TODO better https://dev.to/yezyilomo/global-state-management-in-react-with-global-variables-and-hooks-state-management-doesn-t-have-to-be-so-hard-2n2c
 export let workloadScanData: any[] = null;
 
 export default function ComplianceView() {
@@ -62,7 +61,10 @@ function ConfigurationScanningListView() {
                   header: 'ID',
                   accessorFn: item => {
                     return (
-                      <Link href={'https://hub.armosec.io/docs/' + item.controlID.toLowerCase()}>
+                      <Link
+                        target="_blank"
+                        href={'https://hub.armosec.io/docs/' + item.controlID.toLowerCase()}
+                      >
                         {item.controlID}
                       </Link>
                     );
@@ -71,8 +73,17 @@ function ConfigurationScanningListView() {
                 },
                 {
                   header: 'Control Name',
-                  accessorFn: item => item.name,
-                  gridTemplate: 'min-content',
+                  accessorFn: item => {
+                    return (
+                      <Tooltip
+                        title={item.description}
+                        slotProps={{ tooltip: { sx: { fontSize: '0.9em' } } }}
+                      >
+                        {item.name}
+                      </Tooltip>
+                    );
+                  },
+                  gridTemplate: 'auto',
                 },
                 {
                   header: 'Remediation',
@@ -82,11 +93,6 @@ function ConfigurationScanningListView() {
                   header: 'Resources',
                   accessorFn: item => makeResultsLabel(workloadScanData, item),
                   gridTemplate: 'auto',
-                },
-                {
-                  header: 'Skipped',
-                  accessorFn: item => countScans(workloadScanData, item, 'skipped'),
-                  gridTemplate: 'min-content',
                 },
               ]}
             />
@@ -165,7 +171,7 @@ function makeResultsLabel(workloadScanData: any[], item) {
 
   if (failCount > 0) {
     return (
-      <StatusLabel status={status}>
+      <StatusLabel status={status} sx={{ width: '100%' }}>
         <Box
           aria-label="hidden"
           display="inline"

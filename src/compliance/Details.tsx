@@ -109,7 +109,10 @@ function Controls(props) {
             header: 'Control',
             accessorFn: item => {
               return (
-                <Link href={'https://hub.armosec.io/docs/' + item.controlID.toLowerCase()}>
+                <Link
+                  target="_blank"
+                  href={'https://hub.armosec.io/docs/' + item.controlID.toLowerCase()}
+                >
                   {item.controlID}
                 </Link>
               );

@@ -100,12 +100,23 @@ registerRoute({
 import KubescapeVulnerabilityDetails from './vulnerabilities/Details';
 
 registerRoute({
-  path: '/kubescape/vulnerabilities/:namespace/:name',
+  path: '/kubescape/vulnerabilities/namespaces/:namespace/:name',
   parent: kubescape,
   sidebar: vulnerabilities,
   component: () => <KubescapeVulnerabilityDetails />,
   exact: true,
   name: 'Vulnerability',
+});
+
+import KubescapeCVEResults from './vulnerabilities/CVEResults';
+
+registerRoute({
+  path: '/kubescape/vulnerabilities/cves/:cve',
+  parent: kubescape,
+  sidebar: vulnerabilities,
+  component: () => <KubescapeCVEResults />,
+  exact: true,
+  name: 'CVE Vulnerabilities',
 });
 
 import addKubescapeWorkloadSection from './sections/WorkloadSection';

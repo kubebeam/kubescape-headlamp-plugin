@@ -51,7 +51,7 @@ function VulnerabilityScans(props) {
             accessorFn: item => {
               return (
                 <Link
-                  routeName={`/kubescape/vulnerabilities/:namespace/:name`}
+                  routeName={`/kubescape/vulnerabilities/namespaces/:namespace/:name`}
                   params={{
                     name: item.name,
                     namespace: item.namespace,
