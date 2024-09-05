@@ -1,13 +1,15 @@
-import { ApiProxy } from '@kinvolk/headlamp-plugin/lib';
-import { Link as HeadlampLink } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
+import {
+  Link as HeadlampLink,
+  Tabs as HeadlampTabs,
+} from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import {
   SectionBox,
-  StatusLabel,
-  StatusLabelProps,
   Table,
 } from '@kinvolk/headlamp-plugin/lib/components/common';
-import { Box } from '@mui/material';
 import { useEffect, useState } from 'react';
+import makeSeverityLabel from '../common/SeverityLabel';
+import { deepListQuery } from '../model';
+import ImageListView from './ImageList';
 import WorkloadScanListView from './ResourceList';
 
 export interface WorkloadScan {
@@ -17,11 +19,13 @@ export interface WorkloadScan {
   container: string;
   namespace: string;
   imageScan: ImageScan;
+  relevant: ImageScan;
 }
 
 export interface ImageScan {
   manifestName: string;
   imageName: string;
+  creationTimestamp: string;
   vulnerabilities: Vulnerability[];
 }
 export interface Vulnerability {
@@ -45,6 +49,7 @@ interface VulnerabilityDetails extends Vulnerability {
   images: Set<string>;
 }
 
+// workloadScans are cached in gloabl scope because it is an expensive query for the API server
 export let workloadScans: WorkloadScan[] = null;
 
 export default function KubescapeVulnerabilities() {
@@ -63,75 +68,80 @@ export default function KubescapeVulnerabilities() {
   return (
     <>
       <h1>Vulnerabilities</h1>
-      <BasicTabs />
+      <HeadlampTabs
+        tabs={[
+          {
+            label: 'CVEs',
+            component: <CVEListView />,
+          },
+          {
+            label: 'Resources',
+            component: <WorkloadScanListView />,
+          },
+          {
+            label: 'Images',
+            component: <ImageListView />,
+          },
+        ]}
+        ariaLabel="Navigation Tabs"
+      />
     </>
   );
 }
 
+// Query vulnerabilitymanifestsummaries amd vulnerabilitymanifests
+// Convert "vulnerabilitymanifestsummaries > vulnerabilitymanifest > vulnerabilitymanifest.payload.match" into "WorkloadScan -> ImageScan > []Vulnerability"
 export async function fetchVulnerabilityManifests(): Promise<any> {
-  async function detailQuery(type) {
-    const overviewList = await ApiProxy.request(
-      `/apis/spdx.softwarecomposition.kubescape.io/v1beta1/${type}`
-    );
-
-    const detailList = await Promise.all(
-      overviewList.items.map(scan =>
-        ApiProxy.request(
-          `/apis/spdx.softwarecomposition.kubescape.io/v1beta1/namespaces/${scan.metadata.namespace}/${type}/${scan.metadata.name}`
-        )
-      )
-    );
-    return detailList;
-  }
-
-  const vulnerabilityManifestSummaries = await detailQuery('vulnerabilitymanifestsummaries');
-  const vulnerabilityManifests = await detailQuery('vulnerabilitymanifests');
+  const vulnerabilityManifestSummaries = await deepListQuery('vulnerabilitymanifestsummaries');
+  const vulnerabilityManifests = await deepListQuery('vulnerabilitymanifests');
 
   const workloadScans: WorkloadScan[] = [];
   const imageScans: ImageScan[] = [];
 
-  for (const summary of vulnerabilityManifestSummaries) {
-    let imageScan: ImageScan = imageScans.find(
-      element => element.manifestName === summary.spec.vulnerabilitiesRef.all?.name
-    );
-    if (!imageScan) {
-      if (summary.spec.vulnerabilitiesRef.all?.name) {
-        const v = vulnerabilityManifests.find(
-          element => element.metadata.name === summary.spec.vulnerabilitiesRef.all?.name
-        );
-        if (v?.spec.payload.matches) {
-          imageScan = {
-            manifestName: v.metadata.name,
-            imageName: v.metadata.annotations['kubescape.io/image-tag'],
-            vulnerabilities: [],
-          };
-          const matches: any | undefined = v.spec.payload.matches;
-          if (matches) {
-            for (const match of v.spec.payload.matches) {
-              const v: Vulnerability = {
-                CVE: match.vulnerability.id,
-                dataSource: match.vulnerability.dataSource,
-                description: match.vulnerability.description,
-                severity: match.vulnerability.severity,
-                baseScore: match.vulnerability.cvss
-                  ? match.vulnerability.cvss[0].metrics.baseScore
-                  : 0,
-                fix: {
-                  state: match.vulnerability.fix.state,
-                  versions: match.vulnerability.fix.versions,
-                },
-                artifact: {
-                  name: match.artifact.name,
-                  version: match.artifact.version,
-                },
-              };
+  for (const v of vulnerabilityManifests) {
+    if (v?.spec?.payload?.matches) {
+      const imageScan: ImageScan = {
+        manifestName: v.metadata.name,
+        imageName: v.metadata.annotations['kubescape.io/image-tag'],
+        creationTimestamp: v.metadata.creationTimestamp,
+        vulnerabilities: [],
+      };
 
-              imageScan.vulnerabilities.push(v);
-            }
-          }
+      // convert the Matches into Vulnerability, keep only the info we need
+      if (v.spec.payload.matches) {
+        for (const match of v.spec.payload.matches) {
+          const v: Vulnerability = {
+            CVE: match.vulnerability.id,
+            dataSource: match.vulnerability.dataSource,
+            description: match.vulnerability.description,
+            severity: match.vulnerability.severity,
+            baseScore: match.vulnerability.cvss ? match.vulnerability.cvss[0].metrics.baseScore : 0,
+            fix: {
+              state: match.vulnerability.fix.state,
+              versions: match.vulnerability.fix.versions,
+            },
+            artifact: {
+              name: match.artifact.name,
+              version: match.artifact.version,
+            },
+          };
+
+          imageScan.vulnerabilities.push(v);
         }
       }
+      imageScans.push(imageScan);
     }
+  }
+
+  for (const summary of vulnerabilityManifestSummaries) {
+    // vulnerabilitiesRef.all field refers to the manifest
+    const imageScanAll: ImageScan = imageScans.find(
+      element => element.manifestName === summary.spec.vulnerabilitiesRef?.all?.name
+    );
+
+    const imageScanRelevant: ImageScan = imageScans.find(
+      element => element.manifestName === summary.spec.vulnerabilitiesRef?.relevant?.name
+    );
 
     const w: WorkloadScan = {
       manifestName: summary.metadata.name,
@@ -139,7 +149,8 @@ export async function fetchVulnerabilityManifests(): Promise<any> {
       namespace: summary.metadata.labels['kubescape.io/workload-namespace'],
       container: summary.metadata.labels['kubescape.io/workload-container-name'],
       kind: summary.metadata.labels['kubescape.io/workload-kind'],
-      imageScan: imageScan,
+      imageScan: imageScanAll,
+      relevant: imageScanRelevant,
     };
 
     workloadScans.push(w);
@@ -148,6 +159,7 @@ export async function fetchVulnerabilityManifests(): Promise<any> {
   return workloadScans;
 }
 
+// flatten workloadScans into a list of VulnerabilityDetails
 function getCVEList(workloadScans: WorkloadScan[]): VulnerabilityDetails[] {
   const vulnerabilityList: VulnerabilityDetails[] = [];
 
@@ -164,6 +176,10 @@ function getCVEList(workloadScans: WorkloadScan[]): VulnerabilityDetails[] {
         if (v) {
           v.workloads.add(workloadScan.name + '/' + workloadScan.container);
           v.images.add(workloadScan.imageScan.imageName);
+
+          if (!v.fix.versions) {
+            v.fix = { ...vulnerability.fix };
+          }
         } else {
           const newV: VulnerabilityDetails = {
             ...vulnerability,
@@ -179,6 +195,7 @@ function getCVEList(workloadScans: WorkloadScan[]): VulnerabilityDetails[] {
     }
   }
 
+  // default sort on CVSS (baseScore)
   vulnerabilityList.sort((a, b) => {
     if (a.baseScore > b.baseScore) {
       return -1;
@@ -188,6 +205,7 @@ function getCVEList(workloadScans: WorkloadScan[]): VulnerabilityDetails[] {
     }
     return 0;
   });
+
   return vulnerabilityList;
 }
 
@@ -215,12 +233,12 @@ function CVEListView() {
                       </HeadlampLink>
                     );
                   },
-                  gridTemplate: 'auto',
+                  gridTemplate: '0.5fr',
                 },
                 {
                   header: 'Severity',
-                  accessorFn: (item: VulnerabilityDetails) => makeSeverityLabel(item),
-                  gridTemplate: 'min-content',
+                  accessorFn: (item: VulnerabilityDetails) => makeSeverityLabel(item.severity),
+                  gridTemplate: '0.2fr',
                 },
                 {
                   header: 'CVSS',
@@ -230,14 +248,13 @@ function CVEListView() {
                 {
                   header: 'Component',
                   accessorFn: (item: VulnerabilityDetails) =>
-                    `${item.artifact.name} ${item.artifact.version}`,
-                  gridTemplate: 'auto',
+                    `${item.artifact.name}  ${item.artifact.version}`,
+                  gridTemplate: '2fr',
                 },
                 {
                   header: 'Fix version',
-                  accessorFn: (item: VulnerabilityDetails) =>
-                    item.fix.state && item.fix.versions ? item.fix.versions.join() : '',
-                  gridTemplate: 'min-content',
+                  accessorFn: (item: VulnerabilityDetails) => item.fix?.versions?.join(),
+                  gridTemplate: '1fr',
                 },
                 {
                   header: 'Images',
@@ -255,90 +272,5 @@ function CVEListView() {
         </>
       )}
     </>
-  );
-}
-
-function makeSeverityLabel(item: Vulnerability) {
-  const severity = item.severity;
-  let status: StatusLabelProps['status'] = '';
-
-  if (severity === 'Critical') {
-    status = 'error';
-  } else {
-    status = 'success';
-  }
-
-  return (
-    <StatusLabel status={status}>
-      {severity}
-      {severity === 'Critical' && (
-        <Box
-          aria-label="hidden"
-          display="inline"
-          paddingTop={1}
-          paddingLeft={0.5}
-          style={{ verticalAlign: 'text-top' }}
-        ></Box>
-      )}
-    </StatusLabel>
-  );
-}
-
-// copied from https://mui.com/material-ui/react-tabs/#introduction
-import Tab from '@mui/material/Tab';
-import Tabs from '@mui/material/Tabs';
-import * as React from 'react';
-
-interface TabPanelProps {
-  children?: React.ReactNode;
-  index: number;
-  value: number;
-}
-
-function CustomTabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props;
-
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`simple-tabpanel-${index}`}
-      aria-labelledby={`simple-tab-${index}`}
-      {...other}
-    >
-      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
-    </div>
-  );
-}
-
-function a11yProps(index: number) {
-  return {
-    id: `simple-tab-${index}`,
-    'aria-controls': `simple-tabpanel-${index}`,
-  };
-}
-
-function BasicTabs() {
-  const [value, setValue] = React.useState(0);
-
-  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
-    setValue(newValue);
-  };
-
-  return (
-    <Box sx={{ width: '100%' }}>
-      <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-        <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
-          <Tab label="CVEs" {...a11yProps(0)} />
-          <Tab label="Resources" {...a11yProps(1)} />
-        </Tabs>
-      </Box>
-      <CustomTabPanel value={value} index={0}>
-        <CVEListView />
-      </CustomTabPanel>
-      <CustomTabPanel value={value} index={1}>
-        <WorkloadScanListView />
-      </CustomTabPanel>
-    </Box>
   );
 }

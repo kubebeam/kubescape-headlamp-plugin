@@ -42,19 +42,13 @@ function CVEResultsListView(props) {
             value: <Link href={firstCVE.dataSource}>{cve}</Link>,
           },
           {
-            name: 'Description',
-            value: firstCVE.description,
-          },
-          {
-            name: 'Fixable',
-            value: firstCVE.fix.state && firstCVE.fix.versions ? firstCVE.fix.versions.join() : '',
-          },
-          {
             name: 'Severity',
             value: firstCVE.severity,
           },
         ]}
       />
+
+      <p>{firstCVE.description}</p>
 
       <Workloads cve={cve} workloads={workloadScansFiltered} />
     </>
@@ -107,6 +101,18 @@ function Workloads(props) {
                   workload.imageScan.vulnerabilities
                     .filter(v => v.CVE === cve)
                     .map(v => v.artifact.name + ' ' + v.artifact.version)
+                )
+              )}`,
+            gridTemplate: 'auto',
+          },
+          {
+            header: 'Fix',
+            accessorFn: (workload: WorkloadScan) =>
+              `${Array.from(
+                new Set(
+                  workload.imageScan.vulnerabilities
+                    .filter(v => v.CVE === cve && v.fix.versions)
+                    .map(v => v.fix.versions.join())
                 )
               )}`,
             gridTemplate: 'auto',

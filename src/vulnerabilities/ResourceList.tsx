@@ -1,6 +1,6 @@
 import { Link, SectionBox, Table } from '@kinvolk/headlamp-plugin/lib/components/common';
-import { WorkloadScan, workloadScans } from './Vulnerabilities';
 import { Box, Stack, Tooltip } from '@mui/material';
+import { WorkloadScan, workloadScans } from './Vulnerabilities';
 
 export default function WorkloadScanListView() {
   return (

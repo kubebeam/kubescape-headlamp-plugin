@@ -22,7 +22,7 @@ function ConfigurationScanNamespaceSummaryView(props) {
 
   return (
     <>
-      {cr && <MainInfoSection title="Namespace Configuration Scan Summary" resource={cr} />}
+      {cr && <MainInfoSection title="Namespace Configuration Scans" resource={cr} />}
 
       {cr && <ConfigurationScans configurationScans={cr.jsonData.spec.summaryRef} />}
 
@@ -42,7 +42,7 @@ function ConfigurationScans(props) {
         data={configurationScans}
         columns={[
           {
-            header: 'Name',
+            header: 'Namespace',
             accessorFn: item => {
               return (
                 <Link

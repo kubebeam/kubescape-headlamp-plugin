@@ -2,13 +2,12 @@ import { ApiProxy } from '@kinvolk/headlamp-plugin/lib';
 import {
   NameValueTable,
   SectionBox,
-  StatusLabel,
-  StatusLabelProps,
   Table,
 } from '@kinvolk/headlamp-plugin/lib/components/common';
-import { Box, Link } from '@mui/material';
+import { Link } from '@mui/material';
 import React, { useEffect } from 'react';
 import { useLocation } from 'react-router';
+import makeSeverityLabel from '../common/SeverityLabel';
 import { getCVESummary } from './CVESummary';
 
 export default function KubescapeVulnerabilityDetails() {
@@ -206,7 +205,7 @@ function Matches(props) {
           },
           {
             header: 'Severity',
-            accessorFn: item => makeSeverityLabel(item),
+            accessorFn: item => makeSeverityLabel(item.vulnerability.severity),
             gridTemplate: 'auto',
           },
           {
@@ -237,32 +236,6 @@ function Matches(props) {
         ]}
       />
     </SectionBox>
-  );
-}
-
-function makeSeverityLabel(item) {
-  const severity = item.vulnerability.severity;
-  let status: StatusLabelProps['status'] = '';
-
-  if (severity === 'Critical') {
-    status = 'error';
-  } else {
-    status = 'success';
-  }
-
-  return (
-    <StatusLabel status={status}>
-      {severity}
-      {severity === 'Critical' && (
-        <Box
-          aria-label="hidden"
-          display="inline"
-          paddingTop={1}
-          paddingLeft={0.5}
-          style={{ verticalAlign: 'text-top' }}
-        ></Box>
-      )}
-    </StatusLabel>
   );
 }
 

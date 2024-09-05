@@ -1,5 +1,9 @@
 import { Link } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
-import { MainInfoSection, SectionBox, Table } from '@kinvolk/headlamp-plugin/lib/components/common';
+import {
+  NameValueTable,
+  SectionBox,
+  Table,
+} from '@kinvolk/headlamp-plugin/lib/components/common';
 import React from 'react';
 import { useLocation } from 'react-router';
 import { vulnerabilitySummaryClass } from '../model';
@@ -22,12 +26,7 @@ function NamespaceSummaryView(props) {
 
   return (
     <>
-      {vulnerabilitySummary && (
-        <MainInfoSection
-          title="Namespace Vulnerabilities Summary"
-          resource={vulnerabilitySummary}
-        />
-      )}
+      {vulnerabilitySummary && <Maininfo vulnerabilitySummary={vulnerabilitySummary} />}
 
       {vulnerabilitySummary && (
         <VulnerabilityScans
@@ -38,16 +37,32 @@ function NamespaceSummaryView(props) {
   );
 }
 
+function Maininfo(props) {
+  const { vulnerabilitySummary } = props;
+  return (
+    <SectionBox title="Namespace Vulnerabilities">
+      <NameValueTable
+        rows={[
+          {
+            name: 'Namespace',
+            value: vulnerabilitySummary.metadata.name,
+          },
+        ]}
+      />
+    </SectionBox>
+  );
+}
+
 function VulnerabilityScans(props) {
   const { vulnerabilityScans } = props;
 
   return (
-    <SectionBox title="Vulnerability scans">
+    <SectionBox title="Image scans">
       <Table
         data={vulnerabilityScans}
         columns={[
           {
-            header: 'Name',
+            header: 'Workload',
             accessorFn: item => {
               return (
                 <Link
@@ -57,9 +72,16 @@ function VulnerabilityScans(props) {
                     namespace: item.namespace,
                   }}
                 >
-                  {item.name}
+                  {item.name.split('-')?.slice(1).join('-')}
                 </Link>
               );
+            },
+          },
+          {
+            header: 'Kind',
+            accessorFn: item => {
+              const kind = item.name.split('-')?.[0];
+              return kind[0].toUpperCase() + kind.slice(1);
             },
           },
         ]}

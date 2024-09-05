@@ -45,6 +45,22 @@ export const configurationScanSummaries = makeCustomResourceClass({
   pluralName: 'configurationscansummaries',
 });
 
+// List methods for spdx.softwarecomposition.kubescape.io not retrieve detailed info in the spec. We need to fetch each workloadconfigurationscan individually.
+export async function deepListQuery(type) {
+  const overviewList = await ApiProxy.request(
+    `/apis/spdx.softwarecomposition.kubescape.io/v1beta1/${type}`
+  );
+
+  const detailList = await Promise.all(
+    overviewList.items.map(scan =>
+      ApiProxy.request(
+        `/apis/spdx.softwarecomposition.kubescape.io/v1beta1/namespaces/${scan.metadata.namespace}/${type}/${scan.metadata.name}`
+      )
+    )
+  );
+  return detailList;
+}
+
 // configurationscansummaries will not be retrieved with a UID, so we cannot use useApiList()
 export function getAllConfigurationScanSummaries(): Promise<any> {
   return ApiProxy.request(
@@ -57,20 +73,4 @@ export function getAllVulnerabilitySummaries(): Promise<any> {
   return ApiProxy.request(
     `/apis/spdx.softwarecomposition.kubescape.io/v1beta1/vulnerabilitysummaries`
   );
-}
-
-// List of workloadconfigurationscans does not retrieve detailed info in the spec. We need to fetch each workloadconfigurationscan individually.
-export async function fetchWorkloadConfigurationScan(): Promise<any> {
-  const scanList = await ApiProxy.request(
-    `/apis/spdx.softwarecomposition.kubescape.io/v1beta1/workloadconfigurationscansummaries`
-  );
-  const workloadScanData = await Promise.all(
-    scanList.items.map(scan =>
-      ApiProxy.request(
-        `/apis/spdx.softwarecomposition.kubescape.io/v1beta1/namespaces/${scan.metadata.namespace}/workloadconfigurationscansummaries/${scan.metadata.name}`
-      )
-    )
-  );
-
-  return workloadScanData;
 }

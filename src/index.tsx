@@ -119,6 +119,17 @@ registerRoute({
   name: 'CVE Vulnerabilities',
 });
 
+import ImageVulnerabilityDetails from './vulnerabilities/ImageDetails';
+
+registerRoute({
+  path: '/kubescape/vulnerabilities/images/:name',
+  parent: kubescape,
+  sidebar: vulnerabilities,
+  component: () => <ImageVulnerabilityDetails />,
+  exact: true,
+  name: 'Image Vulnerabilities',
+});
+
 import addKubescapeWorkloadSection from './sections/WorkloadSection';
 
 registerDetailsViewSectionsProcessor(addKubescapeWorkloadSection);
