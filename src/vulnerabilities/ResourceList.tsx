@@ -3,67 +3,73 @@ import { Box, Stack, Tooltip } from '@mui/material';
 import { WorkloadScan, workloadScans } from './Vulnerabilities';
 
 export default function WorkloadScanListView() {
+  if (!workloadScans) {
+    return <></>;
+  }
   return (
-    <SectionBox>
-      <Table
-        data={workloadScans}
-        columns={[
-          {
-            header: 'Name',
-            accessorFn: (workloadScan: WorkloadScan) => {
-              return (
+    <>
+      <h5>{workloadScans.length} resources</h5>
+      <SectionBox>
+        <Table
+          data={workloadScans}
+          columns={[
+            {
+              header: 'Name',
+              accessorFn: (workloadScan: WorkloadScan) => {
+                return (
+                  <Link
+                    routeName={`/kubescape/vulnerabilities/namespaces/:namespace/:name`}
+                    params={{
+                      name: workloadScan.manifestName,
+                      namespace: workloadScan.namespace,
+                    }}
+                  >
+                    {workloadScan.name}
+                  </Link>
+                );
+              },
+              gridTemplate: 'max-content',
+            },
+            {
+              header: 'Namespace',
+              accessorFn: (workloadScan: WorkloadScan) => (
                 <Link
-                  routeName={`/kubescape/vulnerabilities/namespaces/:namespace/:name`}
+                  routeName="namespace"
                   params={{
-                    name: workloadScan.manifestName,
-                    namespace: workloadScan.namespace,
+                    name: workloadScan.namespace,
                   }}
                 >
-                  {workloadScan.name}
+                  {workloadScan.namespace}
                 </Link>
-              );
+              ),
+              gridTemplate: 'min-content',
             },
-            gridTemplate: 'max-content',
-          },
-          {
-            header: 'Namespace',
-            accessorFn: (workloadScan: WorkloadScan) => (
-              <Link
-                routeName="namespace"
-                params={{
-                  name: workloadScan.namespace,
-                }}
-              >
-                {workloadScan.namespace}
-              </Link>
-            ),
-            gridTemplate: 'min-content',
-          },
-          {
-            header: 'Container',
-            accessorFn: (workloadScan: WorkloadScan) => workloadScan.container,
-            gridTemplate: 'min-content',
-          },
-          {
-            header: 'Kind',
-            accessorFn: (workloadScan: WorkloadScan) => {
-              return (
-                <Link routeName={workloadScan.kind.toLowerCase() + 's'}>{workloadScan.kind}</Link>
-              );
+            {
+              header: 'Container',
+              accessorFn: (workloadScan: WorkloadScan) => workloadScan.container,
+              gridTemplate: 'min-content',
             },
-            gridTemplate: 'min-content',
-          },
-          {
-            header: 'Image',
-            accessorFn: (workloadScan: WorkloadScan) => workloadScan.imageScan?.imageName,
-          },
-          {
-            header: 'CVE',
-            accessorFn: (workloadScan: WorkloadScan) => resultStack(workloadScan),
-          },
-        ]}
-      />
-    </SectionBox>
+            {
+              header: 'Kind',
+              accessorFn: (workloadScan: WorkloadScan) => {
+                return (
+                  <Link routeName={workloadScan.kind.toLowerCase() + 's'}>{workloadScan.kind}</Link>
+                );
+              },
+              gridTemplate: 'min-content',
+            },
+            {
+              header: 'Image',
+              accessorFn: (workloadScan: WorkloadScan) => workloadScan.imageScan?.imageName,
+            },
+            {
+              header: 'CVE',
+              accessorFn: (workloadScan: WorkloadScan) => resultStack(workloadScan),
+            },
+          ]}
+        />
+      </SectionBox>
+    </>
   );
 }
 

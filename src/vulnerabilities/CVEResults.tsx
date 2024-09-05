@@ -45,10 +45,12 @@ function CVEResultsListView(props) {
             name: 'Severity',
             value: firstCVE.severity,
           },
+          {
+            name: 'Description',
+            value: firstCVE.description,
+          },
         ]}
       />
-
-      <p>{firstCVE.description}</p>
 
       <Workloads cve={cve} workloads={workloadScansFiltered} />
     </>

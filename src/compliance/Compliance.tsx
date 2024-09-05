@@ -37,7 +37,7 @@ export default function ComplianceView() {
       <HeadlampTabs
         tabs={[
           {
-            label: 'CVE',
+            label: 'Controls',
             component: <ConfigurationScanningListView />,
           },
           {
@@ -52,71 +52,73 @@ export default function ComplianceView() {
 }
 
 function ConfigurationScanningListView() {
+  if (!workloadScanData) {
+    return <></>;
+  }
+
+  const controlsWithFindings = getControlsWithFindings(workloadScanData);
+
   return (
     <>
-      {workloadScanData && (
-        <>
-          <h5>
-            {countFailedScans(workloadScanData)} configuration issues,{' '}
-            {countFailedCVE(workloadScanData)} Failed CVE
-          </h5>
-          <SectionBox>
-            <Table
-              data={getControlsWithFindings(workloadScanData)}
-              columns={[
-                {
-                  header: 'Severity',
-                  accessorFn: item =>
-                    makeCVSSLabel(item.baseScore, countScans(workloadScanData, item, 'failed')),
-                  gridTemplate: 'min-content',
-                },
-                {
-                  header: 'ID',
-                  accessorFn: item => {
-                    return (
-                      <Link
-                        target="_blank"
-                        href={'https://hub.armosec.io/docs/' + item.controlID.toLowerCase()}
-                      >
-                        {item.controlID}
-                      </Link>
-                    );
-                  },
-                  gridTemplate: 'min-content',
-                },
-                {
-                  header: 'Control Name',
-                  accessorFn: item => {
-                    return (
-                      <Tooltip
-                        title={item.description}
-                        slotProps={{ tooltip: { sx: { fontSize: '0.9em' } } }}
-                      >
-                        {item.name}
-                      </Tooltip>
-                    );
-                  },
-                  gridTemplate: 'auto',
-                },
-                {
-                  header: 'Remediation',
-                  accessorFn: item => item.remediation.replaceAll('`', "'"),
-                },
-                {
-                  header: 'Resources',
-                  accessorFn: item => makeResultsLabel(workloadScanData, item),
-                  gridTemplate: 'auto',
-                },
-              ]}
-            />
-          </SectionBox>
-        </>
-      )}
+      <h5>
+        {countFailedScans(workloadScanData)} configuration issues, {controlsWithFindings.length}{' '}
+        failed controls
+      </h5>
+      <SectionBox>
+        <Table
+          data={controlsWithFindings}
+          columns={[
+            {
+              header: 'Severity',
+              accessorFn: item =>
+                makeCVSSLabel(item.baseScore, countScans(workloadScanData, item, 'failed')),
+              gridTemplate: 'min-content',
+            },
+            {
+              header: 'ID',
+              accessorFn: item => {
+                return (
+                  <Link
+                    target="_blank"
+                    href={'https://hub.armosec.io/docs/' + item.controlID.toLowerCase()}
+                  >
+                    {item.controlID}
+                  </Link>
+                );
+              },
+              gridTemplate: 'min-content',
+            },
+            {
+              header: 'Control Name',
+              accessorFn: item => {
+                return (
+                  <Tooltip
+                    title={item.description}
+                    slotProps={{ tooltip: { sx: { fontSize: '0.9em' } } }}
+                  >
+                    {item.name}
+                  </Tooltip>
+                );
+              },
+              gridTemplate: 'auto',
+            },
+            {
+              header: 'Remediation',
+              accessorFn: item => item.remediation.replaceAll('`', "'"),
+            },
+            {
+              header: 'Resources',
+              accessorFn: item => makeResultsLabel(workloadScanData, item),
+              gridTemplate: 'auto',
+            },
+          ]}
+        />
+      </SectionBox>
     </>
   );
 }
 
-function getControlsWithFindings(workloadScanData) {
+function getControlsWithFindings(workloadScanData): any {
   return controlLibrary.filter(control => {
     for (const workload of workloadScanData) {
       for (const [controlID, scan] of Object.entries(workload.spec.controls) as any) {
@@ -244,18 +246,4 @@ function countFailedScans(workloadScanData): number {
     }
   }
   return count;
-}
-
-function countFailedCVE(workloadScanData): number {
-  const uniques: string[] = [];
-  for (const workload of workloadScanData) {
-    for (const [controlID, scan] of Object.entries(workload.spec.controls) as any) {
-      if (scan.status.status === 'failed') {
-        if (!uniques.includes(controlID)) {
-          uniques.push(controlID);
-        }
-      }
-    }
-  }
-  return uniques.length;
 }

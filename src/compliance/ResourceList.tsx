@@ -12,72 +12,78 @@ export default function KubescapeWorkloadConfigurationScanList() {
 }
 
 function WorkloadConfigurationScanListView() {
+  if (!workloadScanData) {
+    return <></>;
+  }
+
+  const workloadsWithFindings = getWorkloadsWithFindings(workloadScanData);
   return (
     <>
-      {workloadScanData && (
-        <SectionBox>
-          <Table
-            data={getWorkloadsWithFindings(workloadScanData)}
-            columns={[
-              {
-                header: 'Name',
-                accessorFn: item => {
-                  return (
-                    <Link
-                      routeName={`/kubescape/compliance/namespaces/:namespace/:name`}
-                      params={{
-                        name: item.metadata.name,
-                        namespace: item.metadata.namespace,
-                      }}
-                    >
-                      {item.metadata.labels['kubescape.io/workload-name']}
-                    </Link>
-                  );
-                },
-                gridTemplate: 'auto',
-              },
-              {
-                header: 'Kind',
-                accessorFn: item => item.metadata.labels['kubescape.io/workload-kind'],
-                gridTemplate: 'auto',
-              },
-              {
-                header: 'Namespace',
-                accessorFn: item => (
+      <h5>
+        {workloadScanData.length} resources scanned, {workloadsWithFindings.length} failed
+      </h5>
+      <SectionBox>
+        <Table
+          data={workloadsWithFindings}
+          columns={[
+            {
+              header: 'Name',
+              accessorFn: item => {
+                return (
                   <Link
-                    routeName="namespace"
+                    routeName={`/kubescape/compliance/namespaces/:namespace/:name`}
                     params={{
-                      name: item.metadata.namespace,
+                      name: item.metadata.name,
+                      namespace: item.metadata.namespace,
                     }}
                   >
-                    {item.metadata.namespace}
+                    {item.metadata.labels['kubescape.io/workload-name']}
                   </Link>
-                ),
-                gridTemplate: 'auto',
+                );
               },
-              {
-                header: 'Failed',
-                accessorFn: item => {
-                  let count = 0;
+              gridTemplate: 'auto',
+            },
+            {
+              header: 'Kind',
+              accessorFn: item => item.metadata.labels['kubescape.io/workload-kind'],
+              gridTemplate: 'auto',
+            },
+            {
+              header: 'Namespace',
+              accessorFn: item => (
+                <Link
+                  routeName="namespace"
+                  params={{
+                    name: item.metadata.namespace,
+                  }}
+                >
+                  {item.metadata.namespace}
+                </Link>
+              ),
+              gridTemplate: 'auto',
+            },
+            {
+              header: 'Failed',
+              accessorFn: item => {
+                let count = 0;
 
-                  for (const [, scan] of Object.entries(item.spec.controls) as any) {
-                    if (scan.status.status === 'failed') {
-                      count++;
-                    }
+                for (const [, scan] of Object.entries(item.spec.controls) as any) {
+                  if (scan.status.status === 'failed') {
+                    count++;
                   }
-                  return `${count}/${Object.entries(item.spec.controls).length} controls`;
-                },
-                gridTemplate: 'auto',
+                }
+                return `${count}/${Object.entries(item.spec.controls).length} controls`;
               },
-              {
-                header: 'Controls',
-                accessorFn: item => resultStack(item),
-                gridTemplate: 'auto',
-              },
-            ]}
-          />
-        </SectionBox>
-      )}
+              gridTemplate: 'auto',
+            },
+            {
+              header: 'Controls',
+              accessorFn: item => resultStack(item),
+              gridTemplate: 'auto',
+            },
+          ]}
+        />
+      </SectionBox>
     </>
   );
 }
@@ -93,7 +99,7 @@ function countScans(workloadScan, severity: string): number {
   return count;
 }
 
-function cveList(workloadScan, severity: string) {
+function controlsList(workloadScan, severity: string) {
   const controlIDs = [];
   for (const [controlID, scan] of Object.entries(workloadScan.spec.controls) as any) {
     if (controlIDs.indexOf(controlID) >= 0) {
@@ -151,7 +157,7 @@ function resultStack(workloadScan) {
           width: 20,
         }}
       >
-        <Tooltip title={cveList(workloadScan, severity)}>
+        <Tooltip title={controlsList(workloadScan, severity)}>
           {countScans(workloadScan, severity)}
         </Tooltip>
       </Box>

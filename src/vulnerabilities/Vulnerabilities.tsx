@@ -2,10 +2,7 @@ import {
   Link as HeadlampLink,
   Tabs as HeadlampTabs,
 } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
-import {
-  SectionBox,
-  Table,
-} from '@kinvolk/headlamp-plugin/lib/components/common';
+import { SectionBox, Table } from '@kinvolk/headlamp-plugin/lib/components/common';
 import { useEffect, useState } from 'react';
 import makeSeverityLabel from '../common/SeverityLabel';
 import { deepListQuery } from '../model';
@@ -44,9 +41,14 @@ export interface Vulnerability {
   };
 }
 
-interface VulnerabilityDetails extends Vulnerability {
+interface VulnerabilityDetails {
+  CVE: string;
+  severity: string;
+  baseScore: number;
   workloads: Set<string>;
   images: Set<string>;
+  artifacts: Set<string>;
+  fixed: boolean;
 }
 
 // workloadScans are cached in gloabl scope because it is an expensive query for the API server
@@ -89,8 +91,8 @@ export default function KubescapeVulnerabilities() {
   );
 }
 
-// Query vulnerabilitymanifestsummaries amd vulnerabilitymanifests
-// Convert "vulnerabilitymanifestsummaries > vulnerabilitymanifest > vulnerabilitymanifest.payload.match" into "WorkloadScan -> ImageScan > []Vulnerability"
+// Query vulnerabilitymanifestsummaries and vulnerabilitymanifests
+// Convert the retrieved data to "WorkloadScan -> ImageScan > []Vulnerability"
 export async function fetchVulnerabilityManifests(): Promise<any> {
   const vulnerabilityManifestSummaries = await deepListQuery('vulnerabilitymanifestsummaries');
   const vulnerabilityManifests = await deepListQuery('vulnerabilitymanifests');
@@ -159,36 +161,36 @@ export async function fetchVulnerabilityManifests(): Promise<any> {
   return workloadScans;
 }
 
-// flatten workloadScans into a list of VulnerabilityDetails
+// flatten workloadScans into a list of VulnerabilityDetails with primary key CVE-ID
 function getCVEList(workloadScans: WorkloadScan[]): VulnerabilityDetails[] {
   const vulnerabilityList: VulnerabilityDetails[] = [];
 
   for (const workloadScan of workloadScans) {
     if (workloadScan.imageScan) {
       for (const vulnerability of workloadScan.imageScan.vulnerabilities) {
-        const v = vulnerabilityList.find(
-          element =>
-            element.CVE === vulnerability.CVE &&
-            element.artifact.name === vulnerability.artifact.name &&
-            element.artifact.version === vulnerability.artifact.version
-        );
+        const v = vulnerabilityList.find(element => element.CVE === vulnerability.CVE);
 
         if (v) {
           v.workloads.add(workloadScan.name + '/' + workloadScan.container);
           v.images.add(workloadScan.imageScan.imageName);
+          v.artifacts.add(vulnerability.artifact.name + ' ' + vulnerability.artifact.version);
 
-          if (!v.fix.versions) {
-            v.fix = { ...vulnerability.fix };
-          }
+          v.fixed = v.fixed || !!vulnerability.fix?.versions;
         } else {
           const newV: VulnerabilityDetails = {
-            ...vulnerability,
+            CVE: vulnerability.CVE,
+            severity: vulnerability.severity,
+            baseScore: vulnerability.baseScore,
             workloads: new Set<string>(),
             images: new Set<string>(),
+            artifacts: new Set<string>(),
+            fixed: !!vulnerability.fix?.versions,
           };
 
           newV.workloads.add(workloadScan.name + '/' + workloadScan.container);
           newV.images.add(workloadScan.imageScan.imageName);
+          newV.artifacts.add(vulnerability.artifact.name + ' ' + vulnerability.artifact.version);
+
           vulnerabilityList.push(newV);
         }
       }
@@ -210,67 +212,69 @@ function getCVEList(workloadScans: WorkloadScan[]): VulnerabilityDetails[] {
 }
 
 function CVEListView() {
+  if (!workloadScans) {
+    return <></>;
+  }
+
+  const cveList = getCVEList(workloadScans);
   return (
     <>
-      {workloadScans && (
-        <>
-          <h5>{workloadScans.length} workload scans</h5>
-          <SectionBox>
-            <Table
-              data={getCVEList(workloadScans)}
-              columns={[
-                {
-                  header: 'CVE ID',
-                  accessorFn: item => {
-                    return (
-                      <HeadlampLink
-                        routeName={`/kubescape/vulnerabilities/cves/:cve`}
-                        params={{
-                          cve: item.CVE,
-                        }}
-                      >
-                        {item.CVE}
-                      </HeadlampLink>
-                    );
-                  },
-                  gridTemplate: '0.5fr',
-                },
-                {
-                  header: 'Severity',
-                  accessorFn: (item: VulnerabilityDetails) => makeSeverityLabel(item.severity),
-                  gridTemplate: '0.2fr',
-                },
-                {
-                  header: 'CVSS',
-                  accessorFn: (item: VulnerabilityDetails) => item.baseScore,
-                  gridTemplate: 'min-content',
-                },
-                {
-                  header: 'Component',
-                  accessorFn: (item: VulnerabilityDetails) =>
-                    `${item.artifact.name}  ${item.artifact.version}`,
-                  gridTemplate: '2fr',
-                },
-                {
-                  header: 'Fix version',
-                  accessorFn: (item: VulnerabilityDetails) => item.fix?.versions?.join(),
-                  gridTemplate: '1fr',
-                },
-                {
-                  header: 'Images',
-                  accessorFn: (item: VulnerabilityDetails) => item.images.size,
-                  gridTemplate: 'min-content',
-                },
-                {
-                  header: 'Workloads',
-                  accessorFn: (item: VulnerabilityDetails) => item.workloads.size,
-                  gridTemplate: 'min-content',
-                },
-              ]}
-            />
-          </SectionBox>
-        </>
-      )}
+      <h5>
+        {workloadScans.length} workload scans, {cveList.length} CVE issues
+      </h5>
+      <SectionBox>
+        <Table
+          data={cveList}
+          columns={[
+            {
+              header: 'CVE ID',
+              accessorFn: item => {
+                return (
+                  <HeadlampLink
+                    routeName={`/kubescape/vulnerabilities/cves/:cve`}
+                    params={{
+                      cve: item.CVE,
+                    }}
+                  >
+                    {item.CVE}
+                  </HeadlampLink>
+                );
+              },
+              gridTemplate: 'auto',
+            },
+            {
+              header: 'Severity',
+              accessorFn: (item: VulnerabilityDetails) => makeSeverityLabel(item.severity),
+              gridTemplate: '0.2fr',
+            },
+            {
+              header: 'CVSS',
+              accessorFn: (item: VulnerabilityDetails) => item.baseScore,
+              gridTemplate: 'min-content',
+            },
+            {
+              header: 'Component',
+              accessorFn: (item: VulnerabilityDetails) => Array.from(item.artifacts).join(' '),
+              gridTemplate: '2fr',
+            },
+            {
+              header: 'Fixed',
+              accessorFn: (item: VulnerabilityDetails) => (item.fixed ? 'Yes' : ''),
+              gridTemplate: '1fr',
+            },
+            {
+              header: 'Images',
+              accessorFn: (item: VulnerabilityDetails) => item.images.size,
+              gridTemplate: 'min-content',
+            },
+            {
+              header: 'Workloads',
+              accessorFn: (item: VulnerabilityDetails) => item.workloads.size,
+              gridTemplate: 'min-content',
+            },
+          ]}
+        />
+      </SectionBox>
     </>
   );
 }
