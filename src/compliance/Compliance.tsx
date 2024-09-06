@@ -1,3 +1,6 @@
+/* 
+  Overview  page for configuration controls and resources. 
+*/
 import {
   Link as HeadlampLink,
   Tabs as HeadlampTabs,
@@ -14,6 +17,7 @@ import { deepListQuery } from '../model';
 import controlLibrary from './controlLibrary.js';
 import KubescapeWorkloadConfigurationScanList from './ResourceList';
 
+// workloadScans are cached in gloabl scope because it is an expensive query for the API server
 export let workloadScanData: any[] = null;
 
 export default function ComplianceView() {

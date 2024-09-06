@@ -22,9 +22,14 @@ The plugin code has been tested with Headlamp v0.25.0 (browser and desktop) and 
 
 ## Installation
 
-TODO
+> This information will be updated after the first beta release has been published to artifacthub
 
-Development version of the plugin is published as a GitHub artifact. You can find it on the workflow page: https://github.com/Kubebeam/kubescape-headlamp-plugin/actions
+Latest build of the code in main branch is published as [`latest` release](https://github.com/Kubebeam/kubescape-headlamp-plugin/releases/tag/latest).
+
+For desktop versions of Headlamp, find the plugin folder, create a new folder kubescape-plugin and copy the `main.js` and `package.json` from the release page.
+
+For in-cluster Headlamp deployments, the plugin files need to be added to the headlamp deployment. A simple solution is to download the plugin files with an initContainer. See [example helm values](./examples/headlamp-helm-values.yaml).
+The guidance from headlamp for in-cluster deployment is to create a container image with the plugin artifacts: https://headlamp.dev/blog/2022/10/20/best-practices-for-deploying-headlamp-with-plugins/.
 
 ## Docs
 

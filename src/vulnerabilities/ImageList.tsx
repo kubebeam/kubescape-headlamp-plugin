@@ -1,3 +1,6 @@
+/* 
+  Show container image scans. This view is part of the main Vulnerabilities page.  
+*/
 import { Link as HeadlampLink } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import { DateLabel, SectionBox, Table } from '@kinvolk/headlamp-plugin/lib/components/common';
 import { Box, Stack, Tooltip } from '@mui/material';

@@ -1,3 +1,6 @@
+/* 
+  Provide a panel on the Headlamp namespace page. 
+*/
 import { DefaultDetailsViewSection } from '@kinvolk/headlamp-plugin/lib';
 import { Link, NameValueTable, SectionBox } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import { useState } from 'react';

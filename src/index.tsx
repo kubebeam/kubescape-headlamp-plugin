@@ -1,3 +1,6 @@
+/* 
+  Registration of menu and routes in headlamp. 
+*/
 import {
   registerDetailsViewSectionsProcessor,
   registerRoute,
@@ -53,7 +56,7 @@ registerRoute({
   name: 'Namespace Configuration Scan',
 });
 
-import KubescapeWorkloadConfigurationScanDetails from './compliance/Details';
+import KubescapeWorkloadConfigurationScanDetails from './compliance/WorkloadScanDetails';
 
 registerRoute({
   path: '/kubescape/compliance/namespaces/:namespace/:name',
@@ -97,7 +100,7 @@ registerRoute({
   name: 'Namespace Vulnerabilities',
 });
 
-import KubescapeVulnerabilityDetails from './vulnerabilities/Details';
+import KubescapeVulnerabilityDetails from './vulnerabilities/WorkloadScanDetails';
 
 registerRoute({
   path: '/kubescape/vulnerabilities/namespaces/:namespace/:name',
@@ -130,10 +133,12 @@ registerRoute({
   name: 'Image Vulnerabilities',
 });
 
+// Detail panel for workloads
 import addKubescapeWorkloadSection from './sections/WorkloadSection';
 
 registerDetailsViewSectionsProcessor(addKubescapeWorkloadSection);
 
+// Detail panel for namespaces
 import addKubescapeNamespaceSection from './sections/NamespaceSection';
 
 registerDetailsViewSectionsProcessor(addKubescapeNamespaceSection);

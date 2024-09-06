@@ -1,9 +1,8 @@
+/* 
+  Show the vulnerability issues for workloads in a single namespace.  
+*/
 import { Link } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
-import {
-  NameValueTable,
-  SectionBox,
-  Table,
-} from '@kinvolk/headlamp-plugin/lib/components/common';
+import { NameValueTable, SectionBox, Table } from '@kinvolk/headlamp-plugin/lib/components/common';
 import React from 'react';
 import { useLocation } from 'react-router';
 import { vulnerabilitySummaryClass } from '../model';

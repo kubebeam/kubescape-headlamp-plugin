@@ -1,3 +1,6 @@
+/* 
+  Show workload configuration scans. This view is part of the main Vulnerabilities page.  
+*/
 import { Link, SectionBox, Table } from '@kinvolk/headlamp-plugin/lib/components/common';
 import { Box, Stack, Tooltip } from '@mui/material';
 import { WorkloadScan, workloadScans } from './Vulnerabilities';

@@ -1,9 +1,8 @@
+/* 
+  Show vulnerability scan results for a workload. 
+*/
 import { ApiProxy } from '@kinvolk/headlamp-plugin/lib';
-import {
-  NameValueTable,
-  SectionBox,
-  Table,
-} from '@kinvolk/headlamp-plugin/lib/components/common';
+import { NameValueTable, SectionBox, Table } from '@kinvolk/headlamp-plugin/lib/components/common';
 import { Link } from '@mui/material';
 import React, { useEffect } from 'react';
 import { useLocation } from 'react-router';
@@ -107,36 +106,6 @@ function VulnerabilityManifestDetailView(props) {
               {
                 name: 'CVE',
                 value: getCVESummary(summary),
-              },
-              {
-                name: 'Summary',
-                value: summary?.metadata.name,
-              },
-              {
-                name: 'All',
-                value: (
-                  <Link
-                    routeName={`/kubescape/vulnerabilitymanifests/kubescape/:name`}
-                    params={{
-                      name: summary.spec.vulnerabilitiesRef.all.name,
-                    }}
-                  >
-                    {summary.spec.vulnerabilitiesRef.all.name}
-                  </Link>
-                ),
-              },
-              {
-                name: 'Relevant Findings',
-                value: (
-                  <Link
-                    routeName={`/kubescape/vulnerabilitymanifests/kubescape/:name`}
-                    params={{
-                      name: summary.spec.vulnerabilitiesRef.relevant.name,
-                    }}
-                  >
-                    {summary.spec.vulnerabilitiesRef.relevant.name}
-                  </Link>
-                ),
               },
             ]}
           />

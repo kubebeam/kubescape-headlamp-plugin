@@ -1,3 +1,6 @@
+/* 
+  Provide information on a CVE and the workloads vulnerable for this CVE. 
+*/
 import { Link as HeadlampLink } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import { NameValueTable, SectionBox, Table } from '@kinvolk/headlamp-plugin/lib/components/common';
 import { Link } from '@mui/material';

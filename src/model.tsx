@@ -1,3 +1,6 @@
+/* 
+  Kubescape definitions for resources with basic methods for querying. 
+*/
 import { ApiProxy } from '@kinvolk/headlamp-plugin/lib';
 import { makeCustomResourceClass } from '@kinvolk/headlamp-plugin/lib/lib/k8s/crd';
 

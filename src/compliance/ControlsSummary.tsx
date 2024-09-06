@@ -1,3 +1,6 @@
+/* 
+  Build a horizontack stack with seperate cells for critical, high, medium, low and unknown. 
+*/
 import { Box, Stack, Tooltip } from '@mui/material';
 
 export function getControlsSummary(scanSummary) {

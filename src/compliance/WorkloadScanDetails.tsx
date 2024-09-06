@@ -1,3 +1,6 @@
+/* 
+  Show configuration scan results for a workload. 
+*/
 import {
   MainInfoSection,
   SectionBox,

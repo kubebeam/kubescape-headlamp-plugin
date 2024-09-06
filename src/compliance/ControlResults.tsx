@@ -1,3 +1,6 @@
+/* 
+  Information about a control and failed workloads. 
+*/
 import {
   Link as HeadlampLink,
   NameValueTable,

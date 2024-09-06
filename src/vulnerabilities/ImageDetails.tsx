@@ -1,8 +1,7 @@
-import {
-  NameValueTable,
-  SectionBox,
-  Table,
-} from '@kinvolk/headlamp-plugin/lib/components/common';
+/* 
+  Show vulnerability scan results for a container image. 
+*/
+import { NameValueTable, SectionBox, Table } from '@kinvolk/headlamp-plugin/lib/components/common';
 import { Link } from '@mui/material';
 import React from 'react';
 import { useLocation } from 'react-router';

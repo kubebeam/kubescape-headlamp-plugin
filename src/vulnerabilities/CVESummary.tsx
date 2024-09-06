@@ -1,4 +1,7 @@
-import { Box,Stack, Tooltip } from '@mui/material';
+/* 
+  Build a horizontack stack with seperate cells for critical, high, medium, low, negligible and unknown. 
+*/
+import { Box, Stack, Tooltip } from '@mui/material';
 
 export function getCVESummary(configurationScanSummary) {
   const severities = configurationScanSummary?.spec.severities;
@@ -7,6 +10,7 @@ export function getCVESummary(configurationScanSummary) {
   const mediumCount = severities.medium.all;
   const highCount = severities.high.all;
   const lowCount = severities.low.all;
+  const negligibleCount = severities.negligible.all;
   const unknownCount = severities.unknown.all;
 
   function box(color, severity, countScan) {
@@ -35,6 +39,7 @@ export function getCVESummary(configurationScanSummary) {
       {box('red', 'High', highCount)}
       {box('orange', 'Medium', mediumCount)}
       {box('yellow', 'Low', lowCount)}
+      {box('gray', 'Negligible', negligibleCount)}
       {box('white', 'Unknown', unknownCount)}
     </Stack>
   );

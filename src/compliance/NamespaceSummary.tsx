@@ -1,3 +1,6 @@
+/* 
+  Show the configuration findings for workloads in a single namespace.  
+*/
 import { Link } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import { MainInfoSection, SectionBox, Table } from '@kinvolk/headlamp-plugin/lib/components/common';
 import React from 'react';

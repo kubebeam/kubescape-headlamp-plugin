@@ -1,3 +1,6 @@
+/* 
+  Overview page for vulnerability issues, workloads and images. 
+*/
 import {
   Link as HeadlampLink,
   Tabs as HeadlampTabs,
@@ -49,6 +52,7 @@ interface VulnerabilityDetails {
   images: Set<string>;
   artifacts: Set<string>;
   fixed: boolean;
+  relevant: boolean;
 }
 
 // workloadScans are cached in gloabl scope because it is an expensive query for the API server
@@ -92,7 +96,7 @@ export default function KubescapeVulnerabilities() {
 }
 
 // Query vulnerabilitymanifestsummaries and vulnerabilitymanifests
-// Convert the retrieved data to "WorkloadScan -> ImageScan > []Vulnerability"
+// Convert the retrieved data to "[]WorkloadScan -> ImageScan > []Vulnerability"
 export async function fetchVulnerabilityManifests(): Promise<any> {
   const vulnerabilityManifestSummaries = await deepListQuery('vulnerabilitymanifestsummaries');
   const vulnerabilityManifests = await deepListQuery('vulnerabilitymanifests');
@@ -170,12 +174,17 @@ function getCVEList(workloadScans: WorkloadScan[]): VulnerabilityDetails[] {
       for (const vulnerability of workloadScan.imageScan.vulnerabilities) {
         const v = vulnerabilityList.find(element => element.CVE === vulnerability.CVE);
 
+        const isRelevant: boolean =
+          workloadScan.relevant &&
+          workloadScan.relevant.vulnerabilities.some(v => v.CVE === vulnerability.CVE);
+
         if (v) {
           v.workloads.add(workloadScan.name + '/' + workloadScan.container);
           v.images.add(workloadScan.imageScan.imageName);
           v.artifacts.add(vulnerability.artifact.name + ' ' + vulnerability.artifact.version);
 
           v.fixed = v.fixed || !!vulnerability.fix?.versions;
+          v.relevant = v.relevant || isRelevant;
         } else {
           const newV: VulnerabilityDetails = {
             CVE: vulnerability.CVE,
@@ -185,6 +194,7 @@ function getCVEList(workloadScans: WorkloadScan[]): VulnerabilityDetails[] {
             images: new Set<string>(),
             artifacts: new Set<string>(),
             fixed: !!vulnerability.fix?.versions,
+            relevant: isRelevant,
           };
 
           newV.workloads.add(workloadScan.name + '/' + workloadScan.container);
@@ -256,6 +266,11 @@ function CVEListView() {
               header: 'Component',
               accessorFn: (item: VulnerabilityDetails) => Array.from(item.artifacts).join(' '),
               gridTemplate: '2fr',
+            },
+            {
+              header: 'Relevant',
+              accessorFn: (item: VulnerabilityDetails) => (item.relevant ? 'Yes' : ''),
+              gridTemplate: '1fr',
             },
             {
               header: 'Fixed',

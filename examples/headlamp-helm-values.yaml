@@ -1,0 +1,26 @@
+config:
+  pluginsDir: /build/plugins
+initContainers:
+  - command:
+      - /bin/sh
+      - -c
+      - mkdir -p /build/plugins/kubescape-plugin
+        && wget https://github.com/Kubebeam/kubescape-headlamp-plugin/releases/download/latest/main.js -O /build/plugins/kubescape-plugin/main.js
+        && wget  https://github.com/Kubebeam/kubescape-headlamp-plugin/releases/download/latest/package.json -O /build/plugins/kubescape-plugin/package.json
+    image: busybox
+    name: headlamp-plugins
+    volumeMounts:
+      - mountPath: /build/plugins
+        name: headlamp-plugins
+persistentVolumeClaim:
+  accessModes:
+    - ReadWriteMany # if you prefer ReadWriteOnce, please change deployment.strategy to Recreate.
+  enabled: true
+  size: 1Gi
+volumeMounts:
+  - mountPath: /build/plugins
+    name: headlamp-plugins
+volumes:
+  - name: headlamp-plugins
+    persistentVolumeClaim:
+      claimName: headlamp
