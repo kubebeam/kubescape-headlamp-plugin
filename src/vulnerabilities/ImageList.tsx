@@ -28,7 +28,7 @@ export default function ImageListView() {
                       name: imageScan.manifestName,
                     }}
                   >
-                    {imageScan.imageName}
+                    {imageScan.imageName.split('@sha')[0]}
                   </HeadlampLink>
                 );
               },
@@ -36,7 +36,13 @@ export default function ImageListView() {
             },
             {
               header: 'Workload',
-              accessorFn: (imageScan: ImageScanDetails) => (<div style={{whiteSpace: 'pre-line'}}>{Array.from(imageScan.workloads).map(workload => workload.name).join('\n')}</div>), 
+              accessorFn: (imageScan: ImageScanDetails) => (
+                <div style={{ whiteSpace: 'pre-line' }}>
+                  {Array.from(imageScan.workloads)
+                    .map(workload => workload.name)
+                    .join('\n')}
+                </div>
+              ),
               gridTemplate: 'max-content',
             },
             {

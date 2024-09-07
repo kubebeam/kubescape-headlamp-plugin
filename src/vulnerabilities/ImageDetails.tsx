@@ -5,6 +5,7 @@ import { NameValueTable, SectionBox, Table } from '@kinvolk/headlamp-plugin/lib/
 import { Link } from '@mui/material';
 import React from 'react';
 import { useLocation } from 'react-router';
+import expandableDescription from '../common/AccordionText';
 import makeSeverityLabel from '../common/SeverityLabel';
 import { vulnerabilityManifestClass } from '../model';
 
@@ -113,10 +114,20 @@ function Matches(props) {
           },
           {
             header: 'Description',
-            accessorFn: item =>
-              item.vulnerability.description
-                ? item.vulnerability.description.substr(0, 100) + '...'
-                : '',
+            accessorFn: item => {
+              let relatedDescription: string;
+              if (item.relatedVulnerabilities) {
+                for (const related of item.relatedVulnerabilities) {
+                  if (related.id === item.vulnerability.id) {
+                    relatedDescription = related.description;
+                  }
+                }
+              }
+              return expandableDescription(
+                item.vulnerability.description ?? relatedDescription,
+                '3'
+              );
+            },
           },
         ]}
       />

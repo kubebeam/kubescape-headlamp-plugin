@@ -7,6 +7,7 @@ import {
 } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import { SectionBox, Table } from '@kinvolk/headlamp-plugin/lib/components/common';
 import { useEffect, useState } from 'react';
+import expandableDescription from '../common/AccordionText';
 import makeSeverityLabel from '../common/SeverityLabel';
 import { deepListQuery } from '../model';
 import ImageListView from './ImageList';
@@ -46,6 +47,7 @@ export interface Vulnerability {
 
 interface VulnerabilityDetails {
   CVE: string;
+  description: string;
   severity: string;
   baseScore: number;
   workloads: Set<string>;
@@ -131,9 +133,15 @@ export async function fetchVulnerabilityManifests(): Promise<any> {
           },
         };
 
+        // if we have no description, try get it from related
+        if (!v.description && match.relatedVulnerabilities) {
+          v.description = match.relatedVulnerabilities
+            .filter(rv => rv.id === v.CVE)
+            .map(rv => rv.description);
+        }
         imageScan.vulnerabilities.push(v);
       }
-      
+
       imageScans.push(imageScan);
     }
   }
@@ -187,6 +195,7 @@ function getCVEList(workloadScans: WorkloadScan[]): VulnerabilityDetails[] {
         } else {
           const newV: VulnerabilityDetails = {
             CVE: vulnerability.CVE,
+            description: vulnerability.description,
             severity: vulnerability.severity,
             baseScore: vulnerability.baseScore,
             workloads: new Set<string>(),
@@ -263,8 +272,12 @@ function CVEListView() {
             },
             {
               header: 'Component',
-              accessorFn: (item: VulnerabilityDetails) => (<div style={{whiteSpace: 'pre-line'}}>{Array.from(item.artifacts).join('\n')}</div>), 
-              gridTemplate: '2fr',
+              accessorFn: (item: VulnerabilityDetails) => (
+                <div style={{ whiteSpace: 'pre-line' }}>
+                  {Array.from(item.artifacts).join('\n')}
+                </div>
+              ),
+              gridTemplate: 'auto',
             },
             {
               header: 'Relevant',
@@ -285,6 +298,11 @@ function CVEListView() {
               header: 'Workloads',
               accessorFn: (item: VulnerabilityDetails) => item.workloads.size,
               gridTemplate: 'min-content',
+            },
+            {
+              header: 'Description',
+              accessorFn: (item: VulnerabilityDetails) => expandableDescription(item.description),
+              gridTemplate: 'auto',
             },
           ]}
         />

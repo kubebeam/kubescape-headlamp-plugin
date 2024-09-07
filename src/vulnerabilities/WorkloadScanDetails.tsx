@@ -6,6 +6,7 @@ import { NameValueTable, SectionBox, Table } from '@kinvolk/headlamp-plugin/lib/
 import { Link } from '@mui/material';
 import React, { useEffect } from 'react';
 import { useLocation } from 'react-router';
+import expandableDescription from '../common/AccordionText';
 import makeSeverityLabel from '../common/SeverityLabel';
 import { getCVESummary } from './CVESummary';
 
@@ -197,33 +198,12 @@ function Matches(props) {
           },
           {
             header: 'Description',
-            accessorFn: item => item.vulnerability.description? expandableDescription(item.vulnerability.description) : '', 
-              // item.vulnerability.description
-              //   ? item.vulnerability.description.slice(0, 100) + '...'
-              //   : '',
-          }, 
+            accessorFn: item => expandableDescription(item.vulnerability.description),
+          },
         ]}
       />
     </SectionBox>
   );
-}
-
-import { Accordion, AccordionSummary, AccordionDetails } from '@mui/material'
-
-function expandableDescription(description: string) {
-  return (
-      <Accordion  slotProps={{ heading: { component: 'h4' } }}>
-        <AccordionSummary
-          aria-controls="panel1-content"
-          id="panel1-header"
-        >
-          { description.slice(0, 80) + '...'}
-        </AccordionSummary>
-        <AccordionDetails>
-        { description }
-        </AccordionDetails>
-      </Accordion>
-  )
 }
 
 function isRelevant(relevantManifest, id): string {
