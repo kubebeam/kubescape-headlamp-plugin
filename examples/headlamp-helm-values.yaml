@@ -12,15 +12,9 @@ initContainers:
     volumeMounts:
       - mountPath: /build/plugins
         name: headlamp-plugins
-persistentVolumeClaim:
-  accessModes:
-    - ReadWriteMany # if you prefer ReadWriteOnce, please change deployment.strategy to Recreate.
-  enabled: true
-  size: 1Gi
 volumeMounts:
   - mountPath: /build/plugins
     name: headlamp-plugins
 volumes:
   - name: headlamp-plugins
-    persistentVolumeClaim:
-      claimName: headlamp
+    emptyDir: {} 
