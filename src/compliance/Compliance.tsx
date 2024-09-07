@@ -17,11 +17,11 @@ import { deepListQuery } from '../model';
 import controlLibrary from './controlLibrary.js';
 import KubescapeWorkloadConfigurationScanList from './ResourceList';
 
-// workloadScans are cached in gloabl scope because it is an expensive query for the API server
+// workloadScans are cached in global scope because it is an expensive query for the API server
 export let workloadScanData: any[] = null;
 
 export default function ComplianceView() {
-  const [, setState] = useState();
+  const [, setState] = useState({});
 
   useEffect(() => {
     if (workloadScanData === null) {

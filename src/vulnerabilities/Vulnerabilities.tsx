@@ -55,11 +55,11 @@ interface VulnerabilityDetails {
   relevant: boolean;
 }
 
-// workloadScans are cached in gloabl scope because it is an expensive query for the API server
+// workloadScans are cached in global scope because it is an expensive query for the API server
 export let workloadScans: WorkloadScan[] = null;
 
 export default function KubescapeVulnerabilities() {
-  const [, setState] = useState();
+  const [, setState] = useState({});
 
   useEffect(() => {
     if (workloadScans === null) {
@@ -114,27 +114,26 @@ export async function fetchVulnerabilityManifests(): Promise<any> {
       };
 
       // convert the Matches into Vulnerability, keep only the info we need
-      if (v.spec.payload.matches) {
-        for (const match of v.spec.payload.matches) {
-          const v: Vulnerability = {
-            CVE: match.vulnerability.id,
-            dataSource: match.vulnerability.dataSource,
-            description: match.vulnerability.description,
-            severity: match.vulnerability.severity,
-            baseScore: match.vulnerability.cvss ? match.vulnerability.cvss[0].metrics.baseScore : 0,
-            fix: {
-              state: match.vulnerability.fix.state,
-              versions: match.vulnerability.fix.versions,
-            },
-            artifact: {
-              name: match.artifact.name,
-              version: match.artifact.version,
-            },
-          };
+      for (const match of v.spec.payload.matches) {
+        const v: Vulnerability = {
+          CVE: match.vulnerability.id,
+          dataSource: match.vulnerability.dataSource,
+          description: match.vulnerability.description,
+          severity: match.vulnerability.severity,
+          baseScore: match.vulnerability.cvss ? match.vulnerability.cvss[0].metrics.baseScore : 0,
+          fix: {
+            state: match.vulnerability.fix.state,
+            versions: match.vulnerability.fix.versions,
+          },
+          artifact: {
+            name: match.artifact.name,
+            version: match.artifact.version,
+          },
+        };
 
-          imageScan.vulnerabilities.push(v);
-        }
+        imageScan.vulnerabilities.push(v);
       }
+      
       imageScans.push(imageScan);
     }
   }
@@ -264,7 +263,7 @@ function CVEListView() {
             },
             {
               header: 'Component',
-              accessorFn: (item: VulnerabilityDetails) => Array.from(item.artifacts).join(' '),
+              accessorFn: (item: VulnerabilityDetails) => (<div style={{whiteSpace: 'pre-line'}}>{Array.from(item.artifacts).join('\n')}</div>), 
               gridTemplate: '2fr',
             },
             {

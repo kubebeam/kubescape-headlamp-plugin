@@ -36,8 +36,7 @@ export default function ImageListView() {
             },
             {
               header: 'Workload',
-              accessorFn: (imageScan: ImageScanDetails) =>
-                imageScan.workloads.map(workload => workload.name).join(),
+              accessorFn: (imageScan: ImageScanDetails) => (<div style={{whiteSpace: 'pre-line'}}>{Array.from(imageScan.workloads).map(workload => workload.name).join('\n')}</div>), 
               gridTemplate: 'max-content',
             },
             {
@@ -59,7 +58,7 @@ export default function ImageListView() {
 }
 
 interface ImageScanDetails extends ImageScan {
-  workloads: WorkloadScan[];
+  workloads: Set<WorkloadScan>;
 }
 
 function getImageScans(workloadScans: WorkloadScan[]): ImageScanDetails[] {
@@ -76,13 +75,13 @@ function getImageScans(workloadScans: WorkloadScan[]): ImageScanDetails[] {
       if (!scan) {
         scan = {
           ...workloadScan.imageScan,
-          workloads: [],
+          workloads: new Set(),
         };
 
         imageScans.push(scan);
       }
 
-      scan.workloads.push(workloadScan);
+      scan.workloads.add(workloadScan);
     }
   }
 

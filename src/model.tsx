@@ -5,6 +5,7 @@ import { ApiProxy } from '@kinvolk/headlamp-plugin/lib';
 import { makeCustomResourceClass } from '@kinvolk/headlamp-plugin/lib/lib/k8s/crd';
 
 const apiGroupVersion = [{ group: 'spdx.softwarecomposition.kubescape.io', version: 'v1beta1' }];
+const spdxGroupVersionString = apiGroupVersion[0].group + '/'+ apiGroupVersion[0].version
 
 export const vulnerabilityManifestClass = makeCustomResourceClass({
   apiInfo: apiGroupVersion,
@@ -48,32 +49,41 @@ export const configurationScanSummaries = makeCustomResourceClass({
   pluralName: 'configurationscansummaries',
 });
 
+import { getAllowedNamespaces } from '@kinvolk/headlamp-plugin/lib/k8s/cluster';
+
 // List methods for spdx.softwarecomposition.kubescape.io not retrieve detailed info in the spec. We need to fetch each workloadconfigurationscan individually.
 export async function deepListQuery(type) {
-  const overviewList = await ApiProxy.request(
-    `/apis/spdx.softwarecomposition.kubescape.io/v1beta1/${type}`
-  );
+  const namespaces = getAllowedNamespaces();
+  let items: any = [];
+
+  if (namespaces.length > 1) {
+    // If we have namespaces set, make an API call for each namespace
+    const listOfLists = await Promise.all(
+      namespaces.map(namespace =>
+        ApiProxy.request(
+          `/apis/${spdxGroupVersionString}/namespaces/${namespace}/${type}`
+        )
+      )
+    );
+
+    for (const list of listOfLists) {
+      items = items.concat(list.items);
+    }
+  } else {
+    const overviewList = await ApiProxy.request(
+      `/apis/${spdxGroupVersionString}/${type}`
+    );
+
+    items = overviewList.items;
+  }
 
   const detailList = await Promise.all(
-    overviewList.items.map(scan =>
+    items.map(scan =>
       ApiProxy.request(
-        `/apis/spdx.softwarecomposition.kubescape.io/v1beta1/namespaces/${scan.metadata.namespace}/${type}/${scan.metadata.name}`
+        `/apis/${spdxGroupVersionString}/namespaces/${scan.metadata.namespace}/${type}/${scan.metadata.name}`
       )
     )
   );
+
   return detailList;
-}
-
-// configurationscansummaries will not be retrieved with a UID, so we cannot use useApiList()
-export function getAllConfigurationScanSummaries(): Promise<any> {
-  return ApiProxy.request(
-    `/apis/spdx.softwarecomposition.kubescape.io/v1beta1/configurationscansummaries`
-  );
-}
-
-// vulnerabilitysummaries will not be retrieved with a UID, so we cannot use useApiList()
-export function getAllVulnerabilitySummaries(): Promise<any> {
-  return ApiProxy.request(
-    `/apis/spdx.softwarecomposition.kubescape.io/v1beta1/vulnerabilitysummaries`
-  );
 }

@@ -38,9 +38,9 @@ export function getCVESummary(configurationScanSummary) {
       {box('purple', 'Critical', criticalCount)}
       {box('red', 'High', highCount)}
       {box('orange', 'Medium', mediumCount)}
-      {box('yellow', 'Low', lowCount)}
-      {box('gray', 'Negligible', negligibleCount)}
-      {box('white', 'Unknown', unknownCount)}
+      {box('lime', 'Low', lowCount)}
+      {box('darkgray', 'Negligible', negligibleCount)}
+      {box('lightgray', 'Unknown', unknownCount)}
     </Stack>
   );
 }
