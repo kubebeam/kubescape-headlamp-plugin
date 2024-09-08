@@ -1,14 +1,21 @@
 /* 
   Provide a panel on the Headlamp namespace page. 
 */
-import { DefaultDetailsViewSection } from '@kinvolk/headlamp-plugin/lib';
+import {
+  DefaultDetailsViewSection,
+  DetailsViewSection,
+  KubeObject,
+} from '@kinvolk/headlamp-plugin/lib';
 import { Link, NameValueTable, SectionBox } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import { useState } from 'react';
 import { getControlsSummary } from '../compliance/ControlsSummary';
 import { configurationScanSummaries, vulnerabilitySummaryClass } from '../model';
 import { getCVESummary } from '../vulnerabilities/CVESummary';
 
-export default function addKubescapeNamespaceSection(resource, sections) {
+export default function addKubescapeNamespaceSection(
+  resource: KubeObject,
+  sections: DetailsViewSection[]
+) {
   // Ignore if there is no resource.
   if (!resource) {
     return sections;
@@ -46,7 +53,7 @@ export default function addKubescapeNamespaceSection(resource, sections) {
   return sections;
 }
 
-function KubescapeInfo(props) {
+function KubescapeInfo(props: { resource: KubeObject }) {
   const { resource } = props;
   const resourceName = resource.jsonData.metadata.name;
 

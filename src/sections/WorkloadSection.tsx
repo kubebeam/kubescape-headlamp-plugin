@@ -1,13 +1,20 @@
 /* 
   Provide a panel on the Headlamp resource pages (for deployments, statefulsets, etc). 
 */
-import { DefaultDetailsViewSection } from '@kinvolk/headlamp-plugin/lib';
+import {
+  DefaultDetailsViewSection,
+  DetailsViewSection,
+  KubeObject,
+} from '@kinvolk/headlamp-plugin/lib';
 import { Link, NameValueTable, SectionBox } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import { useState } from 'react';
 import { getControlsSummary } from '../compliance/ControlsSummary';
 import { workloadConfigurationScanSummaryClass } from '../model';
 
-export default function addKubescapeWorkloadSection(resource, sections) {
+export default function addKubescapeWorkloadSection(
+  resource: KubeObject,
+  sections: DetailsViewSection[]
+) {
   // Ignore if there is no resource.
   if (!resource) {
     return sections;
@@ -49,7 +56,7 @@ export default function addKubescapeWorkloadSection(resource, sections) {
   return sections;
 }
 
-function KubescapeInfo(props) {
+function KubescapeInfo(props: { resource: KubeObject }) {
   const { resource } = props;
   const resourceName = resource.jsonData.metadata.name;
   const namespace = resource.jsonData.metadata.namespace;
@@ -58,7 +65,7 @@ function KubescapeInfo(props) {
   const scanName = `${kind.toLowerCase()}-${resourceName.toLowerCase()}`;
   const [configurationScan, setConfigurationScan] = useState<Array<any> | null>(null);
 
-  function onError(apiError) {
+  function onError(apiError: any) {
     // ignore
     console.log(apiError);
   }
