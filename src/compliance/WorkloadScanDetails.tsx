@@ -6,7 +6,7 @@ import {
   SectionBox,
   StatusLabel,
   StatusLabelProps,
-  Table,
+  Table as HeadlampTable,
 } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import { KubeObject } from '@kinvolk/headlamp-plugin/lib/lib/k8s/cluster';
 import { Box, Link } from '@mui/material';
@@ -102,23 +102,23 @@ function Controls(props: { controls: WorkloadConfigurationScan.Controls }) {
 
   return (
     <SectionBox title="Controls">
-      <Table
+      <HeadlampTable
         data={entries}
         columns={[
           {
             header: 'Status',
-            accessorFn: item => makeStatusLabel(item),
+            accessorFn: (control: WorkloadConfigurationScan.Control) => makeStatusLabel(control),
             gridTemplate: 'min-content',
           },
           {
             header: 'Control',
-            accessorFn: item => {
+            accessorFn: (control: WorkloadConfigurationScan.Control) => {
               return (
                 <Link
                   target="_blank"
-                  href={'https://hub.armosec.io/docs/' + item.controlID.toLowerCase()}
+                  href={'https://hub.armosec.io/docs/' + control.controlID.toLowerCase()}
                 >
-                  {item.controlID}
+                  {control.controlID}
                 </Link>
               );
             },
@@ -126,25 +126,26 @@ function Controls(props: { controls: WorkloadConfigurationScan.Controls }) {
           },
           {
             header: 'Name',
-            accessorFn: item => item.name,
+            accessorFn: (control: WorkloadConfigurationScan.Control) => control.name,
           },
           {
             header: 'Severity',
-            accessorFn: item => item.severity.severity,
+            accessorFn: (control: WorkloadConfigurationScan.Control) => control.severity.severity,
             gridTemplate: 'min-content',
           },
           {
             header: 'Score',
-            accessorFn: item => item.severity.scoreFactor,
+            accessorFn: (control: WorkloadConfigurationScan.Control) =>
+              control.severity.scoreFactor,
             gridTemplate: 'min-content',
           },
           {
             header: 'Explain',
-            accessorFn: item => explain(item),
+            accessorFn: (control: WorkloadConfigurationScan.Control) => explain(control),
           },
           {
             header: 'Remediation',
-            accessorFn: item => remediation(item),
+            accessorFn: (control: WorkloadConfigurationScan.Control) => remediation(control),
           },
         ]}
       />

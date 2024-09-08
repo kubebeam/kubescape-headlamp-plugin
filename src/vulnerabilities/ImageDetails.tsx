@@ -1,7 +1,11 @@
 /* 
   Show vulnerability scan results for a container image. 
 */
-import { NameValueTable, SectionBox, Table } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
+import {
+  NameValueTable,
+  SectionBox,
+  Table as HeadlampTable,
+} from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import { KubeObject } from '@kinvolk/headlamp-plugin/lib/lib/k8s/cluster';
 import { Link } from '@mui/material';
 import React from 'react';
@@ -72,7 +76,7 @@ function Matches(props: { manifestVulnerability: VulnerabilityManifest }) {
 
   return (
     <SectionBox title="Findings">
-      <Table
+      <HeadlampTable
         data={results}
         columns={[
           {
