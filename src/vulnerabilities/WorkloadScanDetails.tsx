@@ -1,13 +1,15 @@
 /* 
   Show vulnerability scan results for a workload. 
 */
-import { ApiProxy } from '@kinvolk/headlamp-plugin/lib';
+import { ApiProxy, KubeObject } from '@kinvolk/headlamp-plugin/lib';
 import { NameValueTable, SectionBox, Table } from '@kinvolk/headlamp-plugin/lib/components/common';
 import { Link } from '@mui/material';
 import React, { useEffect } from 'react';
 import { useLocation } from 'react-router';
 import expandableDescription from '../common/AccordionText';
 import makeSeverityLabel from '../common/SeverityLabel';
+import { VulnerabilityManifest } from '../softwarecomposition/VulnerabilityManifest';
+import { VulnerabilityManifestSummary } from '../softwarecomposition/VulnerabilityManifestSummary';
 import { getCVESummary } from './CVESummary';
 
 export default function KubescapeVulnerabilityDetails() {
@@ -23,14 +25,14 @@ export default function KubescapeVulnerabilityDetails() {
 }
 
 // Fetch vulnerabilitymanifestsummary and then vulnerabilitymanifest (if available)
-export async function fetchVulnerabilityManifest(name, namespace) {
+export async function fetchVulnerabilityManifest(name: string, namespace: string) {
   function getVulnerabilityManifestSummary(): Promise<any> {
     return ApiProxy.request(
       `/apis/spdx.softwarecomposition.kubescape.io/v1beta1/namespaces/${namespace}/vulnerabilitymanifestsummaries/${name}`
     );
   }
 
-  function getVulnerabilityManifest(name): Promise<any> {
+  function getVulnerabilityManifest(name: string): Promise<any> {
     if (name === '') {
       return Promise.resolve();
     }
@@ -40,30 +42,33 @@ export async function fetchVulnerabilityManifest(name, namespace) {
   }
 
   const summary = await getVulnerabilityManifestSummary();
-  let allManifest: any = null;
+  let allManifest: VulnerabilityManifest | null = null;
   await getVulnerabilityManifest(summary.spec.vulnerabilitiesRef.all.name)
     .then(result => {
       allManifest = result;
     })
     .catch(error => console.log(error.message));
-  let relevantManifest: any = null;
+  let relevantManifest: VulnerabilityManifest | null = null;
   await getVulnerabilityManifest(summary.spec.vulnerabilitiesRef.relevant.name)
     .then(result => {
       relevantManifest = result;
     })
     .catch(error => console.log(error.message));
 
-  return [summary, allManifest, relevantManifest];
+  return [summary, allManifest, relevantManifest]; // TODO reduce
 }
 
-function VulnerabilityManifestDetailView(props) {
+function VulnerabilityManifestDetailView(props: { name: string; namespace: string }) {
   const { name, namespace } = props;
-  const [summary, setSummary] = React.useState(null);
-  const [manifestAll, setManifestAll] = React.useState(null);
-  const [manifestRelevant, setManifestRelevant] = React.useState(null);
+  const [summary, setSummary]: [VulnerabilityManifestSummary | null, any] =
+    React.useState<VulnerabilityManifestSummary | null>(null);
+  const [manifestAll, setManifestAll]: [VulnerabilityManifest | null, any] =
+    React.useState<VulnerabilityManifest | null>(null);
+  const [manifestRelevant, setManifestRelevant]: [VulnerabilityManifest | null, any] =
+    React.useState<VulnerabilityManifest | null>(null);
 
   useEffect(() => {
-    fetchVulnerabilityManifest(name, namespace).then(response => {
+    fetchVulnerabilityManifest(name, namespace).then((response: string[]) => {
       setSummary(response[0]);
       setManifestAll(response[1]);
       setManifestRelevant(response[2]);
@@ -111,12 +116,7 @@ function VulnerabilityManifestDetailView(props) {
             ]}
           />
 
-          {manifestAll && manifestRelevant && (
-            <Matches manifest={manifestAll} relevant={manifestRelevant} />
-          )}
-          {manifestAll && manifestRelevant == null && (
-            <Matches manifest={manifestAll} relevant={null} />
-          )}
+          {manifestAll && <Matches manifest={manifestAll} relevant={manifestRelevant} />}
         </SectionBox>
 
         {/* <SectionBox title="Summary">
@@ -131,9 +131,9 @@ function VulnerabilityManifestDetailView(props) {
   );
 }
 
-function Matches(props) {
+function Matches(props: { manifest: KubeObject; relevant: KubeObject }) {
   const { manifest, relevant } = props;
-  const results = manifest?.spec.payload.matches;
+  const results: VulnerabilityManifest.Match[] = manifest?.spec.payload.matches;
 
   if (results) {
     results.sort((a, b) => {
@@ -154,7 +154,7 @@ function Matches(props) {
         columns={[
           {
             header: 'CVE',
-            accessorFn: item => {
+            accessorFn: (item: VulnerabilityManifest.Match) => {
               return (
                 <Link target="_blank" href={item.vulnerability.dataSource}>
                   {item.vulnerability.id}
@@ -165,32 +165,34 @@ function Matches(props) {
           },
           {
             header: 'Artifact',
-            accessorFn: item => item.artifact.name,
+            accessorFn: (item: VulnerabilityManifest.Match) => item.artifact.name,
             gridTemplate: 'auto',
           },
           {
             header: 'Version',
-            accessorFn: item => item.artifact.version,
+            accessorFn: (item: VulnerabilityManifest.Match) => item.artifact.version,
             gridTemplate: 'auto',
           },
           {
             header: 'Severity',
-            accessorFn: item => makeSeverityLabel(item.vulnerability.severity),
+            accessorFn: (item: VulnerabilityManifest.Match) =>
+              makeSeverityLabel(item.vulnerability.severity),
             gridTemplate: 'auto',
           },
           {
             header: 'Relevant',
-            accessorFn: item => relevant && isRelevant(relevant, item.vulnerability.id),
+            accessorFn: (item: VulnerabilityManifest.Match) =>
+              relevant && isRelevant(relevant, item.vulnerability.id),
             gridTemplate: 'auto',
           },
           {
             header: 'Fix',
-            accessorFn: item => item.vulnerability.fix.state,
+            accessorFn: (item: VulnerabilityManifest.Match) => item.vulnerability.fix.state,
             gridTemplate: 'auto',
           },
           {
             header: 'Fix in version',
-            accessorFn: item =>
+            accessorFn: (item: VulnerabilityManifest.Match) =>
               item.vulnerability.fix?.versions && Array.isArray(item.vulnerability.fix?.versions)
                 ? item.vulnerability.fix.versions.join(', ')
                 : '',
@@ -198,7 +200,8 @@ function Matches(props) {
           },
           {
             header: 'Description',
-            accessorFn: item => expandableDescription(item.vulnerability.description),
+            accessorFn: (item: VulnerabilityManifest.Match) =>
+              expandableDescription(item.vulnerability.description),
           },
         ]}
       />
@@ -206,7 +209,7 @@ function Matches(props) {
   );
 }
 
-function isRelevant(relevantManifest, id): string {
+function isRelevant(relevantManifest: KubeObject, id: string): string {
   const matches: any | undefined = relevantManifest?.spec.payload.matches;
 
   if (matches) {

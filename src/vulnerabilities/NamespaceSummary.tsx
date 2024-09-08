@@ -3,9 +3,11 @@
 */
 import { Link } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import { NameValueTable, SectionBox, Table } from '@kinvolk/headlamp-plugin/lib/components/common';
+import { KubeObject } from '@kinvolk/headlamp-plugin/lib/lib/k8s/cluster';
 import React from 'react';
 import { useLocation } from 'react-router';
 import { vulnerabilitySummaryClass } from '../model';
+import { VulnerabilitySummary } from '../softwarecomposition/VulnerabilitySummary';
 
 export default function VulnerabilitiesNamespaceSummary() {
   const location = useLocation();
@@ -17,27 +19,29 @@ export default function VulnerabilitiesNamespaceSummary() {
   return <NamespaceSummaryView namespace={namespace} />;
 }
 
-function NamespaceSummaryView(props) {
+function NamespaceSummaryView(props: { namespace: string }) {
   const { namespace } = props;
-  const [vulnerabilitySummary, setVulnerabilitySummary] = React.useState(null);
+  const [vulnerabilitySummaryKubeobject, setVulnerabilitySummary]: [KubeObject, any] =
+    React.useState(null);
 
   vulnerabilitySummaryClass.useApiGet(setVulnerabilitySummary, namespace);
 
+  if (!vulnerabilitySummaryKubeobject) {
+    return <div></div>;
+  }
+
+  const vulnerabilitySummary: VulnerabilitySummary = vulnerabilitySummaryKubeobject.jsonData;
   return (
     <>
-      {vulnerabilitySummary && <Maininfo vulnerabilitySummary={vulnerabilitySummary} />}
-
-      {vulnerabilitySummary && (
-        <VulnerabilityScans
-          vulnerabilityScans={vulnerabilitySummary.jsonData.spec.vulnerabilitiesRef}
-        />
-      )}
+      <Maininfo vulnerabilitySummary={vulnerabilitySummary} />
+      <VulnerabilityScans vulnerabilityScans={vulnerabilitySummary.spec.vulnerabilitiesRef} />
     </>
   );
 }
 
-function Maininfo(props) {
+function Maininfo(props: { vulnerabilitySummary: KubeObject }) {
   const { vulnerabilitySummary } = props;
+
   return (
     <SectionBox title="Namespace Vulnerabilities">
       <NameValueTable
@@ -52,7 +56,9 @@ function Maininfo(props) {
   );
 }
 
-function VulnerabilityScans(props) {
+function VulnerabilityScans(props: {
+  vulnerabilityScans: VulnerabilitySummary.VulnerabilityReference[];
+}) {
   const { vulnerabilityScans } = props;
 
   return (
@@ -62,7 +68,7 @@ function VulnerabilityScans(props) {
         columns={[
           {
             header: 'Workload',
-            accessorFn: item => {
+            accessorFn: (item: VulnerabilitySummary.VulnerabilityReference) => {
               return (
                 <Link
                   routeName={`/kubescape/vulnerabilities/namespaces/:namespace/:name`}
@@ -78,7 +84,7 @@ function VulnerabilityScans(props) {
           },
           {
             header: 'Kind',
-            accessorFn: item => {
+            accessorFn: (item: VulnerabilitySummary.VulnerabilityReference) => {
               const kind = item.name.split('-')?.[0];
               return kind[0].toUpperCase() + kind.slice(1);
             },

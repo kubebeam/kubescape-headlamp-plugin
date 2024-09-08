@@ -3,8 +3,9 @@
 */
 import { Link, SectionBox, Table } from '@kinvolk/headlamp-plugin/lib/components/common';
 import { Box, Stack, Tooltip } from '@mui/material';
+import { WorkloadConfigurationScanSummary } from '../softwarecomposition/WorkloadConfigurationScanSummary';
 import { workloadScanData } from './Compliance';
-import controlLibrary from './controlLibrary.js';
+import controlLibrary from './controlLibrary';
 
 export default function KubescapeWorkloadConfigurationScanList() {
   return (
@@ -31,16 +32,16 @@ function WorkloadConfigurationScanListView() {
           columns={[
             {
               header: 'Name',
-              accessorFn: item => {
+              accessorFn: (workloadScan: WorkloadConfigurationScanSummary) => {
                 return (
                   <Link
                     routeName={`/kubescape/compliance/namespaces/:namespace/:name`}
                     params={{
-                      name: item.metadata.name,
-                      namespace: item.metadata.namespace,
+                      name: workloadScan.metadata.name,
+                      namespace: workloadScan.metadata.namespace,
                     }}
                   >
-                    {item.metadata.labels['kubescape.io/workload-name']}
+                    {workloadScan.metadata.labels['kubescape.io/workload-name']}
                   </Link>
                 );
               },
@@ -48,40 +49,42 @@ function WorkloadConfigurationScanListView() {
             },
             {
               header: 'Kind',
-              accessorFn: item => item.metadata.labels['kubescape.io/workload-kind'],
+              accessorFn: (workloadScan: WorkloadConfigurationScanSummary) =>
+                workloadScan.metadata.labels['kubescape.io/workload-kind'],
               gridTemplate: 'auto',
             },
             {
               header: 'Namespace',
-              accessorFn: item => (
+              accessorFn: (workloadScan: WorkloadConfigurationScanSummary) => (
                 <Link
                   routeName="namespace"
                   params={{
-                    name: item.metadata.namespace,
+                    name: workloadScan.metadata.namespace,
                   }}
                 >
-                  {item.metadata.namespace}
+                  {workloadScan.metadata.namespace}
                 </Link>
               ),
               gridTemplate: 'auto',
             },
             {
               header: 'Failed',
-              accessorFn: item => {
+              accessorFn: (workloadScan: WorkloadConfigurationScanSummary) => {
                 let count = 0;
 
-                for (const [, scan] of Object.entries(item.spec.controls) as any) {
+                for (const [, scan] of Object.entries(workloadScan.spec.controls) as any) {
                   if (scan.status.status === 'failed') {
                     count++;
                   }
                 }
-                return `${count}/${Object.entries(item.spec.controls).length} controls`;
+                return `${count}/${Object.entries(workloadScan.spec.controls).length} controls`;
               },
               gridTemplate: 'auto',
             },
             {
               header: 'Controls',
-              accessorFn: item => resultStack(item),
+              accessorFn: (workloadScan: WorkloadConfigurationScanSummary) =>
+                resultStack(workloadScan),
               gridTemplate: 'auto',
             },
           ]}
@@ -91,7 +94,7 @@ function WorkloadConfigurationScanListView() {
   );
 }
 
-function countScans(workloadScan, severity: string): number {
+function countScans(workloadScan: WorkloadConfigurationScanSummary, severity: string): number {
   let count: number = 0;
 
   for (const [, scan] of Object.entries(workloadScan.spec.controls) as any) {
@@ -102,7 +105,7 @@ function countScans(workloadScan, severity: string): number {
   return count;
 }
 
-function controlsList(workloadScan, severity: string) {
+function controlsList(workloadScan: WorkloadConfigurationScanSummary, severity: string) {
   const controlIDs = [];
   for (const [controlID, scan] of Object.entries(workloadScan.spec.controls) as any) {
     if (controlIDs.indexOf(controlID) >= 0) {
@@ -117,7 +120,7 @@ function controlsList(workloadScan, severity: string) {
     return;
   }
 
-  function controlItem(controlID) {
+  function controlItem(controlID: string) {
     return (
       <div>
         {controlID}: {getControlName(controlID)}
@@ -126,7 +129,7 @@ function controlsList(workloadScan, severity: string) {
     );
   }
 
-  function getControlName(controlID) {
+  function getControlName(controlID: string) {
     for (const control of controlLibrary) {
       if (control.controlID === controlID) {
         return control.name;
@@ -146,8 +149,8 @@ function controlsList(workloadScan, severity: string) {
   );
 }
 
-function resultStack(workloadScan) {
-  function box(color, severity) {
+function resultStack(workloadScan: WorkloadConfigurationScanSummary) {
+  function box(color: string, severity: string) {
     return (
       <Box
         sx={{
@@ -177,7 +180,9 @@ function resultStack(workloadScan) {
   );
 }
 
-function getWorkloadsWithFindings(workloadScanData) {
+function getWorkloadsWithFindings(
+  workloadScanData: WorkloadConfigurationScanSummary[]
+): WorkloadConfigurationScanSummary[] {
   const workloads = [];
   for (const workload of workloadScanData) {
     for (const [, scan] of Object.entries(workload.spec.controls) as any) {

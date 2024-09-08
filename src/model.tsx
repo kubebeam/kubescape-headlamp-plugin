@@ -1,7 +1,8 @@
 /* 
   Kubescape definitions for resources with basic methods for querying. 
 */
-import { ApiProxy } from '@kinvolk/headlamp-plugin/lib';
+import { ApiProxy, KubeObject } from '@kinvolk/headlamp-plugin/lib';
+import { getAllowedNamespaces } from '@kinvolk/headlamp-plugin/lib/k8s/cluster';
 import { makeCustomResourceClass } from '@kinvolk/headlamp-plugin/lib/lib/k8s/crd';
 
 const spdxGroup = 'spdx.softwarecomposition.kubescape.io';
@@ -50,18 +51,18 @@ export const configurationScanSummaries = makeCustomResourceClass({
   pluralName: 'configurationscansummaries',
 });
 
-// TODO
-// import { getAllowedNamespaces } from '@kinvolk/headlamp-plugin/lib/k8s/cluster';
-function getAllowedNamespaces() {
-  return [];
-}
-
 // List methods for spdx.softwarecomposition.kubescape.io not retrieve detailed info in the spec. We need to fetch each workloadconfigurationscan individually.
-export async function deepListQuery(type) {
-  const namespaces = getAllowedNamespaces();
-  let items: any = [];
+export async function deepListQuery(type: string): Promise<KubeObject[]> {
+  let namespaces: string[] = [];
 
-  if (namespaces.length > 1) {
+  // method getAllowedNamespaces may not be released yet
+  if (getAllowedNamespaces !== undefined) {
+    namespaces = getAllowedNamespaces();
+  }
+
+  let items: KubeObject = [];
+
+  if (namespaces.length > 0) {
     // If we have namespaces set, make an API call for each namespace
     const listOfLists = await Promise.all(
       namespaces.map(namespace =>
@@ -79,7 +80,7 @@ export async function deepListQuery(type) {
   }
 
   const detailList = await Promise.all(
-    items.map(scan =>
+    items.map((scan: KubeObject) =>
       ApiProxy.request(
         `/apis/${spdxGroup}/${spdxVersion}/namespaces/${scan.metadata.namespace}/${type}/${scan.metadata.name}`
       )

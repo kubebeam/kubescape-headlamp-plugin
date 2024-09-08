@@ -2,8 +2,9 @@
   Build a horizontack stack with seperate cells for critical, high, medium, low and unknown. 
 */
 import { Box, Stack, Tooltip } from '@mui/material';
+import { WorkloadConfigurationScanSummary } from '../softwarecomposition/WorkloadConfigurationScanSummary';
 
-export function getControlsSummary(scanSummary) {
+export function getControlsSummary(scanSummary: WorkloadConfigurationScanSummary) {
   const severities = scanSummary?.spec.severities;
 
   const criticalCount = severities.critical;

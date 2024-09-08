@@ -17,4 +17,4 @@ volumeMounts:
     name: headlamp-plugins
 volumes:
   - name: headlamp-plugins
-    emptyDir: {} 
+    emptyDir: {}

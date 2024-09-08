@@ -14,11 +14,12 @@ import {
 import { Box, Link, Tooltip } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { deepListQuery } from '../model';
-import controlLibrary from './controlLibrary.js';
+import { WorkloadConfigurationScanSummary } from '../softwarecomposition/WorkloadConfigurationScanSummary';
+import { Control, controlLibrary } from './controlLibrary';
 import KubescapeWorkloadConfigurationScanList from './ResourceList';
 
 // workloadScans are cached in global scope because it is an expensive query for the API server
-export let workloadScanData: any[] = null;
+export let workloadScanData: WorkloadConfigurationScanSummary[] | null = null;
 
 export default function ComplianceView() {
   const [, setState] = useState({});
@@ -74,19 +75,22 @@ function ConfigurationScanningListView() {
           columns={[
             {
               header: 'Severity',
-              accessorFn: item =>
-                makeCVSSLabel(item.baseScore, countScans(workloadScanData, item, 'failed')),
+              accessorFn: (control: Control) =>
+                makeCVSSLabel(
+                  control.baseScore,
+                  workloadScanData ? countScans(workloadScanData, control, 'failed') : 0
+                ),
               gridTemplate: 'min-content',
             },
             {
               header: 'ID',
-              accessorFn: item => {
+              accessorFn: (control: Control) => {
                 return (
                   <Link
                     target="_blank"
-                    href={'https://hub.armosec.io/docs/' + item.controlID.toLowerCase()}
+                    href={'https://hub.armosec.io/docs/' + control.controlID.toLowerCase()}
                   >
-                    {item.controlID}
+                    {control.controlID}
                   </Link>
                 );
               },
@@ -94,13 +98,13 @@ function ConfigurationScanningListView() {
             },
             {
               header: 'Control Name',
-              accessorFn: item => {
+              accessorFn: (control: Control) => {
                 return (
                   <Tooltip
-                    title={item.description}
+                    title={control.description}
                     slotProps={{ tooltip: { sx: { fontSize: '0.9em' } } }}
                   >
-                    {item.name}
+                    {control.name}
                   </Tooltip>
                 );
               },
@@ -108,11 +112,12 @@ function ConfigurationScanningListView() {
             },
             {
               header: 'Remediation',
-              accessorFn: item => item.remediation.replaceAll('`', "'"),
+              accessorFn: (control: Control) => control.remediation.replaceAll('`', "'"),
             },
             {
               header: 'Resources',
-              accessorFn: item => makeResultsLabel(workloadScanData, item),
+              accessorFn: (control: Control) =>
+                workloadScanData ? makeResultsLabel(workloadScanData, control) : '',
               gridTemplate: 'auto',
             },
           ]}
@@ -122,7 +127,7 @@ function ConfigurationScanningListView() {
   );
 }
 
-function getControlsWithFindings(workloadScanData): any {
+function getControlsWithFindings(workloadScanData: WorkloadConfigurationScanSummary[]): Control[] {
   return controlLibrary.filter(control => {
     for (const workload of workloadScanData) {
       for (const [controlID, scan] of Object.entries(workload.spec.controls) as any) {
@@ -177,11 +182,11 @@ function makeCVSSLabel(baseScore: number, failCount: number) {
   }
 }
 
-function makeResultsLabel(workloadScanData: any[], item) {
+function makeResultsLabel(workloadScanData: WorkloadConfigurationScanSummary[], control: Control) {
   let status: StatusLabelProps['status'] = '';
 
-  const failCount = countScans(workloadScanData, item, 'failed');
-  const passedCount = countScans(workloadScanData, item, 'passed');
+  const failCount = countScans(workloadScanData, control, 'failed');
+  const passedCount = countScans(workloadScanData, control, 'passed');
   if (failCount > 0) {
     status = 'error';
   } else {
@@ -201,7 +206,7 @@ function makeResultsLabel(workloadScanData: any[], item) {
           <HeadlampLink
             routeName={`/kubescape/compliance/controls/:control`}
             params={{
-              control: item.controlID,
+              control: control.controlID,
             }}
           >
             {failCount} Failed, {passedCount} Accepted
@@ -226,12 +231,16 @@ function sortControlLibrary() {
   });
 }
 
-function countScans(workloadScanData, item, status): number {
+function countScans(
+  workloadScanData: WorkloadConfigurationScanSummary[],
+  control: Control,
+  status: string
+): number {
   let count: number = 0;
 
   for (const workload of workloadScanData) {
     for (const [controlID, scan] of Object.entries(workload.spec.controls) as any) {
-      if (controlID === item.controlID && scan.status.status === status) {
+      if (controlID === control.controlID && scan.status.status === status) {
         count++;
       }
     }
@@ -239,7 +248,7 @@ function countScans(workloadScanData, item, status): number {
   return count;
 }
 
-function countFailedScans(workloadScanData): number {
+function countFailedScans(workloadScanData: WorkloadConfigurationScanSummary[]): number {
   let count: number = 0;
 
   for (const workload of workloadScanData) {

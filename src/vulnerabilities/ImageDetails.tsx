@@ -2,12 +2,15 @@
   Show vulnerability scan results for a container image. 
 */
 import { NameValueTable, SectionBox, Table } from '@kinvolk/headlamp-plugin/lib/components/common';
+import { KubeObject } from '@kinvolk/headlamp-plugin/lib/lib/k8s/cluster';
+// @ts-ignore
 import { Link } from '@mui/material';
 import React from 'react';
 import { useLocation } from 'react-router';
 import expandableDescription from '../common/AccordionText';
 import makeSeverityLabel from '../common/SeverityLabel';
 import { vulnerabilityManifestClass } from '../model';
+import { VulnerabilityManifest } from '../softwarecomposition/VulnerabilityManifest';
 
 export default function ImageVulnerabilityDetails() {
   const location = useLocation();
@@ -19,9 +22,9 @@ export default function ImageVulnerabilityDetails() {
   return <ImageVulnerabilityDetailsView name={name} />;
 }
 
-function ImageVulnerabilityDetailsView(props) {
+function ImageVulnerabilityDetailsView(props: { name: string }) {
   const { name } = props;
-  const [manifestVulnerability, setVulnerabilityManifest] = React.useState(null);
+  const [manifestVulnerability, setVulnerabilityManifest]: [KubeObject, any] = React.useState(null);
 
   vulnerabilityManifestClass.useApiGet(setVulnerabilityManifest, name, 'kubescape');
 
@@ -52,9 +55,9 @@ function ImageVulnerabilityDetailsView(props) {
   );
 }
 
-function Matches(props) {
+function Matches(props: { manifestVulnerability: VulnerabilityManifest }) {
   const { manifestVulnerability } = props;
-  const results = manifestVulnerability?.spec.payload.matches;
+  const results = manifestVulnerability.spec.payload.matches;
 
   if (results) {
     results.sort((a, b) => {
@@ -75,7 +78,7 @@ function Matches(props) {
         columns={[
           {
             header: 'CVE',
-            accessorFn: item => {
+            accessorFn: (item: VulnerabilityManifest.Match) => {
               return (
                 <Link target="_blank" href={item.vulnerability.dataSource}>
                   {item.vulnerability.id}
@@ -86,27 +89,28 @@ function Matches(props) {
           },
           {
             header: 'Artifact',
-            accessorFn: item => item.artifact.name,
+            accessorFn: (item: VulnerabilityManifest.Match) => item.artifact.name,
             gridTemplate: 'auto',
           },
           {
             header: 'Version',
-            accessorFn: item => item.artifact.version,
+            accessorFn: (item: VulnerabilityManifest.Match) => item.artifact.version,
             gridTemplate: 'auto',
           },
           {
             header: 'Severity',
-            accessorFn: item => makeSeverityLabel(item.vulnerability.severity),
+            accessorFn: (item: VulnerabilityManifest.Match) =>
+              makeSeverityLabel(item.vulnerability.severity),
             gridTemplate: 'auto',
           },
           {
             header: 'Fix',
-            accessorFn: item => item.vulnerability.fix.state,
+            accessorFn: (item: VulnerabilityManifest.Match) => item.vulnerability.fix.state,
             gridTemplate: 'auto',
           },
           {
             header: 'Fix in version',
-            accessorFn: item =>
+            accessorFn: (item: VulnerabilityManifest.Match) =>
               item.vulnerability.fix?.versions && Array.isArray(item.vulnerability.fix?.versions)
                 ? item.vulnerability.fix.versions.join(', ')
                 : '',
@@ -114,8 +118,8 @@ function Matches(props) {
           },
           {
             header: 'Description',
-            accessorFn: item => {
-              let relatedDescription: string;
+            accessorFn: (item: VulnerabilityManifest.Match) => {
+              let relatedDescription: string = '';
               if (item.relatedVulnerabilities) {
                 for (const related of item.relatedVulnerabilities) {
                   if (related.id === item.vulnerability.id) {

@@ -3,8 +3,10 @@
 */
 import { Link as HeadlampLink } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import { DateLabel, SectionBox, Table } from '@kinvolk/headlamp-plugin/lib/components/common';
+// @ts-ignore
 import { Box, Stack, Tooltip } from '@mui/material';
-import { ImageScan, WorkloadScan, workloadScans } from './Vulnerabilities';
+import { VulnerabilityModel } from './view-types';
+import { workloadScans } from './Vulnerabilities';
 
 export default function ImageListView() {
   if (!workloadScans) {
@@ -20,7 +22,7 @@ export default function ImageListView() {
           columns={[
             {
               header: 'Image',
-              accessorFn: (imageScan: ImageScanDetails) => {
+              accessorFn: (imageScan: VulnerabilityModel.ImageScanWithReferences) => {
                 return (
                   <HeadlampLink
                     routeName={`/kubescape/vulnerabilities/images/:name`}
@@ -36,7 +38,7 @@ export default function ImageListView() {
             },
             {
               header: 'Workload',
-              accessorFn: (imageScan: ImageScanDetails) => (
+              accessorFn: (imageScan: VulnerabilityModel.ImageScanWithReferences) => (
                 <div style={{ whiteSpace: 'pre-line' }}>
                   {Array.from(imageScan.workloads)
                     .map(workload => workload.name)
@@ -47,14 +49,15 @@ export default function ImageListView() {
             },
             {
               header: 'Last scan',
-              accessorFn: (imageScan: ImageScanDetails) => (
+              accessorFn: (imageScan: VulnerabilityModel.ImageScanWithReferences) => (
                 <DateLabel date={imageScan.creationTimestamp} />
               ),
               gridTemplate: 'max-content',
             },
             {
               header: 'Vulnerabilities',
-              accessorFn: (imageScan: ImageScanDetails) => resultStack(imageScan),
+              accessorFn: (imageScan: VulnerabilityModel.ImageScanWithReferences) =>
+                resultStack(imageScan),
             },
           ]}
         />
@@ -63,20 +66,18 @@ export default function ImageListView() {
   );
 }
 
-interface ImageScanDetails extends ImageScan {
-  workloads: Set<WorkloadScan>;
-}
-
-function getImageScans(workloadScans: WorkloadScan[]): ImageScanDetails[] {
-  const imageScans: ImageScanDetails[] = [];
+function getImageScans(
+  workloadScans: VulnerabilityModel.WorkloadScan[]
+): VulnerabilityModel.ImageScanWithReferences[] {
+  const imageScans: VulnerabilityModel.ImageScanWithReferences[] = [];
   if (workloadScans) {
     for (const workloadScan of workloadScans) {
       if (!workloadScan.imageScan) {
         continue;
       }
 
-      let scan: ImageScanDetails = imageScans.find(
-        element => element.manifestName === workloadScan.imageScan.manifestName
+      let scan: VulnerabilityModel.ImageScanWithReferences | undefined = imageScans.find(
+        element => element.manifestName === workloadScan.imageScan?.manifestName
       );
       if (!scan) {
         scan = {
@@ -94,8 +95,8 @@ function getImageScans(workloadScans: WorkloadScan[]): ImageScanDetails[] {
   return imageScans;
 }
 
-function resultStack(imageScan: ImageScan) {
-  function box(color, severity) {
+function resultStack(imageScan: VulnerabilityModel.ImageScanWithReferences) {
+  function box(color: string, severity: string) {
     return (
       <Box
         sx={{
@@ -108,7 +109,7 @@ function resultStack(imageScan: ImageScan) {
           width: 20,
         }}
       >
-        <Tooltip title="{severity}">
+        <Tooltip title={severity}>
           {imageScan.vulnerabilities.filter(v => v.severity === severity).length}
         </Tooltip>
       </Box>

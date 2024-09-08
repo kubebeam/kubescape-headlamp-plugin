@@ -1,11 +1,13 @@
 /* 
   Show the configuration findings for workloads in a single namespace.  
 */
+import { KubeObject } from '@kinvolk/headlamp-plugin/lib';
 import { Link } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import { MainInfoSection, SectionBox, Table } from '@kinvolk/headlamp-plugin/lib/components/common';
 import React from 'react';
 import { useLocation } from 'react-router';
 import { configurationScanSummaries } from '../model';
+import { ConfigurationScanSummary } from '../softwarecomposition/ConfigurationScanSummary';
 
 export default function KubescapeConfigurationScanNamespaceSummary() {
   const location = useLocation();
@@ -17,9 +19,9 @@ export default function KubescapeConfigurationScanNamespaceSummary() {
   return <ConfigurationScanNamespaceSummaryView namespace={namespace} />;
 }
 
-function ConfigurationScanNamespaceSummaryView(props) {
+function ConfigurationScanNamespaceSummaryView(props: { namespace: string }) {
   const { namespace } = props;
-  const [cr, setCr] = React.useState(null);
+  const [cr, setCr]: [KubeObject, any] = React.useState(null);
 
   configurationScanSummaries.useApiGet(setCr, namespace);
 
@@ -36,7 +38,7 @@ function ConfigurationScanNamespaceSummaryView(props) {
   );
 }
 
-function ConfigurationScans(props) {
+function ConfigurationScans(props: { configurationScans: ConfigurationScanSummary.SummaryRef[] }) {
   const { configurationScans } = props;
 
   return (
@@ -46,7 +48,7 @@ function ConfigurationScans(props) {
         columns={[
           {
             header: 'Namespace',
-            accessorFn: item => {
+            accessorFn: (item: ConfigurationScanSummary.SummaryRef) => {
               return (
                 <Link
                   routeName={`/kubescape/compliance/namespaces/:namespace/:name`}

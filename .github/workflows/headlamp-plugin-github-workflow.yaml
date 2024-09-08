@@ -8,7 +8,7 @@ on:
 
 permissions:
   contents: write
-  
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -35,14 +35,14 @@ jobs:
 
       - name: Create release info file
         run: |
-         echo -e "ref: $GITHUB_REF \ncommit: $GITHUB_SHA\nbuild: $(date +"%Y-%m-%dT%H:%M:%SZ")" \
-         > dist/info.txt
-      - name: Update latest release 
+          echo -e "ref: $GITHUB_REF \ncommit: $GITHUB_SHA\nbuild: $(date +"%Y-%m-%dT%H:%M:%SZ")" \
+          > dist/info.txt
+      - name: Update latest release
         uses: pyTooling/Actions/releaser@r0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           rm: true
-          tag: latest 
+          tag: latest
           files: |
             dist/info.txt 
             dist/main.js

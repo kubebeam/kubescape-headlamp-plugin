@@ -3,7 +3,8 @@
 */
 import { Link, SectionBox, Table } from '@kinvolk/headlamp-plugin/lib/components/common';
 import { Box, Stack, Tooltip } from '@mui/material';
-import { WorkloadScan, workloadScans } from './Vulnerabilities';
+import { VulnerabilityModel } from './view-types';
+import { workloadScans } from './Vulnerabilities';
 
 export default function WorkloadScanListView() {
   if (!workloadScans) {
@@ -18,7 +19,7 @@ export default function WorkloadScanListView() {
           columns={[
             {
               header: 'Name',
-              accessorFn: (workloadScan: WorkloadScan) => {
+              accessorFn: (workloadScan: VulnerabilityModel.WorkloadScan) => {
                 return (
                   <Link
                     routeName={`/kubescape/vulnerabilities/namespaces/:namespace/:name`}
@@ -35,7 +36,7 @@ export default function WorkloadScanListView() {
             },
             {
               header: 'Namespace',
-              accessorFn: (workloadScan: WorkloadScan) => (
+              accessorFn: (workloadScan: VulnerabilityModel.WorkloadScan) => (
                 <Link
                   routeName="namespace"
                   params={{
@@ -49,12 +50,12 @@ export default function WorkloadScanListView() {
             },
             {
               header: 'Container',
-              accessorFn: (workloadScan: WorkloadScan) => workloadScan.container,
+              accessorFn: (workloadScan: VulnerabilityModel.WorkloadScan) => workloadScan.container,
               gridTemplate: 'min-content',
             },
             {
               header: 'Kind',
-              accessorFn: (workloadScan: WorkloadScan) => {
+              accessorFn: (workloadScan: VulnerabilityModel.WorkloadScan) => {
                 return (
                   <Link routeName={workloadScan.kind.toLowerCase() + 's'}>{workloadScan.kind}</Link>
                 );
@@ -63,11 +64,13 @@ export default function WorkloadScanListView() {
             },
             {
               header: 'Image',
-              accessorFn: (workloadScan: WorkloadScan) => workloadScan.imageScan?.imageName,
+              accessorFn: (workloadScan: VulnerabilityModel.WorkloadScan) =>
+                workloadScan.imageScan?.imageName,
             },
             {
               header: 'CVE',
-              accessorFn: (workloadScan: WorkloadScan) => resultStack(workloadScan),
+              accessorFn: (workloadScan: VulnerabilityModel.WorkloadScan) =>
+                resultStack(workloadScan),
             },
           ]}
         />
@@ -76,22 +79,24 @@ export default function WorkloadScanListView() {
   );
 }
 
-function countScans(workloadScan: WorkloadScan, severity: string): number {
+function countScans(workloadScan: VulnerabilityModel.WorkloadScan, severity: string): number {
   let count: number = 0;
 
-  for (const v of workloadScan.imageScan.vulnerabilities) {
-    if (v.severity === severity) {
-      count++;
+  if (workloadScan.imageScan) {
+    for (const v of workloadScan.imageScan.vulnerabilities) {
+      if (v.severity === severity) {
+        count++;
+      }
     }
   }
   return count;
 }
 
-function resultStack(workloadScan: WorkloadScan) {
+function resultStack(workloadScan: VulnerabilityModel.WorkloadScan) {
   if (!workloadScan.imageScan) {
     return <div />;
   }
-  function box(color, severity) {
+  function box(color: string, severity: string) {
     return (
       <Box
         sx={{
@@ -104,7 +109,7 @@ function resultStack(workloadScan: WorkloadScan) {
           width: 20,
         }}
       >
-        <Tooltip title="{severity}">{countScans(workloadScan, severity)}</Tooltip>
+        <Tooltip title={severity}>{countScans(workloadScan, severity)}</Tooltip>
       </Box>
     );
   }

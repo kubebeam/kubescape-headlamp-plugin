@@ -8,11 +8,13 @@ import {
   StatusLabelProps,
   Table,
 } from '@kinvolk/headlamp-plugin/lib/components/common';
+import { KubeObject } from '@kinvolk/headlamp-plugin/lib/lib/k8s/cluster';
 import { Box, Link } from '@mui/material';
 import React from 'react';
 import { useLocation } from 'react-router';
 import { workloadConfigurationScanClass } from '../model';
-import controlLibrary from './controlLibrary.js';
+import { WorkloadConfigurationScan } from '../softwarecomposition/WorkloadConfigurationScan';
+import { controlLibrary } from './controlLibrary';
 
 export default function KubescapeWorkloadConfigurationScanDetails() {
   const location = useLocation();
@@ -26,10 +28,10 @@ export default function KubescapeWorkloadConfigurationScanDetails() {
   return <WorkloadConfigurationScanDetailView name={name} namespace={namespace} />;
 }
 
-function prepareExtraInfo(cr) {
-  const extraInfo = [];
+function prepareExtraInfo(cr: KubeObject): { name: string; value: string }[] {
+  const extraInfo: { name: string; value: string }[] = [];
 
-  const controls = cr.jsonData.spec.controls;
+  const controls: WorkloadConfigurationScan.Controls = cr.jsonData.spec.controls;
 
   const entries = Object.keys(controls).map(key => controls[key]);
   let failCount: number = 0;
@@ -54,23 +56,23 @@ function prepareExtraInfo(cr) {
 
   extraInfo.push({
     name: 'Failed',
-    value: failCount,
+    value: failCount.toString(),
   });
   extraInfo.push({
     name: 'Passed',
-    value: passedCount,
+    value: passedCount.toString(),
   });
   extraInfo.push({
     name: 'Skipped',
-    value: skippedCount,
+    value: skippedCount.toString(),
   });
 
   return extraInfo;
 }
 
-function WorkloadConfigurationScanDetailView(props) {
+function WorkloadConfigurationScanDetailView(props: { name: string; namespace: string }) {
   const { name, namespace } = props;
-  const [cr, setCr] = React.useState(null);
+  const [cr, setCr]: [KubeObject, any] = React.useState(null);
 
   workloadConfigurationScanClass.useApiGet(setCr, name, namespace);
 
@@ -93,7 +95,7 @@ function WorkloadConfigurationScanDetailView(props) {
   );
 }
 
-function Controls(props) {
+function Controls(props: { controls: WorkloadConfigurationScan.Controls }) {
   const { controls } = props;
 
   const entries = Object.keys(controls).map(key => controls[key]);
@@ -150,25 +152,25 @@ function Controls(props) {
   );
 }
 
-function explain(item) {
+function explain(control: WorkloadConfigurationScan.Control) {
   for (const data of controlLibrary) {
-    if (data.controlID === item.controlID) {
+    if (data.controlID === control.controlID) {
       return data.description;
     }
   }
 }
 
-function remediation(item) {
+function remediation(control: WorkloadConfigurationScan.Control) {
   for (const data of controlLibrary) {
-    if (data.controlID === item.controlID) {
+    if (data.controlID === control.controlID) {
       return data.remediation;
     }
   }
 }
 
-function makeStatusLabel(item) {
+function makeStatusLabel(control: WorkloadConfigurationScan.Control) {
   let status: StatusLabelProps['status'] = '';
-  const statusLabel: string = item.status.status;
+  const statusLabel: string = control.status.status;
 
   if (statusLabel === 'failed') {
     status = 'error';

@@ -9,8 +9,9 @@ import {
 } from '@kinvolk/headlamp-plugin/lib/components/common';
 import { Link } from '@mui/material';
 import { useLocation } from 'react-router';
+import { WorkloadConfigurationScanSummary } from '../softwarecomposition/WorkloadConfigurationScanSummary';
 import { workloadScanData } from './Compliance';
-import controlLibrary from './controlLibrary.js';
+import controlLibrary from './controlLibrary';
 
 export default function KubescapeControlResults() {
   const location = useLocation();
@@ -22,7 +23,7 @@ export default function KubescapeControlResults() {
   return <ControlResultsListView controlID={name} />;
 }
 
-function ControlResultsListView(props) {
+function ControlResultsListView(props: { controlID: string }) {
   const { controlID } = props;
   const control = controlLibrary.find(element => element.controlID === controlID);
 
@@ -47,7 +48,7 @@ function ControlResultsListView(props) {
             },
             {
               name: 'Score',
-              value: control.baseScore,
+              value: control.baseScore.toString(),
             },
             {
               name: 'Remediation',
@@ -74,36 +75,37 @@ function ControlResultsListView(props) {
           columns={[
             {
               header: 'Name',
-              accessorFn: item => {
+              accessorFn: (workloadScan: WorkloadConfigurationScanSummary) => {
                 return (
                   <HeadlampLink
                     routeName={`/kubescape/compliance/namespaces/:namespace/:name`}
                     params={{
-                      name: item.metadata.name,
-                      namespace: item.metadata.namespace,
+                      name: workloadScan.metadata.name,
+                      namespace: workloadScan.metadata.namespace,
                     }}
                   >
-                    {item.metadata.labels['kubescape.io/workload-name']}
+                    {workloadScan.metadata.labels['kubescape.io/workload-name']}
                   </HeadlampLink>
                 );
               },
             },
             {
               header: 'Namespace',
-              accessorFn: item => (
+              accessorFn: (workloadScan: WorkloadConfigurationScanSummary) => (
                 <HeadlampLink
                   routeName="namespace"
                   params={{
-                    name: item.metadata.namespace,
+                    name: workloadScan.metadata.namespace,
                   }}
                 >
-                  {item.metadata.namespace}
+                  {workloadScan.metadata.namespace}
                 </HeadlampLink>
               ),
             },
             {
               header: 'Kind',
-              accessorFn: item => item.metadata.labels['kubescape.io/workload-kind'],
+              accessorFn: (workloadScan: WorkloadConfigurationScanSummary) =>
+                workloadScan.metadata.labels['kubescape.io/workload-kind'],
             },
           ]}
         />
@@ -112,14 +114,18 @@ function ControlResultsListView(props) {
   );
 }
 
-function getFailedWorkloads(workloadScanData, controlID: string) {
+function getFailedWorkloads(
+  workloadScanData: WorkloadConfigurationScanSummary[] | null,
+  controlID: string
+) {
   const workloads = [];
-
-  for (const workload of workloadScanData) {
-    for (const [, scan] of Object.entries(workload.spec.controls) as any) {
-      if (scan.controlID === controlID && scan.status.status === 'failed') {
-        workloads.push(workload);
-        break;
+  if (workloadScanData) {
+    for (const workload of workloadScanData) {
+      for (const [, scan] of Object.entries(workload.spec.controls) as any) {
+        if (scan.controlID === controlID && scan.status.status === 'failed') {
+          workloads.push(workload);
+          break;
+        }
       }
     }
   }

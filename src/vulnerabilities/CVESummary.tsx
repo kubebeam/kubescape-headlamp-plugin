@@ -1,9 +1,11 @@
 /* 
   Build a horizontack stack with seperate cells for critical, high, medium, low, negligible and unknown. 
 */
+// @ts-ignore
 import { Box, Stack, Tooltip } from '@mui/material';
+import { VulnerabilityManifestSummary } from '../softwarecomposition/VulnerabilityManifestSummary';
 
-export function getCVESummary(configurationScanSummary) {
+export function getCVESummary(configurationScanSummary: VulnerabilityManifestSummary) {
   const severities = configurationScanSummary?.spec.severities;
 
   const criticalCount = severities.critical.all;
@@ -13,7 +15,7 @@ export function getCVESummary(configurationScanSummary) {
   const negligibleCount = severities.negligible.all;
   const unknownCount = severities.unknown.all;
 
-  function box(color, severity, countScan) {
+  function box(color: string, severity: string, countScan: number) {
     return (
       <Box
         sx={{

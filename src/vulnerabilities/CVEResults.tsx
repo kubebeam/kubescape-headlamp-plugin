@@ -3,9 +3,11 @@
 */
 import { Link as HeadlampLink } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import { NameValueTable, SectionBox, Table } from '@kinvolk/headlamp-plugin/lib/components/common';
+// @ts-ignore
 import { Link } from '@mui/material';
 import { useLocation } from 'react-router';
-import { WorkloadScan, workloadScans } from './Vulnerabilities';
+import { VulnerabilityModel } from './view-types';
+import { workloadScans } from './Vulnerabilities';
 
 export default function KubescapeCVEResults() {
   const location = useLocation();
@@ -17,21 +19,23 @@ export default function KubescapeCVEResults() {
   return <CVEResultsListView cve={name} />;
 }
 
-function CVEResultsListView(props) {
+function CVEResultsListView(props: { cve: string }) {
   const { cve } = props;
 
   if (!workloadScans) {
-    return;
+    return <div></div>;
   }
-
   const workloadScansFiltered = workloadScans.filter(workloadScan =>
-    workloadScan.imageScan?.vulnerabilities?.some(v => v.CVE === cve)
+    workloadScan.imageScan?.vulnerabilities.some(v => v.CVE === cve)
   );
   if (!workloadScansFiltered) {
-    return;
+    return <div></div>;
   }
-  const firstCVE = workloadScansFiltered[0].imageScan.vulnerabilities.find(v => v.CVE === cve);
+  const firstCVE = workloadScansFiltered[0].imageScan?.vulnerabilities.find(v => v.CVE === cve);
 
+  if (!firstCVE) {
+    return <div></div>;
+  }
   return (
     <>
       <h1>{cve}</h1>
@@ -60,7 +64,7 @@ function CVEResultsListView(props) {
   );
 }
 
-function Workloads(props) {
+function Workloads(props: { cve: string; workloads: VulnerabilityModel.WorkloadScan[] }) {
   const { cve, workloads } = props;
 
   return (
@@ -70,7 +74,7 @@ function Workloads(props) {
         columns={[
           {
             header: 'Workload',
-            accessorFn: (workload: WorkloadScan) => (
+            accessorFn: (workload: VulnerabilityModel.WorkloadScan) => (
               <HeadlampLink
                 routeName={`/kubescape/vulnerabilities/namespaces/:namespace/:name`}
                 params={{
@@ -85,25 +89,25 @@ function Workloads(props) {
           },
           {
             header: 'Kind',
-            accessorFn: (workload: WorkloadScan) => workload.kind,
+            accessorFn: (workload: VulnerabilityModel.WorkloadScan) => workload.kind,
             gridTemplate: 'auto',
           },
           {
             header: 'Namespace',
-            accessorFn: (workload: WorkloadScan) => workload.namespace,
+            accessorFn: (workload: VulnerabilityModel.WorkloadScan) => workload.namespace,
             gridTemplate: 'auto',
           },
           {
             header: 'Container',
-            accessorFn: (workload: WorkloadScan) => workload.container,
+            accessorFn: (workload: VulnerabilityModel.WorkloadScan) => workload.container,
             gridTemplate: 'auto',
           },
           {
             header: 'Component',
-            accessorFn: (workload: WorkloadScan) =>
+            accessorFn: (workload: VulnerabilityModel.WorkloadScan) =>
               `${Array.from(
                 new Set(
-                  workload.imageScan.vulnerabilities
+                  workload.imageScan?.vulnerabilities
                     .filter(v => v.CVE === cve)
                     .map(v => v.artifact.name + ' ' + v.artifact.version)
                 )
@@ -112,10 +116,10 @@ function Workloads(props) {
           },
           {
             header: 'Fix',
-            accessorFn: (workload: WorkloadScan) =>
+            accessorFn: (workload: VulnerabilityModel.WorkloadScan) =>
               `${Array.from(
                 new Set(
-                  workload.imageScan.vulnerabilities
+                  workload.imageScan?.vulnerabilities
                     .filter(v => v.CVE === cve && v.fix.versions)
                     .map(v => v.fix.versions.join())
                 )
@@ -124,7 +128,8 @@ function Workloads(props) {
           },
           {
             header: 'Image',
-            accessorFn: (workload: WorkloadScan) => workload.imageScan.imageName,
+            accessorFn: (workload: VulnerabilityModel.WorkloadScan) =>
+              workload.imageScan?.imageName,
             gridTemplate: 'auto',
           },
         ]}
