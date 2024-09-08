@@ -3,14 +3,12 @@
 */
 import {
   Link as HeadlampLink,
-  Tabs as HeadlampTabs,
-} from '@kinvolk/headlamp-plugin/lib/CommonComponents';
-import {
   SectionBox,
   StatusLabel,
   StatusLabelProps,
   Table,
-} from '@kinvolk/headlamp-plugin/lib/components/common';
+  Tabs as HeadlampTabs,
+} from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import { Box, Link, Tooltip } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { deepListQuery } from '../model';

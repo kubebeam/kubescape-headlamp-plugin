@@ -1,7 +1,7 @@
 /* 
   List configuration scans for all workloads.  
 */
-import { Link, SectionBox, Table } from '@kinvolk/headlamp-plugin/lib/components/common';
+import { Link, SectionBox, Table } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import { Box, Stack, Tooltip } from '@mui/material';
 import { WorkloadConfigurationScanSummary } from '../softwarecomposition/WorkloadConfigurationScanSummary';
 import { workloadScanData } from './Compliance';

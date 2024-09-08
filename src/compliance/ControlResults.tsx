@@ -6,7 +6,7 @@ import {
   NameValueTable,
   SectionBox,
   Table,
-} from '@kinvolk/headlamp-plugin/lib/components/common';
+} from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import { Link } from '@mui/material';
 import { useLocation } from 'react-router';
 import { WorkloadConfigurationScanSummary } from '../softwarecomposition/WorkloadConfigurationScanSummary';

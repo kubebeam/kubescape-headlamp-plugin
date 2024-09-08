@@ -3,9 +3,10 @@
 */
 import {
   Link as HeadlampLink,
+  SectionBox,
+  Table as HeadlampTable,
   Tabs as HeadlampTabs,
 } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
-import { SectionBox, Table } from '@kinvolk/headlamp-plugin/lib/components/common';
 import { useEffect, useState } from 'react';
 import expandableDescription from '../common/AccordionText';
 import makeSeverityLabel from '../common/SeverityLabel';
@@ -204,7 +205,7 @@ function CVEListView() {
         {workloadScans.length} workload scans, {cveList.length} CVE issues
       </h5>
       <SectionBox>
-        <Table
+        <HeadlampTable
           data={cveList}
           columns={[
             {

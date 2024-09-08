@@ -2,8 +2,12 @@
   Show the configuration findings for workloads in a single namespace.  
 */
 import { KubeObject } from '@kinvolk/headlamp-plugin/lib';
-import { Link } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
-import { MainInfoSection, SectionBox, Table } from '@kinvolk/headlamp-plugin/lib/components/common';
+import {
+  Link as HeadlampLink,
+  MainInfoSection,
+  SectionBox,
+  Table,
+} from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import React from 'react';
 import { useLocation } from 'react-router';
 import { configurationScanSummaries } from '../model';
@@ -50,7 +54,7 @@ function ConfigurationScans(props: { configurationScans: ConfigurationScanSummar
             header: 'Namespace',
             accessorFn: (item: ConfigurationScanSummary.SummaryRef) => {
               return (
-                <Link
+                <HeadlampLink
                   routeName={`/kubescape/compliance/namespaces/:namespace/:name`}
                   params={{
                     name: item.name,
@@ -58,7 +62,7 @@ function ConfigurationScans(props: { configurationScans: ConfigurationScanSummar
                   }}
                 >
                   {item.name}
-                </Link>
+                </HeadlampLink>
               );
             },
           },

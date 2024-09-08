@@ -2,7 +2,11 @@
   Show vulnerability scan results for a workload. 
 */
 import { ApiProxy, KubeObject } from '@kinvolk/headlamp-plugin/lib';
-import { NameValueTable, SectionBox, Table } from '@kinvolk/headlamp-plugin/lib/components/common';
+import {
+  NameValueTable,
+  SectionBox,
+  Table as HeadlampTable,
+} from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import { Link } from '@mui/material';
 import React, { useEffect } from 'react';
 import { useLocation } from 'react-router';
@@ -149,7 +153,7 @@ function Matches(props: { manifest: KubeObject; relevant: KubeObject }) {
 
   return (
     <SectionBox title="Findings">
-      <Table
+      <HeadlampTable
         data={results}
         columns={[
           {

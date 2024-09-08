@@ -7,7 +7,7 @@ import {
   StatusLabel,
   StatusLabelProps,
   Table,
-} from '@kinvolk/headlamp-plugin/lib/components/common';
+} from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import { KubeObject } from '@kinvolk/headlamp-plugin/lib/lib/k8s/cluster';
 import { Box, Link } from '@mui/material';
 import React from 'react';

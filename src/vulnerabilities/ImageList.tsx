@@ -1,9 +1,12 @@
 /* 
   Show container image scans. This view is part of the main Vulnerabilities page.  
 */
-import { Link as HeadlampLink } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
-import { DateLabel, SectionBox, Table } from '@kinvolk/headlamp-plugin/lib/components/common';
-// @ts-ignore
+import {
+  DateLabel,
+  Link as HeadlampLink,
+  SectionBox,
+  Table as HeadlampTable,
+} from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import { Box, Stack, Tooltip } from '@mui/material';
 import { VulnerabilityModel } from './view-types';
 import { workloadScans } from './Vulnerabilities';
@@ -17,7 +20,7 @@ export default function ImageListView() {
     <>
       <h5>{imageScans.length} image scans</h5>
       <SectionBox>
-        <Table
+        <HeadlampTable
           data={imageScans}
           columns={[
             {

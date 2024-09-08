@@ -1,9 +1,12 @@
 /* 
   Provide information on a CVE and the workloads vulnerable for this CVE. 
 */
-import { Link as HeadlampLink } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
-import { NameValueTable, SectionBox, Table } from '@kinvolk/headlamp-plugin/lib/components/common';
-// @ts-ignore
+import {
+  Link as HeadlampLink,
+  NameValueTable,
+  SectionBox,
+  Table as HeadlampTable,
+} from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import { Link } from '@mui/material';
 import { useLocation } from 'react-router';
 import { VulnerabilityModel } from './view-types';
@@ -69,7 +72,7 @@ function Workloads(props: { cve: string; workloads: VulnerabilityModel.WorkloadS
 
   return (
     <SectionBox title="Workloads">
-      <Table
+      <HeadlampTable
         data={workloads}
         columns={[
           {

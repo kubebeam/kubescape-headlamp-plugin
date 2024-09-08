@@ -1,8 +1,12 @@
 /* 
   Show the vulnerability issues for workloads in a single namespace.  
 */
-import { Link } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
-import { NameValueTable, SectionBox, Table } from '@kinvolk/headlamp-plugin/lib/components/common';
+import {
+  Link as HeadlampLink,
+  NameValueTable,
+  SectionBox,
+  Table as HeadlampTable,
+} from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import { KubeObject } from '@kinvolk/headlamp-plugin/lib/lib/k8s/cluster';
 import React from 'react';
 import { useLocation } from 'react-router';
@@ -63,14 +67,14 @@ function VulnerabilityScans(props: {
 
   return (
     <SectionBox title="Image scans">
-      <Table
+      <HeadlampTable
         data={vulnerabilityScans}
         columns={[
           {
             header: 'Workload',
             accessorFn: (item: VulnerabilitySummary.VulnerabilityReference) => {
               return (
-                <Link
+                <HeadlampLink
                   routeName={`/kubescape/vulnerabilities/namespaces/:namespace/:name`}
                   params={{
                     name: item.name,
@@ -78,7 +82,7 @@ function VulnerabilityScans(props: {
                   }}
                 >
                   {item.name.split('-')?.slice(1).join('-')}
-                </Link>
+                </HeadlampLink>
               );
             },
           },

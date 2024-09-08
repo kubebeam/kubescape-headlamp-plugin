@@ -1,7 +1,11 @@
 /* 
   Show workload configuration scans. This view is part of the main Vulnerabilities page.  
 */
-import { Link, SectionBox, Table } from '@kinvolk/headlamp-plugin/lib/components/common';
+import {
+  Link,
+  SectionBox,
+  Table as HeadlampTable,
+} from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import { Box, Stack, Tooltip } from '@mui/material';
 import { VulnerabilityModel } from './view-types';
 import { workloadScans } from './Vulnerabilities';
@@ -14,7 +18,7 @@ export default function WorkloadScanListView() {
     <>
       <h5>{workloadScans.length} resources</h5>
       <SectionBox>
-        <Table
+        <HeadlampTable
           data={workloadScans}
           columns={[
             {

@@ -1,7 +1,7 @@
 /* 
   Build a label showing red for critial status. 
 */
-import { StatusLabel, StatusLabelProps } from '@kinvolk/headlamp-plugin/lib/components/common';
+import { StatusLabel, StatusLabelProps } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import { Box } from '@mui/material';
 
 export default function makeSeverityLabel(severity: string) {
