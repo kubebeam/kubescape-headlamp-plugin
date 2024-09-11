@@ -2,6 +2,7 @@
   Show configuration scan results for a workload. 
 */
 import {
+  Link as HeadlampLink,
   MainInfoSection,
   SectionBox,
   StatusLabel,
@@ -86,7 +87,9 @@ function WorkloadConfigurationScanDetailView(props: { name: string; namespace: s
         />
       )}
 
-      {cr && <Controls controls={cr.jsonData.spec.controls} />}
+      {cr && (
+        <Controls controls={cr.jsonData.spec.controls} workloadConfigurationScan={cr.jsonData} />
+      )}
 
       {/* <SectionBox title="Details">
         <pre>{YAML.stringify(cr?.jsonData)}</pre>
@@ -95,8 +98,11 @@ function WorkloadConfigurationScanDetailView(props: { name: string; namespace: s
   );
 }
 
-function Controls(props: { controls: WorkloadConfigurationScan.Controls }) {
-  const { controls } = props;
+function Controls(props: {
+  controls: WorkloadConfigurationScan.Controls;
+  workloadConfigurationScan: WorkloadConfigurationScan;
+}) {
+  const { controls, workloadConfigurationScan } = props;
 
   const entries = Object.keys(controls).map(key => controls[key]);
 
@@ -129,6 +135,16 @@ function Controls(props: { controls: WorkloadConfigurationScan.Controls }) {
             accessorFn: (control: WorkloadConfigurationScan.Control) => control.name,
           },
           {
+            header: 'Category',
+            accessorFn: (control: WorkloadConfigurationScan.Control) => {
+              const controlInfo = controlLibrary.find(
+                controlInfo => controlInfo.controlID === control.controlID
+              );
+              return controlInfo?.category?.subCategory?.name ?? controlInfo?.category?.name;
+            },
+            gridTemplate: 'auto',
+          },
+          {
             header: 'Severity',
             accessorFn: (control: WorkloadConfigurationScan.Control) => control.severity.severity,
             gridTemplate: 'min-content',
@@ -141,32 +157,43 @@ function Controls(props: { controls: WorkloadConfigurationScan.Controls }) {
           },
           {
             header: 'Explain',
-            accessorFn: (control: WorkloadConfigurationScan.Control) => explain(control),
+            accessorFn: (control: WorkloadConfigurationScan.Control) =>
+              controlLibrary.find(controlInfo => controlInfo.controlID === control.controlID)
+                ?.description,
           },
           {
             header: 'Remediation',
-            accessorFn: (control: WorkloadConfigurationScan.Control) => remediation(control),
+            accessorFn: (control: WorkloadConfigurationScan.Control) =>
+              controlLibrary.find(controlInfo => controlInfo.controlID === control.controlID)
+                ?.remediation,
+          },
+          {
+            header: '',
+            accessorFn: (control: WorkloadConfigurationScan.Control) => {
+              if (control.rules.some(rule => rule.paths)) {
+                return (
+                  <HeadlampLink
+                    routeName={`/kubescape/compliance/namespaces/:namespace/:kind/:name/:control`}
+                    params={{
+                      name: workloadConfigurationScan.metadata.labels['kubescape.io/workload-name'],
+                      namespace: workloadConfigurationScan.metadata.namespace,
+                      kind: workloadConfigurationScan.metadata.labels[
+                        'kubescape.io/workload-kind'
+                      ].toLowerCase(),
+                      control: control.controlID,
+                    }}
+                  >
+                    Fix
+                  </HeadlampLink>
+                );
+              }
+            },
+            gridTemplate: 'min-content',
           },
         ]}
       />
     </SectionBox>
   );
-}
-
-function explain(control: WorkloadConfigurationScan.Control) {
-  for (const data of controlLibrary) {
-    if (data.controlID === control.controlID) {
-      return data.description;
-    }
-  }
-}
-
-function remediation(control: WorkloadConfigurationScan.Control) {
-  for (const data of controlLibrary) {
-    if (data.controlID === control.controlID) {
-      return data.remediation;
-    }
-  }
 }
 
 function makeStatusLabel(control: WorkloadConfigurationScan.Control) {

@@ -3,6 +3,14 @@
 
 import { Metadata } from './Metadata';
 
+export interface ConfigurationScanSummary {
+  metadata: Metadata;
+  spec: {
+    severities: ConfigurationScanSummary.Severities;
+    summaryRef: ConfigurationScanSummary.SummaryRef[];
+  };
+}
+
 export namespace ConfigurationScanSummary {
   export interface Severities {
     critical: number;
@@ -17,12 +25,4 @@ export namespace ConfigurationScanSummary {
     name: string;
     namespace: string;
   }
-}
-
-export interface ConfigurationScanSummary {
-  metadata: Metadata;
-  spec: {
-    severities: ConfigurationScanSummary.Severities;
-    summaryRef: ConfigurationScanSummary.SummaryRef[];
-  };
 }

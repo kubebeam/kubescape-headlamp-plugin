@@ -3,6 +3,13 @@
 
 import { Metadata } from './Metadata';
 
+export interface WorkloadConfigurationScan {
+  metadata: Metadata;
+  spec: {
+    controls: WorkloadConfigurationScan.Controls;
+  };
+}
+
 export namespace WorkloadConfigurationScan {
   export interface Control {
     controlID: string;
@@ -15,16 +22,21 @@ export namespace WorkloadConfigurationScan {
     status: {
       status: string;
     };
+    rules: Rule[];
   }
 
   export interface Controls {
     [key: string]: Control;
   }
-}
 
-export interface WorkloadConfigurationScan {
-  metadata: Metadata;
-  spec: {
-    controls: WorkloadConfigurationScan.Controls;
-  };
+  export interface RulePath {
+    fixPath: string;
+    failedPath: string;
+    fixPathValue: string;
+  }
+
+  export interface Rule {
+    name: string;
+    paths: RulePath[];
+  }
 }

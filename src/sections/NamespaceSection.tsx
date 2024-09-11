@@ -94,7 +94,7 @@ function KubescapeInfo(props: { resource: KubeObject }) {
                     Vulnerabilities
                   </Link>
                 ),
-                value: getCVESummary(vulnerabilitySummary.jsonData),
+                value: getCVESummary(vulnerabilitySummary.jsonData, false, false),
               },
             ]}
           />

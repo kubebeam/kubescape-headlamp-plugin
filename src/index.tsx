@@ -78,6 +78,17 @@ registerRoute({
   name: 'Control Configuration Scan',
 });
 
+import KubescapeWorkloadConfigurationScanFixes from './compliance/WorkloadScanFixes';
+
+registerRoute({
+  path: '/kubescape/compliance/namespaces/:namespace/:kind/:name/:control',
+  parent: kubescape,
+  sidebar: compliance,
+  component: () => <KubescapeWorkloadConfigurationScanFixes />,
+  exact: true,
+  name: 'Workload Configuration Fixes',
+});
+
 import KubescapeVulnerabilities from './vulnerabilities/Vulnerabilities';
 
 registerRoute({

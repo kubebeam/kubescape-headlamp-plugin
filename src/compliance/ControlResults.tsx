@@ -121,7 +121,7 @@ function getFailedWorkloads(
   const workloads = [];
   if (workloadScanData) {
     for (const workload of workloadScanData) {
-      for (const [, scan] of Object.entries(workload.spec.controls) as any) {
+      for (const scan of Object.values(workload.spec.controls) as any) {
         if (scan.controlID === controlID && scan.status.status === 'failed') {
           workloads.push(workload);
           break;

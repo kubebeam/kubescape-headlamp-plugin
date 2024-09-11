@@ -7,9 +7,11 @@ import {
   KubeObject,
 } from '@kinvolk/headlamp-plugin/lib';
 import { Link, NameValueTable, SectionBox } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { getControlsSummary } from '../compliance/ControlsSummary';
-import { workloadConfigurationScanSummaryClass } from '../model';
+import { fetchVulnerabilityScanSummaries, workloadConfigurationScanSummaryClass } from '../model';
+import { WorkloadConfigurationScanSummary } from '../softwarecomposition/WorkloadConfigurationScanSummary';
+import { getCVESummary } from '../vulnerabilities/CVESummary';
 
 export default function addKubescapeWorkloadSection(
   resource: KubeObject,
@@ -63,46 +65,87 @@ function KubescapeInfo(props: { resource: KubeObject }) {
   const kind = resource.kind;
 
   const scanName = `${kind.toLowerCase()}-${resourceName.toLowerCase()}`;
-  const [configurationScan, setConfigurationScan] = useState<Array<any> | null>(null);
+  const [vulnerabilityScans, setVulnerabilityScans]: [KubeObject[], any] =
+    useState<Array<KubeObject> | null>(null);
 
-  function onError(apiError: any) {
-    // ignore
-    console.log(apiError);
-  }
-
-  workloadConfigurationScanSummaryClass.useApiGet(
-    setConfigurationScan,
+  const [configurationScan, error] = workloadConfigurationScanSummaryClass.useGet(
     scanName,
-    namespace,
-    onError
+    namespace
   );
 
+  if (kind === 'Deployment') {
+    const manifestNames: string[] = [];
+    const containers = resource.jsonData.spec.template.spec.containers.concat(
+      resource.jsonData.spec.template.spec.initContainers
+    );
+
+    for (const container of containers) {
+      manifestNames.push(`${scanName}-${container.name}`);
+    }
+
+    useEffect(() => {
+      fetchVulnerabilityScanSummaries(namespace, manifestNames).then((results: any[]) =>
+        setVulnerabilityScans(results)
+      );
+    }, []);
+  }
+
+  const tableRows: { name: JSX.Element | string; value: JSX.Element | string }[] = [];
+
+  if (configurationScan) {
+    if (configurationScan.jsonData.spec.severities.critical > 0)
+      tableRows.push({
+        name: (
+          <>
+            <Link
+              routeName={`/kubescape/compliance/namespaces/:namespace/:name`}
+              params={{
+                name: scanName,
+                namespace: namespace,
+              }}
+            >
+              Compliance
+            </Link>
+          </>
+        ),
+        value: getControlsSummary(configurationScan.jsonData),
+      });
+
+    // const scan: WorkloadConfigurationScanSummary = configurationScan.jsonData;
+    // for (const control of Object.values(scan.spec.controls)) {
+    //   tableRows.push({
+    //     name: '',
+    //     value: `${control.controlID} ${
+    //       controlLibrary.find(c => c.controlID === control.controlID)?.name
+    //     }`,
+    //   });
+    // }
+  }
+
+  if (vulnerabilityScans) {
+    for (const vulnerabilityScan of vulnerabilityScans) {
+      tableRows.push({
+        name: (
+          <>
+            <Link
+              routeName={`/kubescape/vulnerabilities/namespaces/:namespace/:name`}
+              params={{
+                name: vulnerabilityScan.metadata.name,
+                namespace: namespace,
+              }}
+            >
+              {`Vulnerabilities / ${vulnerabilityScan.metadata.labels['kubescape.io/workload-container-name']}`}
+            </Link>
+          </>
+        ),
+        value: getCVESummary(vulnerabilityScan, false, false),
+      });
+    }
+  }
+
   return (
-    configurationScan && (
-      <>
-        <SectionBox title="Kubescape">
-          <NameValueTable
-            rows={[
-              {
-                name: (
-                  <>
-                    <Link
-                      routeName={`/kubescape/compliance/namespaces/:namespace/:name`}
-                      params={{
-                        name: scanName,
-                        namespace: namespace,
-                      }}
-                    >
-                      Configuration scan
-                    </Link>
-                  </>
-                ),
-                value: getControlsSummary(configurationScan.jsonData),
-              },
-            ]}
-          />
-        </SectionBox>
-      </>
-    )
+    <SectionBox title="Kubescape">
+      <NameValueTable rows={tableRows} />
+    </SectionBox>
   );
 }

@@ -89,3 +89,14 @@ export async function deepListQuery(type: string): Promise<KubeObject[]> {
 
   return detailList;
 }
+
+export async function fetchVulnerabilityScanSummaries(namespace: string, manifestNames: string[]) {
+  const requests = [];
+  for (const manifestName of manifestNames) {
+    const r = ApiProxy.request(
+      `/apis/${spdxGroup}/${spdxVersion}/namespaces/${namespace}/vulnerabilitymanifestsummaries/${manifestName}`
+    );
+    requests.push(r);
+  }
+  return Promise.all(requests);
+}

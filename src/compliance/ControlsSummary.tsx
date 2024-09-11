@@ -11,7 +11,7 @@ export function getControlsSummary(scanSummary: WorkloadConfigurationScanSummary
   const mediumCount = severities.medium;
   const highCount = severities.high;
   const lowCount = severities.low;
-  const unknownCount: number = severities.unknown;
+  //const unknownCount: number = severities.unknown;
 
   function controlsBox(color: string, severity: string, countScan: number) {
     return (
@@ -39,7 +39,7 @@ export function getControlsSummary(scanSummary: WorkloadConfigurationScanSummary
       {controlsBox('red', 'High', highCount)}
       {controlsBox('orange', 'Medium', mediumCount)}
       {controlsBox('yellow', 'Low', lowCount)}
-      {controlsBox('white', 'Unknown', unknownCount)}
+      {/* {controlsBox('white', 'Unknown', unknownCount)} */}
     </Stack>
   );
 }

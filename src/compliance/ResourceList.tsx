@@ -70,14 +70,11 @@ function WorkloadConfigurationScanListView() {
             {
               header: 'Failed',
               accessorFn: (workloadScan: WorkloadConfigurationScanSummary) => {
-                let count = 0;
+                const count = Object.values(workloadScan.spec.controls).filter(
+                  scan => scan.status.status === 'failed'
+                ).length;
 
-                for (const [, scan] of Object.entries(workloadScan.spec.controls) as any) {
-                  if (scan.status.status === 'failed') {
-                    count++;
-                  }
-                }
-                return `${count}/${Object.entries(workloadScan.spec.controls).length} controls`;
+                return `${count}/${Object.keys(workloadScan.spec.controls).length} controls`;
               },
               gridTemplate: 'auto',
             },
@@ -94,59 +91,30 @@ function WorkloadConfigurationScanListView() {
   );
 }
 
-function countScans(workloadScan: WorkloadConfigurationScanSummary, severity: string): number {
-  let count: number = 0;
-
-  for (const [, scan] of Object.entries(workloadScan.spec.controls) as any) {
-    if (scan.status.status === 'failed' && scan.severity.severity === severity) {
-      count++;
-    }
-  }
-  return count;
-}
-
 function controlsList(workloadScan: WorkloadConfigurationScanSummary, severity: string) {
-  const controlIDs = [];
-  for (const [controlID, scan] of Object.entries(workloadScan.spec.controls) as any) {
-    if (controlIDs.indexOf(controlID) >= 0) {
-      continue;
-    }
+  const controls = [];
+  for (const scan of Object.values(workloadScan.spec.controls)) {
     if (scan.status.status === 'failed' && scan.severity.severity === severity) {
-      controlIDs.push(controlID);
-    }
-  }
-
-  if (controlIDs.length === 0) {
-    return;
-  }
-
-  function controlItem(controlID: string) {
-    return (
-      <div>
-        {controlID}: {getControlName(controlID)}
-        <br />
-      </div>
-    );
-  }
-
-  function getControlName(controlID: string) {
-    for (const control of controlLibrary) {
-      if (control.controlID === controlID) {
-        return control.name;
+      const control = controlLibrary.find(control => control.controlID === scan.controlID);
+      if (control) {
+        controls.push(control);
       }
     }
-    return '';
   }
 
-  return (
-    <>
-      <div style={{ fontSize: 'smaller' }}>{severity}</div>
-      <br />
-      <div style={{ whiteSpace: 'normal', textAlign: 'left', fontSize: 'small' }}>
-        <Stack spacing={1}>{controlIDs.map(controlID => controlItem(controlID))}</Stack>
-      </div>
-    </>
-  );
+  if (controls.length > 0) {
+    return (
+      <>
+        <div style={{ fontSize: 'smaller' }}>{severity}</div>
+        <br />
+        <div style={{ whiteSpace: 'normal', textAlign: 'left', fontSize: 'small' }}>
+          <Stack spacing={1}>
+            {controls.map(control => `${control.controlID}: ${control.name}`)}
+          </Stack>
+        </div>
+      </>
+    );
+  }
 }
 
 function resultStack(workloadScan: WorkloadConfigurationScanSummary) {
@@ -164,7 +132,11 @@ function resultStack(workloadScan: WorkloadConfigurationScanSummary) {
         }}
       >
         <Tooltip title={controlsList(workloadScan, severity)}>
-          {countScans(workloadScan, severity)}
+          {
+            Object.values(workloadScan.spec.controls).filter(
+              scan => scan.status.status === 'failed' && scan.severity.severity === severity
+            ).length
+          }
         </Tooltip>
       </Box>
     );
@@ -185,7 +157,7 @@ function getWorkloadsWithFindings(
 ): WorkloadConfigurationScanSummary[] {
   const workloads = [];
   for (const workload of workloadScanData) {
-    for (const [, scan] of Object.entries(workload.spec.controls) as any) {
+    for (const scan of Object.values(workload.spec.controls) as any) {
       if (scan.status.status === 'failed') {
         workloads.push(workload);
         break;

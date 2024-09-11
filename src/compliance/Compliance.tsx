@@ -109,6 +109,13 @@ function ConfigurationScanningListView() {
               gridTemplate: 'auto',
             },
             {
+              header: 'Category',
+              accessorFn: (control: Control) => {
+                return control.category?.subCategory?.name ?? control.category?.name;
+              },
+              gridTemplate: 'auto',
+            },
+            {
               header: 'Remediation',
               accessorFn: (control: Control) => control.remediation.replaceAll('`', "'"),
             },
@@ -128,8 +135,8 @@ function ConfigurationScanningListView() {
 function getControlsWithFindings(workloadScanData: WorkloadConfigurationScanSummary[]): Control[] {
   return controlLibrary.filter(control => {
     for (const workload of workloadScanData) {
-      for (const [controlID, scan] of Object.entries(workload.spec.controls) as any) {
-        if (control.controlID === controlID && scan.status.status === 'failed') {
+      for (const scan of Object.values(workload.spec.controls) as any) {
+        if (control.controlID === scan.controlID && scan.status.status === 'failed') {
           return true;
         }
       }
@@ -237,8 +244,8 @@ function countScans(
   let count: number = 0;
 
   for (const workload of workloadScanData) {
-    for (const [controlID, scan] of Object.entries(workload.spec.controls) as any) {
-      if (controlID === control.controlID && scan.status.status === status) {
+    for (const scan of Object.values(workload.spec.controls) as any) {
+      if (scan.controlID === control.controlID && scan.status.status === status) {
         count++;
       }
     }
@@ -250,7 +257,7 @@ function countFailedScans(workloadScanData: WorkloadConfigurationScanSummary[]):
   let count: number = 0;
 
   for (const workload of workloadScanData) {
-    for (const [, scan] of Object.entries(workload.spec.controls) as any) {
+    for (const scan of Object.values(workload.spec.controls) as any) {
       if (scan.status.status === 'failed') {
         count++;
       }

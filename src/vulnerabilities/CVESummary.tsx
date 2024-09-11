@@ -5,7 +5,11 @@
 import { Box, Stack, Tooltip } from '@mui/material';
 import { VulnerabilityManifestSummary } from '../softwarecomposition/VulnerabilityManifestSummary';
 
-export function getCVESummary(configurationScanSummary: VulnerabilityManifestSummary) {
+export function getCVESummary(
+  configurationScanSummary: VulnerabilityManifestSummary,
+  showUnknown: boolean,
+  showNegligible: boolean
+) {
   const severities = configurationScanSummary?.spec.severities;
 
   const criticalCount = severities.critical.all;
@@ -40,9 +44,9 @@ export function getCVESummary(configurationScanSummary: VulnerabilityManifestSum
       {box('purple', 'Critical', criticalCount)}
       {box('red', 'High', highCount)}
       {box('orange', 'Medium', mediumCount)}
-      {box('lime', 'Low', lowCount)}
-      {box('darkgray', 'Negligible', negligibleCount)}
-      {box('lightgray', 'Unknown', unknownCount)}
+      {box('yellow', 'Low', lowCount)}
+      {showNegligible ? box('darkgray', 'Negligible', negligibleCount) : ''}
+      {showUnknown ? box('lightgray', 'Unknown', unknownCount) : ''}
     </Stack>
   );
 }

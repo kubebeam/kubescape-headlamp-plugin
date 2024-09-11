@@ -15,10 +15,34 @@ The plugin is yet in alpha status and should not be used in production.
 
 ## Prerequisites
 
--   [Kubescape operator](https://kubescape.io/docs/operator/) should be installed in the k8s cluster and enabled for configuration and image scanning.
--   [Headlamp](https://github.com/headlamp-k8s/headlamp) should be installed in the k8s cluster or workstation
+- [Kubescape operator](https://kubescape.io/docs/operator/) should be installed in the k8s cluster and enabled for configuration and image scanning.
+- [Headlamp](https://github.com/headlamp-k8s/headlamp) should be installed in the k8s cluster or workstation.
 
-The plugin code has been tested with Headlamp v0.25.0 (browser and desktop) and kubescape v0.2.6.
+The plugin code has been tested with Headlamp v0.25.0 (browser and desktop) and kubescape operator v0.2.6.
+
+## Use cases
+
+The use cases support navigating to the information from different user perspectives.
+
+The queries to the Kubescape database use [Allowed namespaces](https://headlamp.dev/docs/latest/faq/#i-cannot-access-any-section-in-my-cluster-it-keeps-saying-access-denied) cluster setting, supporting multi tenant clusters.
+
+For inspecting namespaces or deployments, navigate in standard Headlamp:
+
+- View a namespace, see a summary of configuration issues and vulnerabilities
+- View a resource (e.g. Deployment), see a summary of configuration issues
+
+For an overview of compliance in a cluster:
+
+- View controls
+- View scanned resources
+
+For an overview of vulnerabilty scanning in a cluster:
+
+- View CVEs
+- View scanned workloads
+- View image scans
+
+Pages allow for navigation to detailed and related information.
 
 ## Installation
 
@@ -37,8 +61,8 @@ The guidance from headlamp for in-cluster deployment is to create a container im
 
 ## Dependencies
 
--   The plugin depends on documentation of configuration scanning in [Kubescape User Hub](https://hub.armosec.io/docs/controls).
--   The plugin depends on JSON documentation in the [kubescape regolibrary](https://github.com/kubescape/regolibrary/releases/download/v2/controls/). The [control libary](./src/ConfigurationScanning/controlLibrary.js) is copied for use in the plugin code.
+- The plugin depends on documentation of configuration scanning in [Kubescape User Hub](https://hub.armosec.io/docs/controls).
+- The plugin depends on JSON documentation in the [kubescape regolibrary](https://github.com/kubescape/regolibrary/releases/download/v2/controls/). The [control libary](./src/ConfigurationScanning/controlLibrary.js) is copied for use in the plugin code.
 
 ## Contributing
 

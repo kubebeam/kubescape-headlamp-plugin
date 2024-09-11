@@ -115,7 +115,7 @@ function VulnerabilityManifestDetailView(props: { name: string; namespace: strin
               },
               {
                 name: 'CVE',
-                value: getCVESummary(summary),
+                value: getCVESummary(summary, true, true),
               },
             ]}
           />
