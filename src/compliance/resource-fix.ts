@@ -7,9 +7,11 @@ class ReplacementMarker {}
 // Amend the resource with fixes as per fixPath recommendation
 export function fixResource(resource: any, control: WorkloadConfigurationScan.Control): string {
   // first strip status and managedFields
-  resource = Object.fromEntries(Object.entries(resource).filter(([key]) => key !== 'status'));
-  resource.metadata = Object.fromEntries(
-    Object.entries(resource.metadata).filter(([key]) => key !== 'managedFields')
+  const fixedResource: any = Object.fromEntries(
+    Object.entries(resource).filter(([key]) => key !== 'status')
+  );
+  fixedResource.metadata = Object.fromEntries(
+    Object.entries(fixedResource.metadata).filter(([key]) => key !== 'managedFields')
   );
 
   // evaluate the fix rules
@@ -19,12 +21,12 @@ export function fixResource(resource: any, control: WorkloadConfigurationScan.Co
       continue;
     }
     for (const path of rule.paths) {
-      markerCount = evaluateRule(resource, path, markerCount);
+      markerCount = evaluateRule(fixedResource, path, markerCount);
     }
   }
 
   // make yaml with @@@ annotations for the changed attributes
-  let coloredYAML = YAML.dump(resource, { replacer: replaceMarker });
+  let coloredYAML = YAML.dump(fixedResource, { replacer: replaceMarker });
 
   // now we have the yaml, replace the element markers with <span>
   for (let i = 1; i <= markerCount; i++) {

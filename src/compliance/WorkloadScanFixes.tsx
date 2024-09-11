@@ -1,23 +1,19 @@
 /* 
   Show fix suggestion for a workload. 
 */
+import {
+  NameValueTable,
+  SectionBox,
+} from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import { KubeObject } from '@kinvolk/headlamp-plugin/lib/lib/k8s/cluster';
 import { makeCustomResourceClass } from '@kinvolk/headlamp-plugin/lib/lib/k8s/crd';
+import { Link } from '@mui/material';
 import React from 'react';
 import { useLocation } from 'react-router';
 import { workloadConfigurationScanClass } from '../model';
 import { WorkloadConfigurationScan } from '../softwarecomposition/WorkloadConfigurationScan';
-import { fixResource } from './resource-fix';
 import controlLibrary from './controlLibrary';
-import {
-  Link as HeadlampLink,
-  NameValueTable,
-  SectionBox,
-  Table,
-} from '@kinvolk/headlamp-plugin/lib/CommonComponents';
-import { Link } from '@mui/material';
-import { WorkloadConfigurationScanSummary } from '../softwarecomposition/WorkloadConfigurationScanSummary';
-import { workloadScanData } from './Compliance';
+import { fixResource } from './resource-fix';
 
 export default function KubescapeWorkloadConfigurationScanFixes() {
   const location = useLocation();
