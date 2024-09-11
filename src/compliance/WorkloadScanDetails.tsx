@@ -3,10 +3,10 @@
 */
 import {
   Link as HeadlampLink,
-  MainInfoSection,
   SectionBox,
   StatusLabel,
   StatusLabelProps,
+  NameValueTable,
   Table as HeadlampTable,
 } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import { KubeObject } from '@kinvolk/headlamp-plugin/lib/lib/k8s/cluster';
@@ -29,16 +29,11 @@ export default function KubescapeWorkloadConfigurationScanDetails() {
   return <WorkloadConfigurationScanDetailView name={name} namespace={namespace} />;
 }
 
-function prepareExtraInfo(cr: KubeObject): { name: string; value: string }[] {
-  const extraInfo: { name: string; value: string }[] = [];
-
-  const controls: WorkloadConfigurationScan.Controls = cr.jsonData.spec.controls;
-
-  const entries = Object.keys(controls).map(key => controls[key]);
+function getResults(scan: WorkloadConfigurationScan): string {
   let failCount: number = 0;
   let passedCount: number = 0;
   let skippedCount: number = 0;
-  for (const data of entries) {
+  for (const data of Object.values(scan.spec.controls)) {
     switch (data.status.status) {
       case 'failed': {
         failCount++;
@@ -55,20 +50,7 @@ function prepareExtraInfo(cr: KubeObject): { name: string; value: string }[] {
     }
   }
 
-  extraInfo.push({
-    name: 'Failed',
-    value: failCount.toString(),
-  });
-  extraInfo.push({
-    name: 'Passed',
-    value: passedCount.toString(),
-  });
-  extraInfo.push({
-    name: 'Skipped',
-    value: skippedCount.toString(),
-  });
-
-  return extraInfo;
+  return `Failed ${failCount}, Passed ${passedCount}, Skipped ${skippedCount}`;
 }
 
 function WorkloadConfigurationScanDetailView(props: { name: string; namespace: string }) {
@@ -77,19 +59,41 @@ function WorkloadConfigurationScanDetailView(props: { name: string; namespace: s
 
   workloadConfigurationScanClass.useApiGet(setCr, name, namespace);
 
+  if (!cr) {
+    return <></>;
+  }
+
+  const workloadConfigurationScan: WorkloadConfigurationScan = cr.jsonData;
   return (
     <>
-      {cr && (
-        <MainInfoSection
-          title="Workload Configuration Scan"
-          resource={cr}
-          extraInfo={prepareExtraInfo(cr)}
+      <SectionBox title="Workload Configuration Scan">
+        <NameValueTable
+          rows={[
+            {
+              name: 'Name',
+              value: workloadConfigurationScan.metadata.labels['kubescape.io/workload-name'],
+            },
+            {
+              name: 'Namespace',
+              value: workloadConfigurationScan.metadata.namespace,
+            },
+            {
+              name: 'Kind',
+              value: workloadConfigurationScan.metadata.labels['kubescape.io/workload-kind'],
+            },
+            {
+              name: 'Last scan',
+              value: workloadConfigurationScan.metadata.creationTimestamp,
+            },
+            {
+              name: 'Results',
+              value: getResults(workloadConfigurationScan),
+            },
+          ]}
         />
-      )}
+      </SectionBox>
 
-      {cr && (
-        <Controls controls={cr.jsonData.spec.controls} workloadConfigurationScan={cr.jsonData} />
-      )}
+      <Controls controls={cr.jsonData.spec.controls} workloadConfigurationScan={cr.jsonData} />
 
       {/* <SectionBox title="Details">
         <pre>{YAML.stringify(cr?.jsonData)}</pre>
