@@ -3,10 +3,10 @@
 */
 import {
   Link as HeadlampLink,
+  NameValueTable,
   SectionBox,
   StatusLabel,
   StatusLabelProps,
-  NameValueTable,
   Table as HeadlampTable,
 } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import { KubeObject } from '@kinvolk/headlamp-plugin/lib/lib/k8s/cluster';
@@ -94,10 +94,6 @@ function WorkloadConfigurationScanDetailView(props: { name: string; namespace: s
       </SectionBox>
 
       <Controls controls={cr.jsonData.spec.controls} workloadConfigurationScan={cr.jsonData} />
-
-      {/* <SectionBox title="Details">
-        <pre>{YAML.stringify(cr?.jsonData)}</pre>
-      </SectionBox> */}
     </>
   );
 }

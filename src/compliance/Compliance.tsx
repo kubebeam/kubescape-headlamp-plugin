@@ -188,15 +188,8 @@ function makeCVSSLabel(baseScore: number, failCount: number) {
 }
 
 function makeResultsLabel(workloadScanData: WorkloadConfigurationScanSummary[], control: Control) {
-  let status: StatusLabelProps['status'] = '';
-
   const failCount = countScans(workloadScanData, control, 'failed');
   const passedCount = countScans(workloadScanData, control, 'passed');
-  if (failCount > 0) {
-    status = 'error';
-  } else {
-    status = 'success';
-  }
 
   if (failCount > 0) {
     return (
