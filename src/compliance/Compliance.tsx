@@ -200,24 +200,14 @@ function makeResultsLabel(workloadScanData: WorkloadConfigurationScanSummary[], 
 
   if (failCount > 0) {
     return (
-      <StatusLabel status={status} sx={{ width: '100%' }}>
-        <Box
-          aria-label="hidden"
-          display="inline"
-          paddingTop={1}
-          paddingLeft={0.5}
-          style={{ verticalAlign: 'text-top' }}
-        >
-          <HeadlampLink
-            routeName={`/kubescape/compliance/controls/:control`}
-            params={{
-              control: control.controlID,
-            }}
-          >
-            {failCount} Failed, {passedCount} Accepted
-          </HeadlampLink>
-        </Box>
-      </StatusLabel>
+      <HeadlampLink
+        routeName={`/kubescape/compliance/controls/:control`}
+        params={{
+          control: control.controlID,
+        }}
+      >
+        {failCount} Failed, {passedCount} Accepted
+      </HeadlampLink>
     );
   } else {
     return failCount;
