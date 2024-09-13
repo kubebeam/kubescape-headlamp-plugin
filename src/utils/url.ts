@@ -8,8 +8,5 @@ export function getURLSegments(...indexes: number[]): string[] {
 }
 
 export function getLastURLSegment(): string {
-  const location = useLocation();
-  const segments = location.pathname.split('/');
-
-  return segments[segments.length - 1];
+  return getURLSegments(-1)[0];
 }

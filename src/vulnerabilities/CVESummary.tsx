@@ -1,7 +1,6 @@
 /* 
   Build a horizontack stack with seperate cells for critical, high, medium, low, negligible and unknown. 
 */
-
 import { Box, Stack, Tooltip } from '@mui/material';
 import { VulnerabilityManifestSummary } from '../softwarecomposition/VulnerabilityManifestSummary';
 

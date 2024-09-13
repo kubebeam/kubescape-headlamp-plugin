@@ -8,17 +8,14 @@ import {
   Table,
 } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import { Link } from '@mui/material';
+import { Path } from '../index';
 import { WorkloadConfigurationScanSummary } from '../softwarecomposition/WorkloadConfigurationScanSummary';
 import { getLastURLSegment } from '../utils/url';
 import { workloadScanData } from './Compliance';
 import controlLibrary from './controlLibrary';
 
 export default function KubescapeControlResults() {
-  return <ControlResultsListView controlID={getLastURLSegment()} />;
-}
-
-function ControlResultsListView(props: { controlID: string }) {
-  const { controlID } = props;
+  const controlID = getLastURLSegment();
   const control = controlLibrary.find(element => element.controlID === controlID);
 
   if (!control) {
@@ -72,7 +69,7 @@ function ControlResultsListView(props: { controlID: string }) {
               accessorFn: (workloadScan: WorkloadConfigurationScanSummary) => {
                 return (
                   <HeadlampLink
-                    routeName={`/kubescape/compliance/namespaces/:namespace/:name`}
+                    routeName={Path.KubescapeWorkloadConfigurationScanDetails}
                     params={{
                       name: workloadScan.metadata.name,
                       namespace: workloadScan.metadata.namespace,
@@ -112,7 +109,7 @@ function ControlResultsListView(props: { controlID: string }) {
                 //if (control.rules.some(rule => rule.paths)) {
                 return (
                   <HeadlampLink
-                    routeName={`/kubescape/compliance/namespaces/:namespace/:name/:control`}
+                    routeName={Path.KubescapeWorkloadConfigurationScanFixes}
                     params={{
                       name: workloadScan.metadata.name,
                       namespace: workloadScan.metadata.namespace,

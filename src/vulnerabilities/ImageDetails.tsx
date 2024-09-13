@@ -16,11 +16,7 @@ import { VulnerabilityManifest } from '../softwarecomposition/VulnerabilityManif
 import { getLastURLSegment } from '../utils/url';
 
 export default function ImageVulnerabilityDetails() {
-  return <ImageVulnerabilityDetailsView name={getLastURLSegment()} />;
-}
-
-function ImageVulnerabilityDetailsView(props: { name: string }) {
-  const { name } = props;
+  const name = getLastURLSegment();
   const [manifestVulnerability, setVulnerabilityManifest]: [KubeObject, any] = React.useState(null);
 
   vulnerabilityManifestClass.useApiGet(setVulnerabilityManifest, name, 'kubescape');

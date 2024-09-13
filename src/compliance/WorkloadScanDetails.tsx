@@ -11,6 +11,7 @@ import {
 } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import { Box, Link } from '@mui/material';
 import { useEffect, useState } from 'react';
+import { Path } from '../index';
 import { fetchWorkloadConfigurationScan } from '../model';
 import { WorkloadConfigurationScan } from '../softwarecomposition/WorkloadConfigurationScan';
 import { getURLSegments } from '../utils/url';
@@ -18,36 +19,6 @@ import { controlLibrary } from './controlLibrary';
 
 export default function KubescapeWorkloadConfigurationScanDetails() {
   const [name, namespace] = getURLSegments(-1, -2);
-
-  return <WorkloadConfigurationScanDetailView name={name} namespace={namespace} />;
-}
-
-function getResults(scan: WorkloadConfigurationScan): string {
-  let failCount: number = 0;
-  let passedCount: number = 0;
-  let skippedCount: number = 0;
-  for (const data of Object.values(scan.spec.controls)) {
-    switch (data.status.status) {
-      case 'failed': {
-        failCount++;
-        break;
-      }
-      case 'passed': {
-        passedCount++;
-        break;
-      }
-      case 'skipped': {
-        skippedCount++;
-        break;
-      }
-    }
-  }
-
-  return `Failed ${failCount}, Passed ${passedCount}, Skipped ${skippedCount}`;
-}
-
-function WorkloadConfigurationScanDetailView(props: { name: string; namespace: string }) {
-  const { name, namespace } = props;
   const [workloadConfigurationScan, setWorkloadConfigurationScan]: [
     WorkloadConfigurationScan,
     any
@@ -168,7 +139,7 @@ function Controls(props: { workloadConfigurationScan: WorkloadConfigurationScan 
               if (control.rules.some(rule => rule.paths)) {
                 return (
                   <HeadlampLink
-                    routeName={`/kubescape/compliance/namespaces/:namespace/:name/:control`}
+                    routeName={Path.KubescapeWorkloadConfigurationScanFixes}
                     params={{
                       name: workloadConfigurationScan.metadata.name,
                       namespace: workloadConfigurationScan.metadata.namespace,
@@ -186,6 +157,30 @@ function Controls(props: { workloadConfigurationScan: WorkloadConfigurationScan 
       />
     </SectionBox>
   );
+}
+
+function getResults(scan: WorkloadConfigurationScan): string {
+  let failCount: number = 0;
+  let passedCount: number = 0;
+  let skippedCount: number = 0;
+  for (const data of Object.values(scan.spec.controls)) {
+    switch (data.status.status) {
+      case 'failed': {
+        failCount++;
+        break;
+      }
+      case 'passed': {
+        passedCount++;
+        break;
+      }
+      case 'skipped': {
+        skippedCount++;
+        break;
+      }
+    }
+  }
+
+  return `Failed ${failCount}, Passed ${passedCount}, Skipped ${skippedCount}`;
 }
 
 function makeStatusLabel(control: WorkloadConfigurationScan.Control) {

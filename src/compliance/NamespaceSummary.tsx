@@ -9,16 +9,13 @@ import {
   Table,
 } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import React from 'react';
+import { Path } from '../index';
 import { configurationScanSummaries } from '../model';
 import { ConfigurationScanSummary } from '../softwarecomposition/ConfigurationScanSummary';
 import { getLastURLSegment } from '../utils/url';
 
 export default function KubescapeConfigurationScanNamespaceSummary() {
-  return <ConfigurationScanNamespaceSummaryView namespace={getLastURLSegment()} />;
-}
-
-function ConfigurationScanNamespaceSummaryView(props: { namespace: string }) {
-  const { namespace } = props;
+  const namespace = getLastURLSegment();
   const [cr, setCr]: [KubeObject, any] = React.useState(null);
 
   configurationScanSummaries.useApiGet(setCr, namespace);
@@ -49,7 +46,7 @@ function ConfigurationScans(props: { configurationScans: ConfigurationScanSummar
             accessorFn: (item: ConfigurationScanSummary.SummaryRef) => {
               return (
                 <HeadlampLink
-                  routeName={`/kubescape/compliance/namespaces/:namespace/:name`}
+                  routeName={Path.KubescapeWorkloadConfigurationScanDetails}
                   params={{
                     name: item.name,
                     namespace: item.namespace,

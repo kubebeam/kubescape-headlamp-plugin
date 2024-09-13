@@ -9,16 +9,13 @@ import {
 } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import { KubeObject } from '@kinvolk/headlamp-plugin/lib/lib/k8s/cluster';
 import React from 'react';
+import { Path } from '../index';
 import { vulnerabilitySummaryClass } from '../model';
 import { VulnerabilitySummary } from '../softwarecomposition/VulnerabilitySummary';
 import { getLastURLSegment } from '../utils/url';
 
 export default function VulnerabilitiesNamespaceSummary() {
-  return <NamespaceSummaryView namespace={getLastURLSegment()} />;
-}
-
-function NamespaceSummaryView(props: { namespace: string }) {
-  const { namespace } = props;
+  const namespace = getLastURLSegment();
   const [vulnerabilitySummaryKubeobject, setVulnerabilitySummary]: [KubeObject, any] =
     React.useState(null);
 
@@ -31,26 +28,18 @@ function NamespaceSummaryView(props: { namespace: string }) {
   const vulnerabilitySummary: VulnerabilitySummary = vulnerabilitySummaryKubeobject.jsonData;
   return (
     <>
-      <Maininfo vulnerabilitySummary={vulnerabilitySummary} />
+      <SectionBox title="Namespace Vulnerabilities">
+        <NameValueTable
+          rows={[
+            {
+              name: 'Namespace',
+              value: vulnerabilitySummary.metadata.name,
+            },
+          ]}
+        />
+      </SectionBox>
       <VulnerabilityScans vulnerabilityScans={vulnerabilitySummary.spec.vulnerabilitiesRef} />
     </>
-  );
-}
-
-function Maininfo(props: { vulnerabilitySummary: KubeObject }) {
-  const { vulnerabilitySummary } = props;
-
-  return (
-    <SectionBox title="Namespace Vulnerabilities">
-      <NameValueTable
-        rows={[
-          {
-            name: 'Namespace',
-            value: vulnerabilitySummary.metadata.name,
-          },
-        ]}
-      />
-    </SectionBox>
   );
 }
 
@@ -69,7 +58,7 @@ function VulnerabilityScans(props: {
             accessorFn: (item: VulnerabilitySummary.VulnerabilityReference) => {
               return (
                 <HeadlampLink
-                  routeName={`/kubescape/vulnerabilities/namespaces/:namespace/:name`}
+                  routeName={Path.KubescapeVulnerabilityDetails}
                   params={{
                     name: item.name,
                     namespace: item.namespace,

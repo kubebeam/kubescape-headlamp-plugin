@@ -8,6 +8,7 @@ import {
   Table as HeadlampTable,
 } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import { Box, Stack, Tooltip } from '@mui/material';
+import { Path } from '../index';
 import { VulnerabilityModel } from './view-types';
 import { workloadScans } from './Vulnerabilities';
 
@@ -28,7 +29,7 @@ export default function ImageListView() {
               accessorFn: (imageScan: VulnerabilityModel.ImageScanWithReferences) => {
                 return (
                   <HeadlampLink
-                    routeName={`/kubescape/vulnerabilities/images/:name`}
+                    routeName={Path.ImageVulnerabilityDetails}
                     params={{
                       name: imageScan.manifestName,
                     }}
@@ -69,35 +70,6 @@ export default function ImageListView() {
   );
 }
 
-function getImageScans(
-  workloadScans: VulnerabilityModel.WorkloadScan[]
-): VulnerabilityModel.ImageScanWithReferences[] {
-  const imageScans: VulnerabilityModel.ImageScanWithReferences[] = [];
-  if (workloadScans) {
-    for (const workloadScan of workloadScans) {
-      if (!workloadScan.imageScan) {
-        continue;
-      }
-
-      let scan: VulnerabilityModel.ImageScanWithReferences | undefined = imageScans.find(
-        element => element.manifestName === workloadScan.imageScan?.manifestName
-      );
-      if (!scan) {
-        scan = {
-          ...workloadScan.imageScan,
-          workloads: new Set(),
-        };
-
-        imageScans.push(scan);
-      }
-
-      scan.workloads.add(workloadScan);
-    }
-  }
-
-  return imageScans;
-}
-
 function resultStack(imageScan: VulnerabilityModel.ImageScanWithReferences) {
   function box(color: string, severity: string) {
     return (
@@ -127,4 +99,33 @@ function resultStack(imageScan: VulnerabilityModel.ImageScanWithReferences) {
       {box('yellow', 'Low')}
     </Stack>
   );
+}
+
+function getImageScans(
+  workloadScans: VulnerabilityModel.WorkloadScan[]
+): VulnerabilityModel.ImageScanWithReferences[] {
+  const imageScans: VulnerabilityModel.ImageScanWithReferences[] = [];
+  if (workloadScans) {
+    for (const workloadScan of workloadScans) {
+      if (!workloadScan.imageScan) {
+        continue;
+      }
+
+      let scan: VulnerabilityModel.ImageScanWithReferences | undefined = imageScans.find(
+        element => element.manifestName === workloadScan.imageScan?.manifestName
+      );
+      if (!scan) {
+        scan = {
+          ...workloadScan.imageScan,
+          workloads: new Set(),
+        };
+
+        imageScans.push(scan);
+      }
+
+      scan.workloads.add(workloadScan);
+    }
+  }
+
+  return imageScans;
 }

@@ -45,10 +45,25 @@ registerRoute({
   name: 'Compliance',
 });
 
+export namespace Path {
+  export const KubescapeConfigurationScanNamespaceSummary = '/kubescape/compliance/:namespace';
+  export const KubescapeWorkloadConfigurationScanDetails =
+    '/kubescape/compliance/namespaces/:namespace/:name';
+  export const KubescapeControlResults = '/kubescape/compliance/controls/:control';
+  export const KubescapeWorkloadConfigurationScanFixes =
+    '/kubescape/compliance/namespaces/:namespace/:name/:control';
+  export const KubescapeVulnerabilities = '/kubescape/vulnerabilities';
+  export const VulnerabilitiesNamespaceSummary = '/kubescape/vulnerabilities/:namespace';
+  export const KubescapeVulnerabilityDetails =
+    '/kubescape/vulnerabilities/namespaces/:namespace/:name';
+  export const KubescapeCVEResults = '/kubescape/vulnerabilities/cves/:cve';
+  export const ImageVulnerabilityDetails = '/kubescape/vulnerabilities/images/:name';
+}
+
 import KubescapeConfigurationScanNamespaceSummary from './compliance/NamespaceSummary';
 
 registerRoute({
-  path: '/kubescape/compliance/:namespace',
+  path: Path.KubescapeConfigurationScanNamespaceSummary,
   parent: kubescape,
   sidebar: compliance,
   component: () => <KubescapeConfigurationScanNamespaceSummary />,
@@ -59,7 +74,7 @@ registerRoute({
 import KubescapeWorkloadConfigurationScanDetails from './compliance/WorkloadScanDetails';
 
 registerRoute({
-  path: '/kubescape/compliance/namespaces/:namespace/:name',
+  path: Path.KubescapeWorkloadConfigurationScanDetails,
   parent: kubescape,
   sidebar: compliance,
   component: () => <KubescapeWorkloadConfigurationScanDetails />,
@@ -70,7 +85,7 @@ registerRoute({
 import KubescapeControlResults from './compliance/ControlResults';
 
 registerRoute({
-  path: '/kubescape/compliance/controls/:control',
+  path: Path.KubescapeControlResults,
   parent: kubescape,
   sidebar: compliance,
   component: () => <KubescapeControlResults />,
@@ -81,7 +96,7 @@ registerRoute({
 import KubescapeWorkloadConfigurationScanFixes from './compliance/WorkloadScanFixes';
 
 registerRoute({
-  path: '/kubescape/compliance/namespaces/:namespace/:name/:control',
+  path: Path.KubescapeWorkloadConfigurationScanFixes,
   parent: kubescape,
   sidebar: compliance,
   component: () => <KubescapeWorkloadConfigurationScanFixes />,
@@ -92,7 +107,7 @@ registerRoute({
 import KubescapeVulnerabilities from './vulnerabilities/Vulnerabilities';
 
 registerRoute({
-  path: '/kubescape/vulnerabilities',
+  path: Path.KubescapeVulnerabilities,
   parent: kubescape,
   sidebar: vulnerabilities,
   component: () => <KubescapeVulnerabilities />,
@@ -103,7 +118,7 @@ registerRoute({
 import VulnerabilitiesNamespaceSummary from './vulnerabilities/NamespaceSummary';
 
 registerRoute({
-  path: '/kubescape/vulnerabilities/:namespace',
+  path: Path.VulnerabilitiesNamespaceSummary,
   parent: kubescape,
   sidebar: vulnerabilities,
   component: () => <VulnerabilitiesNamespaceSummary />,
@@ -114,7 +129,7 @@ registerRoute({
 import KubescapeVulnerabilityDetails from './vulnerabilities/WorkloadScanDetails';
 
 registerRoute({
-  path: '/kubescape/vulnerabilities/namespaces/:namespace/:name',
+  path: Path.KubescapeVulnerabilityDetails,
   parent: kubescape,
   sidebar: vulnerabilities,
   component: () => <KubescapeVulnerabilityDetails />,
@@ -125,7 +140,7 @@ registerRoute({
 import KubescapeCVEResults from './vulnerabilities/CVEResults';
 
 registerRoute({
-  path: '/kubescape/vulnerabilities/cves/:cve',
+  path: Path.KubescapeCVEResults,
   parent: kubescape,
   sidebar: vulnerabilities,
   component: () => <KubescapeCVEResults />,
@@ -136,7 +151,7 @@ registerRoute({
 import ImageVulnerabilityDetails from './vulnerabilities/ImageDetails';
 
 registerRoute({
-  path: '/kubescape/vulnerabilities/images/:name',
+  path: Path.ImageVulnerabilityDetails,
   parent: kubescape,
   sidebar: vulnerabilities,
   component: () => <ImageVulnerabilityDetails />,

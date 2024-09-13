@@ -1,7 +1,7 @@
 /* 
   Show vulnerability scan results for a workload. 
 */
-import { ApiProxy, KubeObject } from '@kinvolk/headlamp-plugin/lib';
+import { ApiProxy } from '@kinvolk/headlamp-plugin/lib';
 import {
   NameValueTable,
   SectionBox,
@@ -19,45 +19,6 @@ import { getCVESummary } from './CVESummary';
 export default function KubescapeVulnerabilityDetails() {
   const [name, namespace] = getURLSegments(-1, -2);
 
-  return <VulnerabilityManifestDetailView name={name} namespace={namespace} />;
-}
-
-// Fetch vulnerabilitymanifestsummary and then vulnerabilitymanifest (if available)
-export async function fetchVulnerabilityManifest(name: string, namespace: string) {
-  function getVulnerabilityManifestSummary(): Promise<any> {
-    return ApiProxy.request(
-      `/apis/spdx.softwarecomposition.kubescape.io/v1beta1/namespaces/${namespace}/vulnerabilitymanifestsummaries/${name}`
-    );
-  }
-
-  function getVulnerabilityManifest(name: string): Promise<any> {
-    if (name === '') {
-      return Promise.resolve();
-    }
-    return ApiProxy.request(
-      `/apis/spdx.softwarecomposition.kubescape.io/v1beta1/namespaces/kubescape/vulnerabilitymanifests/${name}`
-    );
-  }
-
-  const summary = await getVulnerabilityManifestSummary();
-  let allManifest: VulnerabilityManifest | null = null;
-  await getVulnerabilityManifest(summary.spec.vulnerabilitiesRef.all.name)
-    .then(result => {
-      allManifest = result;
-    })
-    .catch(error => console.log(error.message));
-  let relevantManifest: VulnerabilityManifest | null = null;
-  await getVulnerabilityManifest(summary.spec.vulnerabilitiesRef.relevant.name)
-    .then(result => {
-      relevantManifest = result;
-    })
-    .catch(error => console.log(error.message));
-
-  return [summary, allManifest, relevantManifest]; // TODO reduce
-}
-
-function VulnerabilityManifestDetailView(props: { name: string; namespace: string }) {
-  const { name, namespace } = props;
   const [summary, setSummary]: [VulnerabilityManifestSummary | null, any] =
     React.useState<VulnerabilityManifestSummary | null>(null);
   const [manifestAll, setManifestAll]: [VulnerabilityManifest | null, any] =
@@ -129,7 +90,10 @@ function VulnerabilityManifestDetailView(props: { name: string; namespace: strin
   );
 }
 
-function Matches(props: { manifest: KubeObject; relevant: KubeObject }) {
+function Matches(props: {
+  manifest: VulnerabilityManifest;
+  relevant: VulnerabilityManifest | null;
+}) {
   const { manifest, relevant } = props;
   const results: VulnerabilityManifest.Match[] = manifest?.spec.payload.matches;
 
@@ -179,8 +143,16 @@ function Matches(props: { manifest: KubeObject; relevant: KubeObject }) {
           },
           {
             header: 'Relevant',
-            accessorFn: (item: VulnerabilityManifest.Match) =>
-              relevant && isRelevant(relevant, item.vulnerability.id),
+            accessorFn: (item: VulnerabilityManifest.Match) => {
+              if (
+                relevant?.spec.payload.matches &&
+                relevant?.spec.payload.matches.some(
+                  match => match.vulnerability.id === item.vulnerability.id
+                )
+              ) {
+                return 'Yes';
+              }
+            },
             gridTemplate: 'auto',
           },
           {
@@ -207,15 +179,36 @@ function Matches(props: { manifest: KubeObject; relevant: KubeObject }) {
   );
 }
 
-function isRelevant(relevantManifest: KubeObject, id: string): string {
-  const matches: any | undefined = relevantManifest?.spec.payload.matches;
-
-  if (matches) {
-    for (const match of matches) {
-      if (match.vulnerability.id === id) {
-        return 'Yes';
-      }
-    }
+// Fetch vulnerabilitymanifestsummary and then vulnerabilitymanifest (if available)
+export async function fetchVulnerabilityManifest(name: string, namespace: string) {
+  function getVulnerabilityManifestSummary(): Promise<any> {
+    return ApiProxy.request(
+      `/apis/spdx.softwarecomposition.kubescape.io/v1beta1/namespaces/${namespace}/vulnerabilitymanifestsummaries/${name}`
+    );
   }
-  return '';
+
+  function getVulnerabilityManifest(name: string): Promise<any> {
+    if (name === '') {
+      return Promise.resolve();
+    }
+    return ApiProxy.request(
+      `/apis/spdx.softwarecomposition.kubescape.io/v1beta1/namespaces/kubescape/vulnerabilitymanifests/${name}`
+    );
+  }
+
+  const summary = await getVulnerabilityManifestSummary();
+  let allManifest: VulnerabilityManifest | null = null;
+  await getVulnerabilityManifest(summary.spec.vulnerabilitiesRef.all.name)
+    .then(result => {
+      allManifest = result;
+    })
+    .catch(error => console.log(error.message));
+  let relevantManifest: VulnerabilityManifest | null = null;
+  await getVulnerabilityManifest(summary.spec.vulnerabilitiesRef.relevant.name)
+    .then(result => {
+      relevantManifest = result;
+    })
+    .catch(error => console.log(error.message));
+
+  return [summary, allManifest, relevantManifest]; // TODO reduce
 }

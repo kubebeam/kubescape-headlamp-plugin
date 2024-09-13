@@ -11,6 +11,7 @@ import {
 } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import { Box, Link, Tooltip } from '@mui/material';
 import { useEffect, useState } from 'react';
+import { Path } from '../index';
 import { deepListQuery } from '../model';
 import { WorkloadConfigurationScanSummary } from '../softwarecomposition/WorkloadConfigurationScanSummary';
 import { Control, controlLibrary } from './controlLibrary';
@@ -194,7 +195,7 @@ function makeResultsLabel(workloadScanData: WorkloadConfigurationScanSummary[], 
   if (failCount > 0) {
     return (
       <HeadlampLink
-        routeName={`/kubescape/compliance/controls/:control`}
+        routeName={Path.KubescapeControlResults}
         params={{
           control: control.controlID,
         }}

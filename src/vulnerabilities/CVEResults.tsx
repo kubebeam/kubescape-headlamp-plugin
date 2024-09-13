@@ -8,18 +8,13 @@ import {
   Table as HeadlampTable,
 } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import { Link } from '@mui/material';
+import { Path } from '../index';
 import { getURLSegments } from '../utils/url';
 import { VulnerabilityModel } from './view-types';
 import { workloadScans } from './Vulnerabilities';
 
 export default function KubescapeCVEResults() {
-  const [name] = getURLSegments(-1);
-
-  return <CVEResultsListView cve={name} />;
-}
-
-function CVEResultsListView(props: { cve: string }) {
-  const { cve } = props;
+  const [cve] = getURLSegments(-1);
 
   if (!workloadScans) {
     return <div></div>;
@@ -75,7 +70,7 @@ function Workloads(props: { cve: string; workloads: VulnerabilityModel.WorkloadS
             header: 'Workload',
             accessorFn: (workload: VulnerabilityModel.WorkloadScan) => (
               <HeadlampLink
-                routeName={`/kubescape/vulnerabilities/namespaces/:namespace/:name`}
+                routeName={Path.KubescapeVulnerabilityDetails}
                 params={{
                   name: workload.manifestName,
                   namespace: workload.namespace,

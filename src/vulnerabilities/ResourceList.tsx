@@ -7,6 +7,7 @@ import {
   Table as HeadlampTable,
 } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import { Box, Stack, Tooltip } from '@mui/material';
+import { Path } from '../index';
 import { VulnerabilityModel } from './view-types';
 import { workloadScans } from './Vulnerabilities';
 
@@ -26,7 +27,7 @@ export default function WorkloadScanListView() {
               accessorFn: (workloadScan: VulnerabilityModel.WorkloadScan) => {
                 return (
                   <Link
-                    routeName={`/kubescape/vulnerabilities/namespaces/:namespace/:name`}
+                    routeName={Path.KubescapeVulnerabilityDetails}
                     params={{
                       name: workloadScan.manifestName,
                       namespace: workloadScan.namespace,

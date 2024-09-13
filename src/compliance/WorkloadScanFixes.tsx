@@ -1,8 +1,9 @@
 /* 
   Show fix suggestion for a workload. 
 */
+import { K8s } from '@kinvolk/headlamp-plugin/lib';
 import { NameValueTable, SectionBox } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
-import { Editor, DiffEditor } from '@monaco-editor/react';
+import { DiffEditor } from '@monaco-editor/react';
 import { Link } from '@mui/material';
 import { useEffect, useState } from 'react';
 import YAML from 'yaml';
@@ -13,54 +14,6 @@ import controlLibrary from './controlLibrary';
 
 export default function KubescapeWorkloadConfigurationScanFixes() {
   const [controlID, name, namespace] = getURLSegments(-1, -2, -3);
-
-  return <WorkloadConfigurationScanFixes name={name} namespace={namespace} controlID={controlID} />;
-}
-
-const apiResourceDefinitions = [
-  {
-    group: '',
-    version: 'v1',
-    pluralName: 'serviceaccounts',
-    singularName: 'serviceaccount',
-    isNamespaced: true,
-  },
-  {
-    group: 'rbac.authorization.k8s.io',
-    version: 'v1',
-    pluralName: 'clusterroles',
-    singularName: 'clusterrole',
-    isNamespaced: false,
-  },
-  {
-    group: 'rbac.authorization.k8s.io',
-    version: 'v1',
-    pluralName: 'clusterrolebindings',
-    singularName: 'clusterrolebinding',
-    isNamespaced: false,
-  },
-  {
-    group: 'apps',
-    version: 'v1',
-    pluralName: 'deployments',
-    singularName: 'deployment',
-    isNamespaced: true,
-  },
-  {
-    group: 'admissionregistration.k8s.io',
-    version: 'v1',
-    pluralName: 'mutatingwebhookconfigurations',
-    singularName: 'mutatingwebhookconfiguration',
-    isNamespaced: false,
-  },
-];
-
-function WorkloadConfigurationScanFixes(props: {
-  name: string;
-  namespace: string;
-  controlID: string;
-}) {
-  const { name, namespace, controlID } = props;
   const [workloadConfigurationScan, setWorkloadConfigurationScan]: [
     WorkloadConfigurationScan,
     any
@@ -196,17 +149,18 @@ function Fix(props: {
   const [resource, setResource]: [any, any] = useState(null);
 
   useEffect(() => {
-    const groupVersion = apiResourceDefinitions.find(gv => gv.singularName === kind.toLowerCase());
-    if (!groupVersion) {
+    const kubeObjectClass = K8s.ResourceClasses[kind];
+    if (!kubeObjectClass) {
       console.log('Fix is not supported yet for:' + kind);
       return;
     }
+
     proxyRequest(
       name,
-      groupVersion.isNamespaced ? namespace : '',
-      groupVersion.group,
-      groupVersion.version,
-      groupVersion.pluralName
+      kubeObjectClass.isNamespaced ? namespace : '',
+      kubeObjectClass.apiEndpoint.apiInfo[0].group,
+      kubeObjectClass.apiEndpoint.apiInfo[0].version,
+      kubeObjectClass.pluralName
     ).then((result: any) => {
       setResource(result);
     });
@@ -237,7 +191,7 @@ function Fix(props: {
             language="yaml"
             original={original}
             modified={fixedYAML}
-            height={lines * 20}
+            height={lines * 30}
             options={{
               renderSideBySide: true,
             }}
@@ -261,9 +215,13 @@ export function fixResource(
       }
       for (const rulePath of rule.paths) {
         let path = rulePath.fixPath.length > 0 ? rulePath.fixPath : rulePath.failedPath;
-        if (path.startsWith(prefix)) {
-          path = path.replace(prefix, '');
-          evaluateRule(resource, path, rulePath.fixPathValue);
+        if (path) {
+          const isRelatedObjectFix = path.startsWith('relatedObjects');
+
+          if ((prefix && path.startsWith(prefix)) || (!prefix && !isRelatedObjectFix)) {
+            path = path.replace(prefix, '');
+            evaluateRule(resource, path, rulePath.fixPathValue);
+          }
         }
       }
     }
