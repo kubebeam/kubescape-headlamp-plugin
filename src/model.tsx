@@ -30,13 +30,6 @@ export const vulnerabilitySummaryClass = makeCustomResourceClass({
   pluralName: 'vulnerabilitysummaries',
 });
 
-export const workloadConfigurationScanClass = makeCustomResourceClass({
-  apiInfo: spdxGroupVersions,
-  isNamespaced: true,
-  singularName: 'workloadconfigurationscan',
-  pluralName: 'workloadconfigurationscans',
-});
-
 export const workloadConfigurationScanSummaryClass = makeCustomResourceClass({
   apiInfo: spdxGroupVersions,
   isNamespaced: true,
@@ -91,12 +84,26 @@ export async function deepListQuery(type: string): Promise<KubeObject[]> {
 }
 
 export async function fetchVulnerabilityScanSummaries(namespace: string, manifestNames: string[]) {
-  const requests = [];
-  for (const manifestName of manifestNames) {
-    const r = ApiProxy.request(
-      `/apis/${spdxGroup}/${spdxVersion}/namespaces/${namespace}/vulnerabilitymanifestsummaries/${manifestName}`
-    );
-    requests.push(r);
-  }
-  return Promise.all(requests);
+  return Promise.all(
+    manifestNames.map(name =>
+      proxyRequest(name, namespace, spdxGroup, spdxVersion, 'vulnerabilitymanifestsummaries')
+    )
+  );
+}
+
+export function fetchWorkloadConfigurationScan(name: string, namespace: string): Promise<any> {
+  return proxyRequest(name, namespace, spdxGroup, spdxVersion, 'workloadconfigurationscans');
+}
+
+export function proxyRequest(
+  name: string,
+  namespace: string,
+  group: string,
+  version: string,
+  pluralName: string
+): Promise<any> {
+  const api = group ? '/apis/' : '/api';
+  return ApiProxy.request(
+    `${api}${group}/${version}/${namespace ? 'namespaces/' : ''}${namespace}/${pluralName}/${name}`
+  );
 }

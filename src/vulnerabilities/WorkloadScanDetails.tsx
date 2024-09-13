@@ -9,21 +9,15 @@ import {
 } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import { Link } from '@mui/material';
 import React, { useEffect } from 'react';
-import { useLocation } from 'react-router';
 import expandableDescription from '../common/AccordionText';
 import makeSeverityLabel from '../common/SeverityLabel';
 import { VulnerabilityManifest } from '../softwarecomposition/VulnerabilityManifest';
 import { VulnerabilityManifestSummary } from '../softwarecomposition/VulnerabilityManifestSummary';
+import { getURLSegments } from '../utils/url';
 import { getCVESummary } from './CVESummary';
 
 export default function KubescapeVulnerabilityDetails() {
-  const location = useLocation();
-  const segments = location.pathname.split('/');
-
-  // The second last segment is the namespace
-  const namespace = segments[segments.length - 2];
-  // The last segment is the name
-  const name = segments[segments.length - 1];
+  const [name, namespace] = getURLSegments(-1, -2);
 
   return <VulnerabilityManifestDetailView name={name} namespace={namespace} />;
 }

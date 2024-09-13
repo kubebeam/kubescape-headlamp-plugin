@@ -8,19 +8,13 @@ import {
   Table,
 } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import { Link } from '@mui/material';
-import { useLocation } from 'react-router';
 import { WorkloadConfigurationScanSummary } from '../softwarecomposition/WorkloadConfigurationScanSummary';
+import { getLastURLSegment } from '../utils/url';
 import { workloadScanData } from './Compliance';
 import controlLibrary from './controlLibrary';
 
 export default function KubescapeControlResults() {
-  const location = useLocation();
-  const segments = location.pathname.split('/');
-
-  // The last segment is the controlID
-  const name = segments[segments.length - 1];
-
-  return <ControlResultsListView controlID={name} />;
+  return <ControlResultsListView controlID={getLastURLSegment()} />;
 }
 
 function ControlResultsListView(props: { controlID: string }) {
@@ -106,6 +100,30 @@ function ControlResultsListView(props: { controlID: string }) {
               header: 'Kind',
               accessorFn: (workloadScan: WorkloadConfigurationScanSummary) =>
                 workloadScan.metadata.labels['kubescape.io/workload-kind'],
+            },
+            {
+              header: 'Scan',
+              accessorFn: (workloadScan: WorkloadConfigurationScanSummary) =>
+                workloadScan.metadata.name,
+            },
+            {
+              header: '',
+              accessorFn: (workloadScan: WorkloadConfigurationScanSummary) => {
+                //if (control.rules.some(rule => rule.paths)) {
+                return (
+                  <HeadlampLink
+                    routeName={`/kubescape/compliance/namespaces/:namespace/:name/:control`}
+                    params={{
+                      name: workloadScan.metadata.name,
+                      namespace: workloadScan.metadata.namespace,
+                      control: control.controlID,
+                    }}
+                  >
+                    Fix
+                  </HeadlampLink>
+                );
+                //  }
+              },
             },
           ]}
         />

@@ -2,43 +2,56 @@
   Show fix suggestion for a workload. 
 */
 import { NameValueTable, SectionBox } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
-import { KubeObject } from '@kinvolk/headlamp-plugin/lib/lib/k8s/cluster';
-import { makeCustomResourceClass } from '@kinvolk/headlamp-plugin/lib/lib/k8s/crd';
-import { DiffEditor } from '@monaco-editor/react';
+import { Editor, DiffEditor } from '@monaco-editor/react';
 import { Link } from '@mui/material';
-import React from 'react';
-import { useLocation } from 'react-router';
+import { useEffect, useState } from 'react';
 import YAML from 'yaml';
-import { workloadConfigurationScanClass } from '../model';
+import { fetchWorkloadConfigurationScan, proxyRequest } from '../model';
 import { WorkloadConfigurationScan } from '../softwarecomposition/WorkloadConfigurationScan';
+import { getURLSegments } from '../utils/url';
 import controlLibrary from './controlLibrary';
 
 export default function KubescapeWorkloadConfigurationScanFixes() {
-  const location = useLocation();
-  const segments = location.pathname.split('/');
+  const [controlID, name, namespace] = getURLSegments(-1, -2, -3);
 
-  // /kubescape/compliance/namespaces/:namespace/:kind/:name/:control
-  const namespace = segments[segments.length - 4];
-  const kind = segments[segments.length - 3];
-  const name = segments[segments.length - 2];
-  const controlID = segments[segments.length - 1];
-
-  return (
-    <WorkloadConfigurationScanFixes
-      kind={kind}
-      name={name}
-      namespace={namespace}
-      controlID={controlID}
-    />
-  );
+  return <WorkloadConfigurationScanFixes name={name} namespace={namespace} controlID={controlID} />;
 }
 
-const apiGroupVersions = [
+const apiResourceDefinitions = [
   {
-    apiInfo: [{ group: 'apps', version: 'v1' }],
+    group: '',
+    version: 'v1',
+    pluralName: 'serviceaccounts',
+    singularName: 'serviceaccount',
+    isNamespaced: true,
+  },
+  {
+    group: 'rbac.authorization.k8s.io',
+    version: 'v1',
+    pluralName: 'clusterroles',
+    singularName: 'clusterrole',
+    isNamespaced: false,
+  },
+  {
+    group: 'rbac.authorization.k8s.io',
+    version: 'v1',
+    pluralName: 'clusterrolebindings',
+    singularName: 'clusterrolebinding',
+    isNamespaced: false,
+  },
+  {
+    group: 'apps',
+    version: 'v1',
     pluralName: 'deployments',
     singularName: 'deployment',
     isNamespaced: true,
+  },
+  {
+    group: 'admissionregistration.k8s.io',
+    version: 'v1',
+    pluralName: 'mutatingwebhookconfigurations',
+    singularName: 'mutatingwebhookconfiguration',
+    isNamespaced: false,
   },
 ];
 
@@ -46,31 +59,20 @@ function WorkloadConfigurationScanFixes(props: {
   name: string;
   namespace: string;
   controlID: string;
-  kind: string;
 }) {
-  const { name, namespace, kind, controlID } = props;
-  const [workloadConfigurationScan, setWorkloadConfigurationScan]: [KubeObject, any] =
-    React.useState(null);
-  const [resource, setResource]: [KubeObject, any] = React.useState(null);
+  const { name, namespace, controlID } = props;
+  const [workloadConfigurationScan, setWorkloadConfigurationScan]: [
+    WorkloadConfigurationScan,
+    any
+  ] = useState(null);
+
   const control = controlLibrary.find(element => element.controlID === controlID);
 
-  const groupVersion = apiGroupVersions.find(gv => gv.singularName === kind);
-  if (!groupVersion) {
-    console.log('Fix is not supported for:' + kind);
-    return;
-  }
-  workloadConfigurationScanClass.useApiGet(
-    setWorkloadConfigurationScan,
-    `${kind}-${name}`,
-    namespace
-  );
-  const resourceClass = makeCustomResourceClass({
-    apiInfo: groupVersion.apiInfo,
-    isNamespaced: groupVersion.isNamespaced,
-    singularName: kind,
-    pluralName: groupVersion.pluralName,
-  });
-  resourceClass.useApiGet(setResource, name, namespace);
+  useEffect(() => {
+    fetchWorkloadConfigurationScan(name, namespace).then((result: WorkloadConfigurationScan) => {
+      setWorkloadConfigurationScan(result);
+    });
+  }, []);
 
   if (!workloadConfigurationScan) {
     return <></>;
@@ -88,14 +90,25 @@ function WorkloadConfigurationScanFixes(props: {
             },
             {
               name: 'Namespace',
-              value: workloadConfigurationScan.metadata.namespace,
+              value: workloadConfigurationScan.metadata.labels['kubescape.io/workload-namespace'],
             },
             {
               name: 'Kind',
               value: workloadConfigurationScan.metadata.labels['kubescape.io/workload-kind'],
             },
             {
-              name: 'Description',
+              name: 'Control',
+              value: (
+                <Link
+                  target="_blank"
+                  href={'https://hub.armosec.io/docs/' + control?.controlID.toLowerCase()}
+                >
+                  {control?.controlID} {control?.name}
+                </Link>
+              ),
+            },
+            {
+              name: 'Explain',
               value: control?.description,
             },
             {
@@ -106,107 +119,188 @@ function WorkloadConfigurationScanFixes(props: {
               name: 'Remediation',
               value: control?.remediation,
             },
+            // {
+            //   name: 'Scan',
+            //   value: workloadConfigurationScan.metadata.name,
+            // },
             {
-              name: 'More information',
-              value: (
-                <Link
-                  target="_blank"
-                  href={'https://hub.armosec.io/docs/' + controlID.toLowerCase()}
-                >
-                  https://hub.armosec.io/docs/{controlID.toLowerCase()}
-                </Link>
-              ),
+              name: 'Related objects',
+              value: workloadConfigurationScan.spec.relatedObjects
+                ? workloadConfigurationScan.spec.relatedObjects
+                    .map(object => `${object.name}: ${object.kind}`)
+                    .join(', ')
+                : '',
             },
           ]}
         />
       </SectionBox>
 
-      {resource && (
-        <Fix
-          control={getControl(workloadConfigurationScan.jsonData, controlID)}
-          resource={resource.jsonData}
-        />
-      )}
+      {fixes(workloadConfigurationScan, controlID)}
     </>
   );
 }
 
-function getControl(
+function fixes(
   workloadConfigurationScan: WorkloadConfigurationScan,
   controlID: string
-): WorkloadConfigurationScan.Control | undefined {
-  return Object.values(workloadConfigurationScan.spec.controls).find(
-    control => control.controlID === controlID
+): JSX.Element[] {
+  const fixes: JSX.Element[] = [];
+  const control = Object.values(workloadConfigurationScan.spec.controls).find(
+    item => item.controlID === controlID
   );
+
+  if (!control) {
+    return fixes;
+  }
+
+  const labels = workloadConfigurationScan.metadata.labels;
+  const primaryFix = (
+    <Fix
+      control={control}
+      kind={labels['kubescape.io/workload-kind']}
+      name={labels['kubescape.io/workload-name']}
+      namespace={labels['kubescape.io/workload-namespace']}
+    />
+  );
+  if (primaryFix) {
+    fixes.push(primaryFix);
+  }
+  if (workloadConfigurationScan.spec.relatedObjects) {
+    workloadConfigurationScan.spec.relatedObjects.forEach((obj, index) => {
+      const fix = (
+        <Fix
+          control={control}
+          kind={obj.kind}
+          name={obj.name}
+          namespace={obj.namespace}
+          rulePathPrefix={`relatedObjects[${index}].`}
+        />
+      );
+      if (fix) {
+        fixes.push(fix);
+      }
+    });
+  }
+
+  return fixes;
 }
 
-function Fix(props: { control: WorkloadConfigurationScan.Control | undefined; resource: any }) {
-  const { control, resource } = props;
+function Fix(props: {
+  control: WorkloadConfigurationScan.Control;
+  kind: string;
+  name: string;
+  namespace: string;
+  rulePathPrefix?: string; // to filter rules for relatedObjects
+}) {
+  const { control, kind, name, namespace, rulePathPrefix } = props;
+  const [resource, setResource]: [any, any] = useState(null);
 
-  // strip status
-  const strippedResource: any = Object.fromEntries(
-    Object.entries(resource).filter(([key]) => key !== 'status')
-  );
-  // strip managedFields
-  strippedResource.metadata = Object.fromEntries(
-    Object.entries(strippedResource.metadata).filter(([key]) => key !== 'managedFields')
-  );
+  useEffect(() => {
+    const groupVersion = apiResourceDefinitions.find(gv => gv.singularName === kind.toLowerCase());
+    if (!groupVersion) {
+      console.log('Fix is not supported yet for:' + kind);
+      return;
+    }
+    proxyRequest(
+      name,
+      groupVersion.isNamespaced ? namespace : '',
+      groupVersion.group,
+      groupVersion.version,
+      groupVersion.pluralName
+    ).then((result: any) => {
+      setResource(result);
+    });
+  }, []);
 
-  if (control?.rules) {
-    const original = YAML.stringify(strippedResource);
-
-    const fixedYAML = fixResource(strippedResource, control);
-
-    return (
-      <DiffEditor
-        theme="vs-dark"
-        language="yaml"
-        original={original}
-        modified={fixedYAML}
-        height={1000}
-        options={{
-          renderSideBySide: true,
-        }}
-      />
+  if (resource) {
+    // strip status
+    const strippedResource: any = Object.fromEntries(
+      Object.entries(resource).filter(([key]) => key !== 'status')
     );
+    // strip managedFields
+    strippedResource.metadata = Object.fromEntries(
+      Object.entries(strippedResource.metadata).filter(([key]) => key !== 'managedFields')
+    );
+
+    if (control?.rules) {
+      const original = YAML.stringify(strippedResource);
+
+      const fixedYAML = fixResource(strippedResource, control, rulePathPrefix ?? '');
+      const lines = fixedYAML.match(/\n/g)?.length ?? 10;
+
+      return (
+        <>
+          {/* <Editor theme="vs-dark" language="yaml" value={YAML.stringify(control)} height={500} /> */}
+
+          <DiffEditor
+            theme="vs-dark"
+            language="yaml"
+            original={original}
+            modified={fixedYAML}
+            height={lines * 20}
+            options={{
+              renderSideBySide: true,
+            }}
+          />
+        </>
+      );
+    }
   }
 }
 
 // Amend the resource as per fixPath recommendations
-export function fixResource(resource: any, control: WorkloadConfigurationScan.Control): string {
-  // evaluate the fix rules
-  for (const rule of control.rules) {
-    if (!rule.paths) {
-      continue;
-    }
-    for (const path of rule.paths) {
-      evaluateRule(resource, path);
+export function fixResource(
+  resource: any,
+  control: WorkloadConfigurationScan.Control,
+  prefix: string
+): string {
+  if (control.rules) {
+    for (const rule of control.rules) {
+      if (!rule.paths) {
+        continue;
+      }
+      for (const rulePath of rule.paths) {
+        let path = rulePath.fixPath.length > 0 ? rulePath.fixPath : rulePath.failedPath;
+        if (path.startsWith(prefix)) {
+          path = path.replace(prefix, '');
+          evaluateRule(resource, path, rulePath.fixPathValue);
+        }
+      }
     }
   }
 
   return YAML.stringify(resource);
 }
 
-function evaluateRule(resource: any, path: WorkloadConfigurationScan.RulePath) {
-  const parts = path.fixPath ? path.fixPath.split('.') : path.failedPath.split('.');
+function evaluateRule(resource: any, path: string, fixPathValue: string) {
+  const parts = path.split('.');
 
   let element: any = resource;
   for (const part of parts) {
-    const matchArrayField = part.match(/(\w+)\[([0-9]+)\]/); // e.g. containers[0]
-    if (matchArrayField) {
-      const field = matchArrayField[1];
+    const arrayMatch = part.match(/(\w+)\[([0-9]+)\]/); // e.g. containers[0]
+    if (arrayMatch) {
+      const field = arrayMatch[1];
+      const index = parseInt(arrayMatch[2]);
 
       if (field in element) {
-        const index = parseInt(matchArrayField[2]);
-        element = element[field][index];
+        const list: [] = element[field];
+        if (list.length > index) {
+          if (part === parts[parts.length - 1]) {
+            element[field][index] = fixPathValue;
+            return; // done
+          }
+          element = element[field][index];
+        } else {
+          return; // the rule has a mismatch
+        }
       } else {
         element[field] = [{}]; // new array with 1 object
         element = element[field][0];
       }
     } else {
       if (part === parts[parts.length - 1]) {
-        element[part] = path.fixPathValue;
-        return;
+        element[part] = fixPathValue;
+        return; // done
       }
       if (!(part in element)) {
         element[part] = {};

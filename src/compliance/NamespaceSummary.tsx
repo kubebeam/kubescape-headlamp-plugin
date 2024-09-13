@@ -9,18 +9,12 @@ import {
   Table,
 } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import React from 'react';
-import { useLocation } from 'react-router';
 import { configurationScanSummaries } from '../model';
 import { ConfigurationScanSummary } from '../softwarecomposition/ConfigurationScanSummary';
+import { getLastURLSegment } from '../utils/url';
 
 export default function KubescapeConfigurationScanNamespaceSummary() {
-  const location = useLocation();
-  const segments = location.pathname.split('/');
-
-  // The last segment is the namespace
-  const namespace = segments[segments.length - 1];
-
-  return <ConfigurationScanNamespaceSummaryView namespace={namespace} />;
+  return <ConfigurationScanNamespaceSummaryView namespace={getLastURLSegment()} />;
 }
 
 function ConfigurationScanNamespaceSummaryView(props: { namespace: string }) {

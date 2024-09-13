@@ -7,10 +7,15 @@ export interface WorkloadConfigurationScan {
   metadata: Metadata;
   spec: {
     controls: WorkloadConfigurationScan.Controls;
+    relatedObjects: WorkloadConfigurationScan.RelatedObject[];
   };
 }
 
 export namespace WorkloadConfigurationScan {
+  export interface Controls {
+    [key: string]: Control;
+  }
+
   export interface Control {
     controlID: string;
 
@@ -25,18 +30,21 @@ export namespace WorkloadConfigurationScan {
     rules: Rule[];
   }
 
-  export interface Controls {
-    [key: string]: Control;
+  export interface RelatedObject {
+    namespace: string;
+    apiGroup: string;
+    apiVersion: string;
+    kind: string;
+    name: string;
+  }
+  export interface Rule {
+    name: string;
+    paths: RulePath[];
   }
 
   export interface RulePath {
     fixPath: string;
     failedPath: string;
     fixPathValue: string;
-  }
-
-  export interface Rule {
-    name: string;
-    paths: RulePath[];
   }
 }

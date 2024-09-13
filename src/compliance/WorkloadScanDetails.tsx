@@ -9,22 +9,15 @@ import {
   StatusLabelProps,
   Table as HeadlampTable,
 } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
-import { KubeObject } from '@kinvolk/headlamp-plugin/lib/lib/k8s/cluster';
 import { Box, Link } from '@mui/material';
-import React from 'react';
-import { useLocation } from 'react-router';
-import { workloadConfigurationScanClass } from '../model';
+import { useEffect, useState } from 'react';
+import { fetchWorkloadConfigurationScan } from '../model';
 import { WorkloadConfigurationScan } from '../softwarecomposition/WorkloadConfigurationScan';
+import { getURLSegments } from '../utils/url';
 import { controlLibrary } from './controlLibrary';
 
 export default function KubescapeWorkloadConfigurationScanDetails() {
-  const location = useLocation();
-  const segments = location.pathname.split('/');
-
-  // The second last segment is the namespace
-  const namespace = segments[segments.length - 2];
-  // The last segment is the name
-  const name = segments[segments.length - 1];
+  const [name, namespace] = getURLSegments(-1, -2);
 
   return <WorkloadConfigurationScanDetailView name={name} namespace={namespace} />;
 }
@@ -55,15 +48,20 @@ function getResults(scan: WorkloadConfigurationScan): string {
 
 function WorkloadConfigurationScanDetailView(props: { name: string; namespace: string }) {
   const { name, namespace } = props;
-  const [cr, setCr]: [KubeObject, any] = React.useState(null);
+  const [workloadConfigurationScan, setWorkloadConfigurationScan]: [
+    WorkloadConfigurationScan,
+    any
+  ] = useState(null);
 
-  workloadConfigurationScanClass.useApiGet(setCr, name, namespace);
-
-  if (!cr) {
+  useEffect(() => {
+    fetchWorkloadConfigurationScan(name, namespace).then((result: WorkloadConfigurationScan) => {
+      setWorkloadConfigurationScan(result);
+    });
+  }, []);
+  if (!workloadConfigurationScan) {
     return <></>;
   }
 
-  const workloadConfigurationScan: WorkloadConfigurationScan = cr.jsonData;
   return (
     <>
       <SectionBox title="Workload Configuration Scan">
@@ -93,17 +91,14 @@ function WorkloadConfigurationScanDetailView(props: { name: string; namespace: s
         />
       </SectionBox>
 
-      <Controls controls={cr.jsonData.spec.controls} workloadConfigurationScan={cr.jsonData} />
+      <Controls workloadConfigurationScan={workloadConfigurationScan} />
     </>
   );
 }
 
-function Controls(props: {
-  controls: WorkloadConfigurationScan.Controls;
-  workloadConfigurationScan: WorkloadConfigurationScan;
-}) {
-  const { controls, workloadConfigurationScan } = props;
-
+function Controls(props: { workloadConfigurationScan: WorkloadConfigurationScan }) {
+  const { workloadConfigurationScan } = props;
+  const controls = workloadConfigurationScan.spec.controls;
   const entries = Object.keys(controls).map(key => controls[key]);
 
   return (
@@ -173,13 +168,10 @@ function Controls(props: {
               if (control.rules.some(rule => rule.paths)) {
                 return (
                   <HeadlampLink
-                    routeName={`/kubescape/compliance/namespaces/:namespace/:kind/:name/:control`}
+                    routeName={`/kubescape/compliance/namespaces/:namespace/:name/:control`}
                     params={{
-                      name: workloadConfigurationScan.metadata.labels['kubescape.io/workload-name'],
+                      name: workloadConfigurationScan.metadata.name,
                       namespace: workloadConfigurationScan.metadata.namespace,
-                      kind: workloadConfigurationScan.metadata.labels[
-                        'kubescape.io/workload-kind'
-                      ].toLowerCase(),
                       control: control.controlID,
                     }}
                   >

@@ -8,16 +8,12 @@ import {
   Table as HeadlampTable,
 } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import { Link } from '@mui/material';
-import { useLocation } from 'react-router';
+import { getURLSegments } from '../utils/url';
 import { VulnerabilityModel } from './view-types';
 import { workloadScans } from './Vulnerabilities';
 
 export default function KubescapeCVEResults() {
-  const location = useLocation();
-  const segments = location.pathname.split('/');
-
-  // The last segment is the CVE
-  const name = segments[segments.length - 1];
+  const [name] = getURLSegments(-1);
 
   return <CVEResultsListView cve={name} />;
 }

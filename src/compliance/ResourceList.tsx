@@ -62,7 +62,7 @@ function WorkloadConfigurationScanListView() {
                     name: workloadScan.metadata.namespace,
                   }}
                 >
-                  {workloadScan.metadata.namespace}
+                  {workloadScan.metadata.labels['kubescape.io/workload-namespace']}
                 </Link>
               ),
               gridTemplate: 'auto',

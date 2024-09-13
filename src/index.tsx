@@ -81,7 +81,7 @@ registerRoute({
 import KubescapeWorkloadConfigurationScanFixes from './compliance/WorkloadScanFixes';
 
 registerRoute({
-  path: '/kubescape/compliance/namespaces/:namespace/:kind/:name/:control',
+  path: '/kubescape/compliance/namespaces/:namespace/:name/:control',
   parent: kubescape,
   sidebar: compliance,
   component: () => <KubescapeWorkloadConfigurationScanFixes />,

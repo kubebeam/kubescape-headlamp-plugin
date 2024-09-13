@@ -9,18 +9,12 @@ import {
 } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import { KubeObject } from '@kinvolk/headlamp-plugin/lib/lib/k8s/cluster';
 import React from 'react';
-import { useLocation } from 'react-router';
 import { vulnerabilitySummaryClass } from '../model';
 import { VulnerabilitySummary } from '../softwarecomposition/VulnerabilitySummary';
+import { getLastURLSegment } from '../utils/url';
 
 export default function VulnerabilitiesNamespaceSummary() {
-  const location = useLocation();
-  const segments = location.pathname.split('/');
-
-  // The last segment is the namespace
-  const namespace = segments[segments.length - 1];
-
-  return <NamespaceSummaryView namespace={namespace} />;
+  return <NamespaceSummaryView namespace={getLastURLSegment()} />;
 }
 
 function NamespaceSummaryView(props: { namespace: string }) {

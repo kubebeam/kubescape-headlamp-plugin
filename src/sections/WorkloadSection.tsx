@@ -71,12 +71,13 @@ function KubescapeInfo(props: { resource: KubeObject }) {
 
   if (kind === 'Deployment') {
     const manifestNames: string[] = [];
-    const containers = resource.jsonData.spec.template.spec.containers.concat(
-      resource.jsonData.spec.template.spec.initContainers
-    );
-
-    for (const container of containers) {
+    for (const container of resource.jsonData.spec.template.spec.containers) {
       manifestNames.push(`${scanName}-${container.name}`);
+    }
+    if (resource.jsonData.spec.template.spec.initContainers) {
+      for (const container of resource.jsonData.spec.template.spec.initContainers) {
+        manifestNames.push(`${scanName}-${container.name}`);
+      }
     }
 
     useEffect(() => {
@@ -89,23 +90,23 @@ function KubescapeInfo(props: { resource: KubeObject }) {
   const tableRows: { name: JSX.Element | string; value: JSX.Element | string }[] = [];
 
   if (configurationScan) {
-    if (configurationScan.jsonData.spec.severities.critical > 0)
-      tableRows.push({
-        name: (
-          <>
-            <Link
-              routeName={`/kubescape/compliance/namespaces/:namespace/:name`}
-              params={{
-                name: scanName,
-                namespace: namespace,
-              }}
-            >
-              Compliance
-            </Link>
-          </>
-        ),
-        value: getControlsSummary(configurationScan.jsonData),
-      });
+    //if (configurationScan.jsonData.spec.severities.critical > 0)
+    tableRows.push({
+      name: (
+        <>
+          <Link
+            routeName={`/kubescape/compliance/namespaces/:namespace/:name`}
+            params={{
+              name: scanName,
+              namespace: namespace,
+            }}
+          >
+            Compliance
+          </Link>
+        </>
+      ),
+      value: getControlsSummary(configurationScan.jsonData),
+    });
 
     // const scan: WorkloadConfigurationScanSummary = configurationScan.jsonData;
     // for (const control of Object.values(scan.spec.controls)) {

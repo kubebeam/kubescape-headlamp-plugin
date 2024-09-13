@@ -9,20 +9,14 @@ import {
 import { KubeObject } from '@kinvolk/headlamp-plugin/lib/lib/k8s/cluster';
 import { Link } from '@mui/material';
 import React from 'react';
-import { useLocation } from 'react-router';
 import expandableDescription from '../common/AccordionText';
 import makeSeverityLabel from '../common/SeverityLabel';
 import { vulnerabilityManifestClass } from '../model';
 import { VulnerabilityManifest } from '../softwarecomposition/VulnerabilityManifest';
+import { getLastURLSegment } from '../utils/url';
 
 export default function ImageVulnerabilityDetails() {
-  const location = useLocation();
-  const segments = location.pathname.split('/');
-
-  // The last segment is the manifest name
-  const name = segments[segments.length - 1];
-
-  return <ImageVulnerabilityDetailsView name={name} />;
+  return <ImageVulnerabilityDetailsView name={getLastURLSegment()} />;
 }
 
 function ImageVulnerabilityDetailsView(props: { name: string }) {
