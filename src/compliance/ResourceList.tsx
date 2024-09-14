@@ -102,7 +102,9 @@ function controlsList(workloadScan: WorkloadConfigurationScanSummary, severity: 
         <br />
         <div style={{ whiteSpace: 'normal', textAlign: 'left', fontSize: 'small' }}>
           <Stack spacing={1}>
-            {controls.map(control => `${control.controlID}: ${control.name}`)}
+            {controls.map(control => (
+              <div>{`${control.controlID}: ${control.name}`} </div>
+            ))}
           </Stack>
         </div>
       </>

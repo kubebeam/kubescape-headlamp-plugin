@@ -81,6 +81,11 @@ export default function KubescapeControlResults() {
               },
             },
             {
+              header: 'Kind',
+              accessorFn: (workloadScan: WorkloadConfigurationScanSummary) =>
+                workloadScan.metadata.labels['kubescape.io/workload-kind'],
+            },
+            {
               header: 'Namespace',
               accessorFn: (workloadScan: WorkloadConfigurationScanSummary) => (
                 <HeadlampLink
@@ -92,11 +97,6 @@ export default function KubescapeControlResults() {
                   {workloadScan.metadata.namespace}
                 </HeadlampLink>
               ),
-            },
-            {
-              header: 'Kind',
-              accessorFn: (workloadScan: WorkloadConfigurationScanSummary) =>
-                workloadScan.metadata.labels['kubescape.io/workload-kind'],
             },
             {
               header: 'Scan',

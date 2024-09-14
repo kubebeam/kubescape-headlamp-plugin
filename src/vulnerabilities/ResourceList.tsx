@@ -40,6 +40,16 @@ export default function WorkloadScanListView() {
               gridTemplate: 'max-content',
             },
             {
+              header: 'Container',
+              accessorFn: (workloadScan: VulnerabilityModel.WorkloadScan) => workloadScan.container,
+              gridTemplate: 'min-content',
+            },
+            {
+              header: 'Kind',
+              accessorFn: (workloadScan: VulnerabilityModel.WorkloadScan) => workloadScan.kind,
+              gridTemplate: 'min-content',
+            },
+            {
               header: 'Namespace',
               accessorFn: (workloadScan: VulnerabilityModel.WorkloadScan) => (
                 <Link
@@ -51,20 +61,6 @@ export default function WorkloadScanListView() {
                   {workloadScan.namespace}
                 </Link>
               ),
-              gridTemplate: 'min-content',
-            },
-            {
-              header: 'Container',
-              accessorFn: (workloadScan: VulnerabilityModel.WorkloadScan) => workloadScan.container,
-              gridTemplate: 'min-content',
-            },
-            {
-              header: 'Kind',
-              accessorFn: (workloadScan: VulnerabilityModel.WorkloadScan) => {
-                return (
-                  <Link routeName={workloadScan.kind.toLowerCase() + 's'}>{workloadScan.kind}</Link>
-                );
-              },
               gridTemplate: 'min-content',
             },
             {

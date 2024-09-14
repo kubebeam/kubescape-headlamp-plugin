@@ -11,6 +11,7 @@ import { Box, Stack, Tooltip } from '@mui/material';
 import { Path } from '../index';
 import { VulnerabilityModel } from './view-types';
 import { workloadScans } from './Vulnerabilities';
+import { VulnerabilityManifest } from 'src/softwarecomposition/VulnerabilityManifest';
 
 export default function ImageListView() {
   if (!workloadScans) {
@@ -44,9 +45,9 @@ export default function ImageListView() {
               header: 'Workload',
               accessorFn: (imageScan: VulnerabilityModel.ImageScanWithReferences) => (
                 <div style={{ whiteSpace: 'pre-line' }}>
-                  {Array.from(imageScan.workloads)
-                    .map(workload => workload.name)
-                    .join('\n')}
+                  {Array.from(
+                    new Set(Array.from(imageScan.workloads).map(workload => workload.name))
+                  ).join('\n')}
                 </div>
               ),
               gridTemplate: 'max-content',
@@ -84,7 +85,7 @@ function resultStack(imageScan: VulnerabilityModel.ImageScanWithReferences) {
           width: 20,
         }}
       >
-        <Tooltip title={severity}>
+        <Tooltip title={cveList(imageScan, severity)}>
           {imageScan.vulnerabilities.filter(v => v.severity === severity).length}
         </Tooltip>
       </Box>
@@ -99,6 +100,31 @@ function resultStack(imageScan: VulnerabilityModel.ImageScanWithReferences) {
       {box('yellow', 'Low')}
     </Stack>
   );
+}
+
+function cveList(imageScan: VulnerabilityModel.ImageScanWithReferences, severity: string) {
+  const cves = [];
+  for (const scan of imageScan.vulnerabilities) {
+    if (scan.severity === severity) {
+      cves.push(scan.CVE);
+    }
+  }
+
+  if (cves.length > 0) {
+    return (
+      <>
+        <div style={{ fontSize: 'smaller' }}>{severity}</div>
+        <br />
+        <div style={{ whiteSpace: 'normal', textAlign: 'left', fontSize: 'small' }}>
+          <Stack spacing={1}>
+            {cves.map(cve => (
+              <div>{cve} </div>
+            ))}
+          </Stack>
+        </div>
+      </>
+    );
+  }
 }
 
 function getImageScans(
