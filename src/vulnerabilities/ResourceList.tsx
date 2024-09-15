@@ -73,6 +73,19 @@ export default function WorkloadScanListView() {
               accessorFn: (workloadScan: VulnerabilityModel.WorkloadScan) =>
                 resultStack(workloadScan),
             },
+            {
+              header: 'Relevant',
+              accessorFn: (workloadScan: VulnerabilityModel.WorkloadScan) => {
+                if (!workloadScan.imageScan || !workloadScan.relevant) return;
+                let count = 0;
+                for (const v of workloadScan.imageScan.vulnerabilities) {
+                  if (workloadScan.relevant.vulnerabilities.some(r => r.CVE === v.CVE)) {
+                    count++;
+                  }
+                }
+                return `${count} of ${workloadScan.imageScan.vulnerabilities.length}`;
+              },
+            },
           ]}
         />
       </SectionBox>

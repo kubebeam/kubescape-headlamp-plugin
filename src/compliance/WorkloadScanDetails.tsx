@@ -19,17 +19,16 @@ import { controlLibrary } from './controlLibrary';
 
 export default function KubescapeWorkloadConfigurationScanDetails() {
   const [name, namespace] = getURLSegments(-1, -2);
-  const [workloadConfigurationScan, setWorkloadConfigurationScan]: [
-    WorkloadConfigurationScan,
-    any
-  ] = useState(null);
+  const [configurationScan, setConfigurationScan] = useState<WorkloadConfigurationScan | null>(
+    null
+  );
 
   useEffect(() => {
     fetchWorkloadConfigurationScan(name, namespace).then((result: WorkloadConfigurationScan) => {
-      setWorkloadConfigurationScan(result);
+      setConfigurationScan(result);
     });
   }, []);
-  if (!workloadConfigurationScan) {
+  if (!configurationScan) {
     return <></>;
   }
 
@@ -40,29 +39,29 @@ export default function KubescapeWorkloadConfigurationScanDetails() {
           rows={[
             {
               name: 'Name',
-              value: workloadConfigurationScan.metadata.labels['kubescape.io/workload-name'],
+              value: configurationScan.metadata.labels['kubescape.io/workload-name'],
             },
             {
               name: 'Namespace',
-              value: workloadConfigurationScan.metadata.namespace,
+              value: configurationScan.metadata.namespace,
             },
             {
               name: 'Kind',
-              value: workloadConfigurationScan.metadata.labels['kubescape.io/workload-kind'],
+              value: configurationScan.metadata.labels['kubescape.io/workload-kind'],
             },
             {
               name: 'Last scan',
-              value: workloadConfigurationScan.metadata.creationTimestamp,
+              value: configurationScan.metadata.creationTimestamp,
             },
             {
               name: 'Results',
-              value: getResults(workloadConfigurationScan),
+              value: getResults(configurationScan),
             },
           ]}
         />
       </SectionBox>
 
-      <Controls workloadConfigurationScan={workloadConfigurationScan} />
+      <Controls workloadConfigurationScan={configurationScan} />
     </>
   );
 }

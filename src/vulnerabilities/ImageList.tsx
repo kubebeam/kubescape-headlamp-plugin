@@ -11,7 +11,6 @@ import { Box, Stack, Tooltip } from '@mui/material';
 import { Path } from '../index';
 import { VulnerabilityModel } from './view-types';
 import { workloadScans } from './Vulnerabilities';
-import { VulnerabilityManifest } from 'src/softwarecomposition/VulnerabilityManifest';
 
 export default function ImageListView() {
   if (!workloadScans) {
@@ -27,7 +26,7 @@ export default function ImageListView() {
           columns={[
             {
               header: 'Image',
-              accessorFn: (imageScan: VulnerabilityModel.ImageScanWithReferences) => {
+              accessorFn: (imageScan: VulnerabilityModel.ImageScan) => {
                 return (
                   <HeadlampLink
                     routeName={Path.ImageVulnerabilityDetails}
@@ -43,26 +42,21 @@ export default function ImageListView() {
             },
             {
               header: 'Workload',
-              accessorFn: (imageScan: VulnerabilityModel.ImageScanWithReferences) => (
-                <div style={{ whiteSpace: 'pre-line' }}>
-                  {Array.from(
-                    new Set(Array.from(imageScan.workloads).map(workload => workload.name))
-                  ).join('\n')}
-                </div>
+              accessorFn: (imageScan: VulnerabilityModel.ImageScan) => (
+                <div style={{ whiteSpace: 'pre-line' }}>{getWorkloads(imageScan).join('\n')}</div>
               ),
               gridTemplate: 'max-content',
             },
             {
               header: 'Last scan',
-              accessorFn: (imageScan: VulnerabilityModel.ImageScanWithReferences) => (
+              accessorFn: (imageScan: VulnerabilityModel.ImageScan) => (
                 <DateLabel date={imageScan.creationTimestamp} />
               ),
               gridTemplate: 'max-content',
             },
             {
               header: 'Vulnerabilities',
-              accessorFn: (imageScan: VulnerabilityModel.ImageScanWithReferences) =>
-                resultStack(imageScan),
+              accessorFn: (imageScan: VulnerabilityModel.ImageScan) => resultStack(imageScan),
             },
           ]}
         />
@@ -71,7 +65,7 @@ export default function ImageListView() {
   );
 }
 
-function resultStack(imageScan: VulnerabilityModel.ImageScanWithReferences) {
+function resultStack(imageScan: VulnerabilityModel.ImageScan) {
   function box(color: string, severity: string) {
     return (
       <Box
@@ -102,7 +96,7 @@ function resultStack(imageScan: VulnerabilityModel.ImageScanWithReferences) {
   );
 }
 
-function cveList(imageScan: VulnerabilityModel.ImageScanWithReferences, severity: string) {
+function cveList(imageScan: VulnerabilityModel.ImageScan, severity: string) {
   const cves = [];
   for (const scan of imageScan.vulnerabilities) {
     if (scan.severity === severity) {
@@ -127,30 +121,35 @@ function cveList(imageScan: VulnerabilityModel.ImageScanWithReferences, severity
   }
 }
 
-function getImageScans(
-  workloadScans: VulnerabilityModel.WorkloadScan[]
-): VulnerabilityModel.ImageScanWithReferences[] {
-  const imageScans: VulnerabilityModel.ImageScanWithReferences[] = [];
+function getWorkloads(imageScan: VulnerabilityModel.ImageScan): string[] {
+  const workloadScansForImage: Set<string> = new Set();
+
   if (workloadScans) {
     for (const workloadScan of workloadScans) {
-      if (!workloadScan.imageScan) {
-        continue;
+      if (workloadScan.imageScan?.manifestName === imageScan?.manifestName) {
+        workloadScansForImage.add(workloadScan.container);
       }
-
-      let scan: VulnerabilityModel.ImageScanWithReferences | undefined = imageScans.find(
-        element => element.manifestName === workloadScan.imageScan?.manifestName
-      );
-      if (!scan) {
-        scan = {
-          ...workloadScan.imageScan,
-          workloads: new Set(),
-        };
-
-        imageScans.push(scan);
-      }
-
-      scan.workloads.add(workloadScan);
     }
+  }
+  return Array.from(workloadScansForImage);
+}
+
+function getImageScans(
+  workloadScans: VulnerabilityModel.WorkloadScan[]
+): VulnerabilityModel.ImageScan[] {
+  const imageScans: VulnerabilityModel.ImageScan[] = [];
+  if (workloadScans) {
+    workloadScans.map(workloadScan => {
+      if (workloadScan.imageScan) {
+        if (
+          !imageScans.some(
+            imageScan => imageScan.manifestName === workloadScan.imageScan?.manifestName
+          )
+        ) {
+          imageScans.push(workloadScan.imageScan);
+        }
+      }
+    });
   }
 
   return imageScans;

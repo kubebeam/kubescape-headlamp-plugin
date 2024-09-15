@@ -19,15 +19,14 @@ import { getCVESummary } from './CVESummary';
 export default function KubescapeVulnerabilityDetails() {
   const [name, namespace] = getURLSegments(-1, -2);
 
-  const [summary, setSummary]: [VulnerabilityManifestSummary | null, any] =
-    React.useState<VulnerabilityManifestSummary | null>(null);
-  const [manifestAll, setManifestAll]: [VulnerabilityManifest | null, any] =
-    React.useState<VulnerabilityManifest | null>(null);
-  const [manifestRelevant, setManifestRelevant]: [VulnerabilityManifest | null, any] =
-    React.useState<VulnerabilityManifest | null>(null);
+  const [summary, setSummary] = React.useState<VulnerabilityManifestSummary | null>(null);
+  const [manifestAll, setManifestAll] = React.useState<VulnerabilityManifest | null>(null);
+  const [manifestRelevant, setManifestRelevant] = React.useState<VulnerabilityManifest | null>(
+    null
+  );
 
   useEffect(() => {
-    fetchVulnerabilityManifest(name, namespace).then((response: string[]) => {
+    fetchVulnerabilityManifest(name, namespace).then((response: any[]) => {
       setSummary(response[0]);
       setManifestAll(response[1]);
       setManifestRelevant(response[2]);

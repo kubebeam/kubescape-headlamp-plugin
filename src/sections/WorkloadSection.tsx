@@ -65,8 +65,7 @@ function KubescapeInfo(props: { resource: KubeObject }) {
   const kind = resource.kind;
 
   const scanName = `${kind.toLowerCase()}-${resourceName.toLowerCase()}`;
-  const [vulnerabilityScans, setVulnerabilityScans]: [KubeObject[], any] =
-    useState<Array<KubeObject> | null>(null);
+  const [vulnerabilityScans, setVulnerabilityScans] = useState<Array<KubeObject> | null>(null);
 
   const [configurationScan] = workloadConfigurationScanSummaryClass.useGet(scanName, namespace);
 

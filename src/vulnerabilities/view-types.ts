@@ -52,13 +52,4 @@ export namespace VulnerabilityModel {
     fixed: boolean;
     relevant: boolean;
   }
-
-  // ImageScan > Vulnerabilityp[] + WorkloadScan[]
-  export interface ImageScanWithReferences {
-    manifestName: string;
-    imageName: string;
-    creationTimestamp: string;
-    vulnerabilities: Vulnerability[];
-    workloads: Set<WorkloadScan>;
-  }
 }

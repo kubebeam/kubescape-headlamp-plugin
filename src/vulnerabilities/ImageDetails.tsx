@@ -8,7 +8,7 @@ import {
 } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import { KubeObject } from '@kinvolk/headlamp-plugin/lib/lib/k8s/cluster';
 import { Link } from '@mui/material';
-import React from 'react';
+import { useState } from 'react';
 import expandableDescription from '../common/AccordionText';
 import makeSeverityLabel from '../common/SeverityLabel';
 import { vulnerabilityManifestClass } from '../model';
@@ -17,7 +17,7 @@ import { getLastURLSegment } from '../utils/url';
 
 export default function ImageVulnerabilityDetails() {
   const name = getLastURLSegment();
-  const [manifestVulnerability, setVulnerabilityManifest]: [KubeObject, any] = React.useState(null);
+  const [manifestVulnerability, setVulnerabilityManifest] = useState<KubeObject>(null);
 
   vulnerabilityManifestClass.useApiGet(setVulnerabilityManifest, name, 'kubescape');
 

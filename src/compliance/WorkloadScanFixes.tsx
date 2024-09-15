@@ -14,10 +14,8 @@ import controlLibrary from './controlLibrary';
 
 export default function KubescapeWorkloadConfigurationScanFixes() {
   const [controlID, name, namespace] = getURLSegments(-1, -2, -3);
-  const [workloadConfigurationScan, setWorkloadConfigurationScan]: [
-    WorkloadConfigurationScan,
-    any
-  ] = useState(null);
+  const [workloadConfigurationScan, setWorkloadConfigurationScan] =
+    useState<WorkloadConfigurationScan | null>(null);
 
   const control = controlLibrary.find(element => element.controlID === controlID);
 
@@ -146,7 +144,7 @@ function Fix(props: {
   rulePathPrefix?: string; // to filter rules for relatedObjects
 }) {
   const { control, kind, name, namespace, rulePathPrefix } = props;
-  const [resource, setResource]: [any, any] = useState(null);
+  const [resource, setResource] = useState<any>(null);
 
   useEffect(() => {
     const kubeObjectClass = K8s.ResourceClasses[kind];

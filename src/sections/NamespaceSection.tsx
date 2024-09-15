@@ -58,8 +58,8 @@ function KubescapeInfo(props: { resource: KubeObject }) {
   const { resource } = props;
   const resourceName = resource.jsonData.metadata.name;
 
-  const [configurationScanSummary, setConfigurationScanSummary] = useState(null);
-  const [vulnerabilitySummary, setVulnerabilitySummary] = useState(null);
+  const [configurationScanSummary, setConfigurationScanSummary] = useState<KubeObject | null>(null);
+  const [vulnerabilitySummary, setVulnerabilitySummary] = useState<KubeObject | null>(null);
 
   configurationScanSummaries.useApiGet(setConfigurationScanSummary, resourceName);
   vulnerabilitySummaryClass.useApiGet(setVulnerabilitySummary, resourceName);

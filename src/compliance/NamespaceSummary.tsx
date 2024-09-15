@@ -8,7 +8,7 @@ import {
   SectionBox,
   Table,
 } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
-import React from 'react';
+import { useState } from 'react';
 import { Path } from '../index';
 import { configurationScanSummaries } from '../model';
 import { ConfigurationScanSummary } from '../softwarecomposition/ConfigurationScanSummary';
@@ -16,15 +16,24 @@ import { getLastURLSegment } from '../utils/url';
 
 export default function KubescapeConfigurationScanNamespaceSummary() {
   const namespace = getLastURLSegment();
-  const [cr, setCr]: [KubeObject, any] = React.useState(null);
+  const [configurationScanSummary, setConfigurationScanSummary] = useState<KubeObject>(null);
 
-  configurationScanSummaries.useApiGet(setCr, namespace);
+  configurationScanSummaries.useApiGet(setConfigurationScanSummary, namespace);
 
   return (
     <>
-      {cr && <MainInfoSection title="Namespace Configuration Scans" resource={cr} />}
+      {configurationScanSummary && (
+        <MainInfoSection
+          title="Namespace Configuration Scans"
+          resource={configurationScanSummary}
+        />
+      )}
 
-      {cr && <ConfigurationScans configurationScans={cr.jsonData.spec.summaryRef} />}
+      {configurationScanSummary && (
+        <ConfigurationScans
+          configurationScans={configurationScanSummary.jsonData.spec.summaryRef}
+        />
+      )}
 
       {/* <SectionBox title="Details">
         <pre>{YAML.stringify(cr?.jsonData)}</pre>

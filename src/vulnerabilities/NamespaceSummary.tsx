@@ -8,7 +8,7 @@ import {
   Table as HeadlampTable,
 } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import { KubeObject } from '@kinvolk/headlamp-plugin/lib/lib/k8s/cluster';
-import React from 'react';
+import { useState } from 'react';
 import { Path } from '../index';
 import { vulnerabilitySummaryClass } from '../model';
 import { VulnerabilitySummary } from '../softwarecomposition/VulnerabilitySummary';
@@ -16,16 +16,15 @@ import { getLastURLSegment } from '../utils/url';
 
 export default function VulnerabilitiesNamespaceSummary() {
   const namespace = getLastURLSegment();
-  const [vulnerabilitySummaryKubeobject, setVulnerabilitySummary]: [KubeObject, any] =
-    React.useState(null);
+  const [kubeObject, setKubeObject]: [KubeObject, any] = useState(null);
 
-  vulnerabilitySummaryClass.useApiGet(setVulnerabilitySummary, namespace);
+  vulnerabilitySummaryClass.useApiGet(setKubeObject, namespace);
 
-  if (!vulnerabilitySummaryKubeobject) {
+  if (!kubeObject) {
     return <div></div>;
   }
 
-  const vulnerabilitySummary: VulnerabilitySummary = vulnerabilitySummaryKubeobject.jsonData;
+  const vulnerabilitySummary: VulnerabilitySummary = kubeObject.jsonData;
   return (
     <>
       <SectionBox title="Namespace Vulnerabilities">
