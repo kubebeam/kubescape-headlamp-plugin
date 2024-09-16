@@ -9,9 +9,11 @@ import {
 import { Box, Stack, Tooltip } from '@mui/material';
 import { RoutingPath } from '../index';
 import { VulnerabilityModel } from './view-types';
-import { workloadScans } from './Vulnerabilities';
 
-export default function WorkloadScanListView() {
+export default function WorkloadScanListView(props: {
+  workloadScans: VulnerabilityModel.WorkloadScan[];
+}) {
+  const { workloadScans } = props;
   if (!workloadScans) {
     return <></>;
   }

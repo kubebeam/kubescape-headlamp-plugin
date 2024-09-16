@@ -18,18 +18,20 @@ import WorkloadScanListView from './ResourceList';
 import { VulnerabilityModel } from './view-types';
 
 // workloadScans are cached in global scope because it is an expensive query for the API server
-export let workloadScans: VulnerabilityModel.WorkloadScan[] | null = null;
+export let globalWorkloadScans: VulnerabilityModel.WorkloadScan[] | null = null;
 
 export default function KubescapeVulnerabilities() {
-  const [, setState] = useState({});
+  const [workloadScans, setWorkloadScans] = useState<VulnerabilityModel.WorkloadScan[]>(null);
 
   useEffect(() => {
-    if (workloadScans === null) {
+    if (globalWorkloadScans === null) {
       fetchVulnerabilityManifests().then(response => {
-        workloadScans = response;
+        globalWorkloadScans = response;
 
-        setState({}); // Force component to re-render
+        setWorkloadScans(response);
       });
+    } else {
+      setWorkloadScans(globalWorkloadScans);
     }
   }, []);
 
@@ -40,15 +42,15 @@ export default function KubescapeVulnerabilities() {
         tabs={[
           {
             label: 'CVEs',
-            component: <CVEListView />,
+            component: <CVEListView workloadScans={workloadScans} />,
           },
           {
             label: 'Resources',
-            component: <WorkloadScanListView />,
+            component: <WorkloadScanListView workloadScans={workloadScans} />,
           },
           {
             label: 'Images',
-            component: <ImageListView />,
+            component: <ImageListView workloadScans={workloadScans} />,
           },
         ]}
         ariaLabel="Navigation Tabs"
@@ -194,7 +196,8 @@ function getCVEList(
   return vulnerabilityList;
 }
 
-function CVEListView() {
+function CVEListView(props: { workloadScans: VulnerabilityModel.WorkloadScan[] }) {
+  const { workloadScans } = props;
   if (!workloadScans) {
     return <></>;
   }

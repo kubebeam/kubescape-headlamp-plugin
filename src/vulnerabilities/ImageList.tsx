@@ -10,9 +10,9 @@ import {
 import { Box, Stack, Tooltip } from '@mui/material';
 import { RoutingPath } from '../index';
 import { VulnerabilityModel } from './view-types';
-import { workloadScans } from './Vulnerabilities';
 
-export default function ImageListView() {
+export default function ImageListView(props: { workloadScans: VulnerabilityModel.WorkloadScan[] }) {
+  const { workloadScans } = props;
   if (!workloadScans) {
     return <></>;
   }
@@ -43,7 +43,9 @@ export default function ImageListView() {
             {
               header: 'Workload',
               accessorFn: (imageScan: VulnerabilityModel.ImageScan) => (
-                <div style={{ whiteSpace: 'pre-line' }}>{getWorkloads(imageScan).join('\n')}</div>
+                <div style={{ whiteSpace: 'pre-line' }}>
+                  {getWorkloads(imageScan, workloadScans).join('\n')}
+                </div>
               ),
               gridTemplate: 'max-content',
             },
@@ -121,7 +123,10 @@ function cveList(imageScan: VulnerabilityModel.ImageScan, severity: string) {
   }
 }
 
-function getWorkloads(imageScan: VulnerabilityModel.ImageScan): string[] {
+function getWorkloads(
+  imageScan: VulnerabilityModel.ImageScan,
+  workloadScans: VulnerabilityModel.WorkloadScan[]
+): string[] {
   const workloadScansForImage: Set<string> = new Set();
 
   if (workloadScans) {

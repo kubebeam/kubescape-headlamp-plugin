@@ -11,15 +11,15 @@ import { Link } from '@mui/material';
 import { RoutingPath } from '../index';
 import { getURLSegments } from '../utils/url';
 import { VulnerabilityModel } from './view-types';
-import { workloadScans } from './Vulnerabilities';
+import { globalWorkloadScans } from './Vulnerabilities';
 
 export default function KubescapeCVEResults() {
   const [cve] = getURLSegments(-1);
 
-  if (!workloadScans) {
+  if (!globalWorkloadScans) {
     return <div></div>;
   }
-  const workloadScansFiltered = workloadScans.filter(workloadScan =>
+  const workloadScansFiltered = globalWorkloadScans.filter(workloadScan =>
     workloadScan.imageScan?.vulnerabilities.some(v => v.CVE === cve)
   );
   if (!workloadScansFiltered) {
