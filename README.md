@@ -16,9 +16,11 @@ The plugin is yet in alpha status and should not be used in production.
 ## Prerequisites
 
 - [Kubescape operator](https://kubescape.io/docs/operator/) should be installed in the k8s cluster and enabled for configuration and image scanning.
-- [Headlamp](https://github.com/headlamp-k8s/headlamp) should be installed in the k8s cluster or workstation.
+  We recommend kubescape operator helm chart v1.20.6 with `capabilities.continuousScan: enable`. Later versions of the operator have an issue with scanning: https://github.com/kubescape/operator/issues/238.
 
-The plugin code has been tested with Headlamp v0.25.0 (browser and desktop) and kubescape operator v0.2.6.
+- [Headlamp](https://github.com/headlamp-k8s/headlamp) should be installed in the k8s cluster or workstation. For a quick test the desktop version is recommended.
+
+The plugin code has been tested with Headlamp v0.25.0 (browser and desktop) and kubescape operator helm chart v1.20.6.
 
 ## Use cases
 
