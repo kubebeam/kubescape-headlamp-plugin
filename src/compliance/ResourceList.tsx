@@ -61,18 +61,19 @@ export default function KubescapeWorkloadConfigurationScanList() {
               gridTemplate: 'auto',
             },
             {
-              header: 'Failed',
+              header: 'Passed',
               accessorFn: (workloadScan: WorkloadConfigurationScanSummary) => {
-                const count = Object.values(workloadScan.spec.controls).filter(
-                  scan => scan.status.status === WorkloadConfigurationScanSummary.Status.Failed
+                const passedCount = Object.values(workloadScan.spec.controls).filter(
+                  scan => scan.status.status === WorkloadConfigurationScanSummary.Status.Passed
                 ).length;
-
-                return `${count}/${Object.keys(workloadScan.spec.controls).length} controls`;
+                return (
+                  <progress value={passedCount / Object.keys(workloadScan.spec.controls).length} />
+                );
               },
               gridTemplate: 'auto',
             },
             {
-              header: 'Controls',
+              header: 'Failed Controls',
               accessorFn: (workloadScan: WorkloadConfigurationScanSummary) =>
                 resultStack(workloadScan),
               gridTemplate: 'auto',
