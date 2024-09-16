@@ -8,7 +8,7 @@ import {
   Table as HeadlampTable,
 } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import { Box, Stack, Tooltip } from '@mui/material';
-import { Path } from '../index';
+import { RoutingPath } from '../index';
 import { VulnerabilityModel } from './view-types';
 import { workloadScans } from './Vulnerabilities';
 
@@ -29,7 +29,7 @@ export default function ImageListView() {
               accessorFn: (imageScan: VulnerabilityModel.ImageScan) => {
                 return (
                   <HeadlampLink
-                    routeName={Path.ImageVulnerabilityDetails}
+                    routeName={RoutingPath.ImageVulnerabilityDetails}
                     params={{
                       name: imageScan.manifestName,
                     }}

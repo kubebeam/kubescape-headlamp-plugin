@@ -11,7 +11,7 @@ import {
 } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import { Box, Link } from '@mui/material';
 import { useEffect, useState } from 'react';
-import { Path } from '../index';
+import { RoutingPath } from '../index';
 import { fetchWorkloadConfigurationScan } from '../model';
 import { WorkloadConfigurationScan } from '../softwarecomposition/WorkloadConfigurationScan';
 import { getURLSegments } from '../utils/url';
@@ -138,7 +138,7 @@ function Controls(props: { workloadConfigurationScan: WorkloadConfigurationScan 
               if (control.rules.some(rule => rule.paths)) {
                 return (
                   <HeadlampLink
-                    routeName={Path.KubescapeWorkloadConfigurationScanFixes}
+                    routeName={RoutingPath.KubescapeWorkloadConfigurationScanFixes}
                     params={{
                       name: workloadConfigurationScan.metadata.name,
                       namespace: workloadConfigurationScan.metadata.namespace,

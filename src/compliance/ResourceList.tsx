@@ -3,7 +3,7 @@
 */
 import { Link, SectionBox, Table } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import { Box, Stack, Tooltip } from '@mui/material';
-import { Path } from '../index';
+import { RoutingPath } from '../index';
 import { WorkloadConfigurationScanSummary } from '../softwarecomposition/WorkloadConfigurationScanSummary';
 import { workloadScanData } from './Compliance';
 import controlLibrary from './controlLibrary';
@@ -28,7 +28,7 @@ export default function KubescapeWorkloadConfigurationScanList() {
               accessorFn: (workloadScan: WorkloadConfigurationScanSummary) => {
                 return (
                   <Link
-                    routeName={Path.KubescapeWorkloadConfigurationScanDetails}
+                    routeName={RoutingPath.KubescapeWorkloadConfigurationScanDetails}
                     params={{
                       name: workloadScan.metadata.name,
                       namespace: workloadScan.metadata.namespace,

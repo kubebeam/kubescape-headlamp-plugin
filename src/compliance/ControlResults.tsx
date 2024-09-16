@@ -8,7 +8,7 @@ import {
   Table,
 } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import { Link } from '@mui/material';
-import { Path } from '../index';
+import { RoutingPath } from '../index';
 import { WorkloadConfigurationScanSummary } from '../softwarecomposition/WorkloadConfigurationScanSummary';
 import { getLastURLSegment } from '../utils/url';
 import { workloadScanData } from './Compliance';
@@ -69,7 +69,7 @@ export default function KubescapeControlResults() {
               accessorFn: (workloadScan: WorkloadConfigurationScanSummary) => {
                 return (
                   <HeadlampLink
-                    routeName={Path.KubescapeWorkloadConfigurationScanDetails}
+                    routeName={RoutingPath.KubescapeWorkloadConfigurationScanDetails}
                     params={{
                       name: workloadScan.metadata.name,
                       namespace: workloadScan.metadata.namespace,
@@ -109,7 +109,7 @@ export default function KubescapeControlResults() {
                 //if (control.rules.some(rule => rule.paths)) {
                 return (
                   <HeadlampLink
-                    routeName={Path.KubescapeWorkloadConfigurationScanFixes}
+                    routeName={RoutingPath.KubescapeWorkloadConfigurationScanFixes}
                     params={{
                       name: workloadScan.metadata.name,
                       namespace: workloadScan.metadata.namespace,

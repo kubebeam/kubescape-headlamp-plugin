@@ -10,7 +10,7 @@ import {
 import { useEffect, useState } from 'react';
 import expandableDescription from '../common/AccordionText';
 import makeSeverityLabel from '../common/SeverityLabel';
-import { Path } from '../index';
+import { RoutingPath } from '../index';
 import { deepListQuery } from '../model';
 import { VulnerabilityManifest } from '../softwarecomposition/VulnerabilityManifest';
 import ImageListView from './ImageList';
@@ -214,7 +214,7 @@ function CVEListView() {
               accessorFn: (item: VulnerabilityModel.VulnerabilityWithReferences) => {
                 return (
                   <HeadlampLink
-                    routeName={Path.KubescapeCVEResults}
+                    routeName={RoutingPath.KubescapeCVEResults}
                     params={{
                       cve: item.CVE,
                     }}
