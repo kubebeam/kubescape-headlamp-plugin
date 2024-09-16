@@ -96,7 +96,7 @@ function getNamespaceResults(
   const namespaces: NamespaceResult[] = [];
 
   for (const scan of workloadScanData) {
-    let namespaceResult = namespaces.find(ns => ns.namespace == scan.metadata.namespace);
+    let namespaceResult = namespaces.find(ns => ns.namespace === scan.metadata.namespace);
     if (!namespaceResult) {
       namespaceResult = new NamespaceResult(scan.metadata.namespace);
       namespaces.push(namespaceResult);
