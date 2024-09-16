@@ -122,7 +122,7 @@ function resultStack(workloadScan: VulnerabilityModel.WorkloadScan) {
           borderBottom: 1,
           borderColor: `gray gray gray ${color}`,
           textAlign: 'center',
-          width: 20,
+          width: 25,
         }}
       >
         <Tooltip title={severity}>{countScans(workloadScan, severity)}</Tooltip>

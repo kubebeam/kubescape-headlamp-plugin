@@ -78,7 +78,7 @@ function resultStack(imageScan: VulnerabilityModel.ImageScan) {
           borderBottom: 1,
           borderColor: `gray gray gray ${color}`,
           textAlign: 'center',
-          width: 20,
+          width: 25,
         }}
       >
         <Tooltip title={cveList(imageScan, severity)}>
