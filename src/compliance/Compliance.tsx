@@ -9,7 +9,7 @@ import {
   Table,
   Tabs as HeadlampTabs,
 } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
-import { Box, Link, Tooltip } from '@mui/material';
+import { Box, Link, Tooltip, FormControlLabel, Switch } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { Path } from '../index';
 import { deepListQuery } from '../model';
@@ -61,6 +61,8 @@ function ConfigurationScanningListView() {
   }
 
   const controlsWithFindings = getControlsWithFindings(workloadScanData);
+  const [isFailedControlSwitchChecked, setIsFailedControlSwitchChecked] = useState(true);
+  const controls = isFailedControlSwitchChecked ? controlsWithFindings : controlLibrary;
 
   return (
     <>
@@ -68,9 +70,17 @@ function ConfigurationScanningListView() {
         {countFailedScans(workloadScanData)} configuration issues, {controlsWithFindings.length}{' '}
         failed controls
       </h5>
+      <FormControlLabel
+        checked={isFailedControlSwitchChecked}
+        control={<Switch color="primary" />}
+        label={'Failed controls'}
+        onChange={(event: any, checked: boolean) => {
+          setIsFailedControlSwitchChecked(checked);
+        }}
+      />
       <SectionBox>
         <Table
-          data={controlsWithFindings}
+          data={controls}
           columns={[
             {
               header: 'Severity',
