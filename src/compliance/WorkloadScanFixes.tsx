@@ -3,10 +3,12 @@
 */
 import { K8s } from '@kinvolk/headlamp-plugin/lib';
 import { NameValueTable, SectionBox } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
+import { createRouteURL } from '@kinvolk/headlamp-plugin/lib/Router';
 import { DiffEditor } from '@monaco-editor/react';
 import { Link } from '@mui/material';
 import { useEffect, useState } from 'react';
 import YAML from 'yaml';
+import { RoutingPath } from '../index';
 import { fetchWorkloadConfigurationScan, proxyRequest } from '../model';
 import { WorkloadConfigurationScan } from '../softwarecomposition/WorkloadConfigurationScan';
 import { getURLSegments } from '../utils/url';
@@ -28,11 +30,16 @@ export default function KubescapeWorkloadConfigurationScanFixes() {
   if (!workloadConfigurationScan) {
     return <></>;
   }
+
   return (
     <>
-      <h1>Fix: {control?.name}</h1>
-
-      <SectionBox title="">
+      <SectionBox
+        title={control?.name}
+        backLink={createRouteURL(RoutingPath.KubescapeWorkloadConfigurationScanDetails, {
+          name: workloadConfigurationScan.metadata.name,
+          namespace: workloadConfigurationScan.metadata.namespace,
+        })}
+      >
         <NameValueTable
           rows={[
             {

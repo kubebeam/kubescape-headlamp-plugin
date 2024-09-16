@@ -7,6 +7,7 @@ import {
   Table as HeadlampTable,
   Tabs as HeadlampTabs,
 } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
+import { createRouteURL } from '@kinvolk/headlamp-plugin/lib/Router';
 import { useEffect, useState } from 'react';
 import expandableDescription from '../common/AccordionText';
 import makeSeverityLabel from '../common/SeverityLabel';
@@ -19,15 +20,19 @@ import { VulnerabilityModel } from './view-types';
 
 // workloadScans are cached in global scope because it is an expensive query for the API server
 export let globalWorkloadScans: VulnerabilityModel.WorkloadScan[] | null = null;
+let currentClusterURL = '';
 
 export default function KubescapeVulnerabilities() {
   const [workloadScans, setWorkloadScans] = useState<VulnerabilityModel.WorkloadScan[]>(null);
 
   useEffect(() => {
-    if (globalWorkloadScans === null) {
+    if (
+      globalWorkloadScans === null ||
+      currentClusterURL !== createRouteURL(RoutingPath.KubescapeVulnerabilities) // check if user switched to another cluster
+    ) {
       fetchVulnerabilityManifests().then(response => {
         globalWorkloadScans = response;
-
+        currentClusterURL = createRouteURL(RoutingPath.KubescapeVulnerabilities);
         setWorkloadScans(response);
       });
     } else {
@@ -203,6 +208,7 @@ function CVEListView(props: { workloadScans: VulnerabilityModel.WorkloadScan[] }
   }
 
   const cveList = getCVEList(workloadScans);
+
   return (
     <>
       <h5>

@@ -7,6 +7,7 @@ import {
   SectionBox,
   Table,
 } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
+import { createRouteURL } from '@kinvolk/headlamp-plugin/lib/Router';
 import { Link } from '@mui/material';
 import { RoutingPath } from '../index';
 import { WorkloadConfigurationScanSummary } from '../softwarecomposition/WorkloadConfigurationScanSummary';
@@ -23,10 +24,10 @@ export default function KubescapeControlResults() {
   }
   return (
     <>
-      <h1>
-        {controlID}: {control.name}
-      </h1>
-      <SectionBox title="Kubescape">
+      <SectionBox
+        title={`${controlID}: ${control.name}`}
+        backLink={createRouteURL(RoutingPath.ComplianceView)}
+      >
         <NameValueTable
           rows={[
             {

@@ -9,6 +9,7 @@ import {
   StatusLabelProps,
   Table as HeadlampTable,
 } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
+import { createRouteURL } from '@kinvolk/headlamp-plugin/lib/Router';
 import { Box, Link } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { RoutingPath } from '../index';
@@ -34,7 +35,10 @@ export default function KubescapeWorkloadConfigurationScanDetails() {
 
   return (
     <>
-      <SectionBox title="Workload Configuration Scan">
+      <SectionBox
+        title="Workload Configuration Scan"
+        backLink={createRouteURL(RoutingPath.ComplianceView)}
+      >
         <NameValueTable
           rows={[
             {

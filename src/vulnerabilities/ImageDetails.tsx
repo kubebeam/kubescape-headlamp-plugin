@@ -7,10 +7,12 @@ import {
   Table as HeadlampTable,
 } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import { KubeObject } from '@kinvolk/headlamp-plugin/lib/lib/k8s/cluster';
+import { createRouteURL } from '@kinvolk/headlamp-plugin/lib/Router';
 import { Link } from '@mui/material';
 import { useState } from 'react';
 import expandableDescription from '../common/AccordionText';
 import makeSeverityLabel from '../common/SeverityLabel';
+import { RoutingPath } from '../index';
 import { vulnerabilityManifestClass } from '../model';
 import { VulnerabilityManifest } from '../softwarecomposition/VulnerabilityManifest';
 import { getLastURLSegment } from '../utils/url';
@@ -24,7 +26,10 @@ export default function ImageVulnerabilityDetails() {
   return (
     manifestVulnerability && (
       <>
-        <SectionBox title="Image Vulnerabilities">
+        <SectionBox
+          title="Image Vulnerabilities"
+          backLink={createRouteURL(RoutingPath.KubescapeVulnerabilities)}
+        >
           <NameValueTable
             rows={[
               {

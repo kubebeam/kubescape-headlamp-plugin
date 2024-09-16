@@ -11,54 +11,55 @@ const kubescape = 'kubescape';
 const vulnerabilities: string = 'vulnerabilities';
 const compliance: string = 'compliance';
 
-// Kubescape main sidebar
-registerSidebarEntry({
-  parent: null,
-  name: kubescape,
-  label: 'Kubescape',
-  icon: 'mdi:shield-search',
-  url: '/kubescape/compliance',
-});
-
-registerSidebarEntry({
-  parent: kubescape,
-  name: compliance,
-  label: 'Compliance',
-  url: '/kubescape/compliance',
-});
-
-registerSidebarEntry({
-  parent: kubescape,
-  name: vulnerabilities,
-  label: 'Vulnerabilities',
-  url: '/kubescape/vulnerabilities',
-});
-
-import ComplianceView from './compliance/Compliance';
-
-registerRoute({
-  path: '/kubescape/compliance',
-  parent: kubescape,
-  sidebar: compliance,
-  component: () => <ComplianceView />,
-  exact: true,
-  name: 'Compliance',
-});
-
 export namespace RoutingPath {
+  export const ComplianceView = '/kubescape/compliance';
   export const KubescapeConfigurationScanNamespaceSummary = '/kubescape/compliance/:namespace';
   export const KubescapeWorkloadConfigurationScanDetails =
     '/kubescape/compliance/namespaces/:namespace/:name';
   export const KubescapeControlResults = '/kubescape/compliance/controls/:control';
   export const KubescapeWorkloadConfigurationScanFixes =
     '/kubescape/compliance/namespaces/:namespace/:name/:control';
-  export const KubescapeVulnerabilities = '/kubescape/vulnerabilities';
   export const VulnerabilitiesNamespaceSummary = '/kubescape/vulnerabilities/:namespace';
   export const KubescapeVulnerabilityDetails =
     '/kubescape/vulnerabilities/namespaces/:namespace/:name';
   export const KubescapeCVEResults = '/kubescape/vulnerabilities/cves/:cve';
   export const ImageVulnerabilityDetails = '/kubescape/vulnerabilities/images/:name';
+  export const KubescapeVulnerabilities = '/kubescape/vulnerabilities';
 }
+
+// Kubescape main sidebar
+registerSidebarEntry({
+  parent: null,
+  name: kubescape,
+  label: 'Kubescape',
+  icon: 'mdi:shield-search',
+  url: RoutingPath.ComplianceView,
+});
+
+registerSidebarEntry({
+  parent: kubescape,
+  name: compliance,
+  label: 'Compliance',
+  url: RoutingPath.ComplianceView,
+});
+
+registerSidebarEntry({
+  parent: kubescape,
+  name: vulnerabilities,
+  label: 'Vulnerabilities',
+  url: RoutingPath.KubescapeVulnerabilities,
+});
+
+import ComplianceView from './compliance/Compliance';
+
+registerRoute({
+  path: RoutingPath.ComplianceView,
+  parent: kubescape,
+  sidebar: compliance,
+  component: () => <ComplianceView />,
+  exact: true,
+  name: 'Compliance',
+});
 
 import KubescapeConfigurationScanNamespaceSummary from './compliance/NamespaceSummary';
 

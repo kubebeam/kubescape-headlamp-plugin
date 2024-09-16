@@ -9,7 +9,8 @@ import {
   Table,
   Tabs as HeadlampTabs,
 } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
-import { Box, FormControlLabel, Link, Switch,Tooltip } from '@mui/material';
+import { createRouteURL } from '@kinvolk/headlamp-plugin/lib/Router';
+import { Box, FormControlLabel, Link, Switch, Tooltip } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { RoutingPath } from '../index';
 import { deepListQuery } from '../model';
@@ -20,15 +21,19 @@ import KubescapeWorkloadConfigurationScanList from './ResourceList';
 
 // workloadScans are cached in global scope because it is an expensive query for the API server
 export let workloadScanData: WorkloadConfigurationScanSummary[] | null = null;
+let currentClusterURL = '';
 
 export default function ComplianceView() {
   const [, setState] = useState({});
 
   useEffect(() => {
-    if (workloadScanData === null) {
+    if (
+      workloadScanData === null ||
+      currentClusterURL !== createRouteURL(RoutingPath.ComplianceView) // check if user switched to another cluster
+    ) {
       deepListQuery('workloadconfigurationscansummaries').then(response => {
         workloadScanData = response;
-
+        currentClusterURL = createRouteURL(RoutingPath.ComplianceView);
         setState({}); // Force component to re-render
       });
     }

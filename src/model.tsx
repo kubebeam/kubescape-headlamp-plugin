@@ -45,7 +45,7 @@ export const configurationScanSummaries = makeCustomResourceClass({
 });
 
 // List methods for spdx.softwarecomposition.kubescape.io not retrieve detailed info in the spec. We need to fetch each workloadconfigurationscan individually.
-export async function deepListQuery(type: string): Promise<KubeObject[]> {
+export async function deepListQuery(type: string): Promise<any[]> {
   let namespaces: string[] = [];
 
   // method getAllowedNamespaces may not be released yet
@@ -53,12 +53,12 @@ export async function deepListQuery(type: string): Promise<KubeObject[]> {
     namespaces = getAllowedNamespaces();
   }
 
-  let items: KubeObject = [];
+  let items: any = [];
 
   // If we have namespaces set, make an API call for each namespace
   if (namespaces.length > 0) {
     // always include kubescape because some objects are saved in this namespace
-    if (!namespaces.some(n => n == 'kubescape')) {
+    if (!namespaces.some(n => n === 'kubescape')) {
       namespaces.push('kubescape');
     }
     const listOfLists = await Promise.all(

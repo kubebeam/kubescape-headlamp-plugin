@@ -7,10 +7,12 @@ import {
   SectionBox,
   Table as HeadlampTable,
 } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
+import { createRouteURL } from '@kinvolk/headlamp-plugin/lib/Router';
 import { Link } from '@mui/material';
 import React, { useEffect } from 'react';
 import expandableDescription from '../common/AccordionText';
 import makeSeverityLabel from '../common/SeverityLabel';
+import { RoutingPath } from '../index';
 import { VulnerabilityManifest } from '../softwarecomposition/VulnerabilityManifest';
 import { VulnerabilityManifestSummary } from '../softwarecomposition/VulnerabilityManifestSummary';
 import { getURLSegments } from '../utils/url';
@@ -36,7 +38,10 @@ export default function KubescapeVulnerabilityDetails() {
   return (
     summary && (
       <>
-        <SectionBox title="Vulnerabilities">
+        <SectionBox
+          title="Vulnerabilities"
+          backLink={createRouteURL(RoutingPath.KubescapeVulnerabilities)}
+        >
           <NameValueTable
             rows={[
               {

@@ -103,7 +103,7 @@ function resultStack(imageScan: VulnerabilityModel.ImageScan) {
 }
 
 function cveList(imageScan: VulnerabilityModel.ImageScan, severity: string) {
-  const cves = imageScan.vulnerabilities.filter(v => v.severity == severity).map(v => v.CVE);
+  const cves = imageScan.vulnerabilities.filter(v => v.severity === severity).map(v => v.CVE);
 
   if (cves.length > 0) {
     return (
