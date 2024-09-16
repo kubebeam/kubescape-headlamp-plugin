@@ -16,6 +16,7 @@ export default function ImageListView(props: { workloadScans: VulnerabilityModel
   if (!workloadScans) {
     return <></>;
   }
+
   const imageScans = getImageScans(workloadScans);
   return (
     <>
@@ -42,11 +43,14 @@ export default function ImageListView(props: { workloadScans: VulnerabilityModel
             },
             {
               header: 'Workload',
-              accessorFn: (imageScan: VulnerabilityModel.ImageScan) => (
-                <div style={{ whiteSpace: 'pre-line' }}>
-                  {getWorkloads(imageScan, workloadScans).join('\n')}
-                </div>
-              ),
+              accessorFn: (imageScan: VulnerabilityModel.ImageScan) => {
+                const workloads = workloadScans
+                  .filter(scan => scan.imageScan?.manifestName === imageScan.manifestName)
+                  .map(scan => scan.container);
+
+                const uniqueWorkloads = [...new Set(workloads)];
+                return <div style={{ whiteSpace: 'pre-line' }}>{uniqueWorkloads.join('\n')}</div>;
+              },
               gridTemplate: 'max-content',
             },
             {
@@ -99,12 +103,7 @@ function resultStack(imageScan: VulnerabilityModel.ImageScan) {
 }
 
 function cveList(imageScan: VulnerabilityModel.ImageScan, severity: string) {
-  const cves = [];
-  for (const scan of imageScan.vulnerabilities) {
-    if (scan.severity === severity) {
-      cves.push(scan.CVE);
-    }
-  }
+  const cves = imageScan.vulnerabilities.filter(v => v.severity == severity).map(v => v.CVE);
 
   if (cves.length > 0) {
     return (
@@ -123,39 +122,22 @@ function cveList(imageScan: VulnerabilityModel.ImageScan, severity: string) {
   }
 }
 
-function getWorkloads(
-  imageScan: VulnerabilityModel.ImageScan,
-  workloadScans: VulnerabilityModel.WorkloadScan[]
-): string[] {
-  const workloadScansForImage: Set<string> = new Set();
-
-  if (workloadScans) {
-    for (const workloadScan of workloadScans) {
-      if (workloadScan.imageScan?.manifestName === imageScan?.manifestName) {
-        workloadScansForImage.add(workloadScan.container);
-      }
-    }
-  }
-  return Array.from(workloadScansForImage);
-}
-
 function getImageScans(
   workloadScans: VulnerabilityModel.WorkloadScan[]
 ): VulnerabilityModel.ImageScan[] {
   const imageScans: VulnerabilityModel.ImageScan[] = [];
-  if (workloadScans) {
-    workloadScans.map(workloadScan => {
-      if (workloadScan.imageScan) {
-        if (
-          !imageScans.some(
-            imageScan => imageScan.manifestName === workloadScan.imageScan?.manifestName
-          )
-        ) {
-          imageScans.push(workloadScan.imageScan);
-        }
+
+  workloadScans.map(workloadScan => {
+    if (workloadScan.imageScan) {
+      if (
+        !imageScans.some(
+          imageScan => imageScan.manifestName === workloadScan.imageScan?.manifestName
+        )
+      ) {
+        imageScans.push(workloadScan.imageScan);
       }
-    });
-  }
+    }
+  });
 
   return imageScans;
 }

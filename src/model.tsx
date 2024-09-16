@@ -55,8 +55,12 @@ export async function deepListQuery(type: string): Promise<KubeObject[]> {
 
   let items: KubeObject = [];
 
+  // If we have namespaces set, make an API call for each namespace
   if (namespaces.length > 0) {
-    // If we have namespaces set, make an API call for each namespace
+    // always include kubescape because some objects are saved in this namespace
+    if (!namespaces.some(n => n == 'kubescape')) {
+      namespaces.push('kubescape');
+    }
     const listOfLists = await Promise.all(
       namespaces.map(namespace =>
         ApiProxy.request(`/apis/${spdxGroup}/${spdxVersion}/namespaces/${namespace}/${type}`)
