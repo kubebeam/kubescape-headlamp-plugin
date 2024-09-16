@@ -9,12 +9,13 @@ import {
   Table,
   Tabs as HeadlampTabs,
 } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
-import { Box, Link, Tooltip, FormControlLabel, Switch } from '@mui/material';
+import { Box, FormControlLabel, Link, Switch,Tooltip } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { RoutingPath } from '../index';
 import { deepListQuery } from '../model';
 import { WorkloadConfigurationScanSummary } from '../softwarecomposition/WorkloadConfigurationScanSummary';
 import { Control, controlLibrary } from './controlLibrary';
+import NamespaceView from './NamespaceView';
 import KubescapeWorkloadConfigurationScanList from './ResourceList';
 
 // workloadScans are cached in global scope because it is an expensive query for the API server
@@ -47,6 +48,10 @@ export default function ComplianceView() {
           {
             label: 'Resources',
             component: <KubescapeWorkloadConfigurationScanList />,
+          },
+          {
+            label: 'Namespaces',
+            component: <NamespaceView />,
           },
         ]}
         ariaLabel="Navigation Tabs"

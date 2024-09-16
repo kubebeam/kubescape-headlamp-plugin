@@ -11,6 +11,10 @@ export interface WorkloadConfigurationScanSummary {
 }
 
 export namespace WorkloadConfigurationScanSummary {
+  export enum Status {
+    Failed = 'failed',
+    Passed = 'passed',
+  }
   export interface Controls {
     [key: string]: Control;
   }
@@ -21,7 +25,7 @@ export namespace WorkloadConfigurationScanSummary {
       severity: string;
     };
     status: {
-      status: string;
+      status: Status;
     };
   }
   export interface Severities {

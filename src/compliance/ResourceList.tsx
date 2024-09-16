@@ -64,7 +64,7 @@ export default function KubescapeWorkloadConfigurationScanList() {
               header: 'Failed',
               accessorFn: (workloadScan: WorkloadConfigurationScanSummary) => {
                 const count = Object.values(workloadScan.spec.controls).filter(
-                  scan => scan.status.status === 'failed'
+                  scan => scan.status.status === WorkloadConfigurationScanSummary.Status.Failed
                 ).length;
 
                 return `${count}/${Object.keys(workloadScan.spec.controls).length} controls`;
@@ -87,7 +87,10 @@ export default function KubescapeWorkloadConfigurationScanList() {
 function controlsList(workloadScan: WorkloadConfigurationScanSummary, severity: string) {
   const controls = [];
   for (const scan of Object.values(workloadScan.spec.controls)) {
-    if (scan.status.status === 'failed' && scan.severity.severity === severity) {
+    if (
+      scan.status.status === WorkloadConfigurationScanSummary.Status.Failed &&
+      scan.severity.severity === severity
+    ) {
       const control = controlLibrary.find(control => control.controlID === scan.controlID);
       if (control) {
         controls.push(control);
@@ -129,7 +132,9 @@ function resultStack(workloadScan: WorkloadConfigurationScanSummary) {
         <Tooltip title={controlsList(workloadScan, severity)}>
           {
             Object.values(workloadScan.spec.controls).filter(
-              scan => scan.status.status === 'failed' && scan.severity.severity === severity
+              scan =>
+                scan.status.status === WorkloadConfigurationScanSummary.Status.Failed &&
+                scan.severity.severity === severity
             ).length
           }
         </Tooltip>
