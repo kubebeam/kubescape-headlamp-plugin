@@ -28,7 +28,7 @@ class NamespaceResult {
 
 export default function NamespaceView() {
   if (!workloadScanData) {
-    return;
+    return <></>;
   }
   return (
     <SectionBox>
