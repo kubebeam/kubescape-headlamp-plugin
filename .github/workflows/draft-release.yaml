@@ -47,6 +47,7 @@ jobs:
           token: ${{ github.token }}
           draft: true
           name: ${{ github.event.inputs.releaseName }}
+          tag_name: ${{ github.event.inputs.releaseName }}
           body: |
             ## ✨ Enhancements:
             * Feature 1
