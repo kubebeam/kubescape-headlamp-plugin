@@ -29,7 +29,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
       - run: npx @kinvolk/headlamp-plugin lint .
@@ -68,8 +68,7 @@ jobs:
 
             <!-- end-release-notes -->
           files: |
-            dist/main.js
-            package.json
+            "$ARCHIVE_NAME".tar.gz
         env:
           GITHUB_REPOSITORY: $GITHUB_REPOSITORY
           ARCHIVE_NAME: ${{ github.event.repository.name }}-${{ github.event.inputs.releaseName }}
