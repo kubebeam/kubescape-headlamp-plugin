@@ -46,7 +46,6 @@ jobs:
         with:
           token: ${{ github.token }}
           draft: true
-          tag_name: ${{ github.ref_name }}
           files: |
             ${{ github.event.repository.name }}-${{ github.ref_name }}.tar.gz
             checksum.txt
