@@ -6,8 +6,8 @@ import { NameValueTable, SectionBox } from '@kinvolk/headlamp-plugin/lib/CommonC
 import { createRouteURL } from '@kinvolk/headlamp-plugin/lib/Router';
 import { DiffEditor } from '@monaco-editor/react';
 import { Link } from '@mui/material';
+import * as yaml from 'js-yaml';
 import { useEffect, useState } from 'react';
-import YAML from 'js-yaml';
 import { RoutingPath } from '../index';
 import { fetchWorkloadConfigurationScan, proxyRequest } from '../model';
 import { WorkloadConfigurationScan } from '../softwarecomposition/WorkloadConfigurationScan';
@@ -16,8 +16,10 @@ import controlLibrary from './controlLibrary';
 
 export default function KubescapeWorkloadConfigurationScanFixes() {
   const [controlID, name, namespace] = getURLSegments(-1, -2, -3);
-  const [workloadConfigurationScan, setWorkloadConfigurationScan] =
-    useState<WorkloadConfigurationScan | null>(null);
+  const [workloadConfigurationScan, setWorkloadConfigurationScan]: [
+    WorkloadConfigurationScan | null,
+    any
+  ] = useState<WorkloadConfigurationScan | null>(null);
 
   const control = controlLibrary.find(element => element.controlID === controlID);
 
@@ -182,14 +184,14 @@ function Fix(props: {
     );
 
     if (control?.rules) {
-      const original = YAML.dump(strippedResource);
+      const original = yaml.dump(strippedResource);
 
       const fixedYAML = fixResource(strippedResource, control, rulePathPrefix ?? '');
       const lines = fixedYAML.match(/\n/g)?.length ?? 10;
 
       return (
         <>
-          {/* <Editor theme="vs-dark" language="yaml" value={YAML.dump(control)} height={500} /> */}
+          {/* <Editor theme="vs-dark" language="yaml" value={yaml.dump(control)} height={500} /> */}
 
           <DiffEditor
             theme="vs-dark"
@@ -232,7 +234,7 @@ export function fixResource(
     }
   }
 
-  return YAML.dump(resource);
+  return yaml.dump(resource);
 }
 
 function evaluateRule(resource: any, path: string, fixPathValue: string) {
