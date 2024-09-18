@@ -1,13 +1,10 @@
 name: Create Release Draft
 
 on:
-  workflow_dispatch:
-    inputs:
-      releaseName:
-        description: 'Name for this release (should be equivalent to the tag without the v prefix)'
-        required: true
-        default: 'X.Y.Z'
-
+  push:
+    tags:
+      - "v*.*.*"
+      
 permissions:
   contents: read
 
@@ -37,16 +34,19 @@ jobs:
       - run: npx @kinvolk/headlamp-plugin build .
 
       - name: create-archive
-        run: tar -czf ${{ github.event.repository.name }}-${{ github.event.inputs.releaseName }}.tar.gz dist/main.js package.json
+        run: |
+          mkdir -p kubescape-plugin
+          cp dist/main.js package.json kubescape-plugin
+          tar -czf ${{ github.event.repository.name }}-${{ github.event.inputs.releaseName }}.tar.gz kubescape-plugin
       - name: create-checksum
         id: create-checksum
         run: sha256sum ${{ github.event.repository.name }}-${{ github.event.inputs.releaseName }}.tar.gz > checksum.txt
-      - name: create-release
-        uses: pyTooling/Actions/releaser@r0
+      - name: Create Release Draft
+        uses: softprops/action-gh-release@v2
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          rm: true
-          tag: ${{ github.event.inputs.releaseName }}
+          token: ${{ github.token }}
+          draft: true
+          name: ${{ github.event.inputs.releaseName }}
           files: |
             ${{ github.event.repository.name }}-${{ github.event.inputs.releaseName }}.tar.gz
             checksum.txt
