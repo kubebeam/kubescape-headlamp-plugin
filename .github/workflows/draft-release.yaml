@@ -3,8 +3,8 @@ name: Create Release
 on:
   push:
     tags:
-      - "v*.*.*"
-      
+      - 'v*.*.*'
+
 permissions:
   contents: read
 
@@ -40,7 +40,7 @@ jobs:
           tar -czf ${{ github.event.repository.name }}-${{ github.ref }}.tar.gz kubescape-plugin
       - name: create-checksum
         id: create-checksum
-        run: sha256sum ${{ github.event.repository.name }}-${{ github.event.inputs.releaseName }}.tar.gz > checksum.txt
+        run: sha256sum ${{ github.event.repository.name }}-${{ github.ref }}.tar.gz > checksum.txt
       - name: Create Release Draft
         uses: softprops/action-gh-release@v2
         with:
@@ -49,6 +49,5 @@ jobs:
           tag_name: ${{ github.ref }}
           name: ${{ github.ref }}
           files: |
-            ${{ github.event.repository.name }}-${{ github.event.inputs.releaseName }}.tar.gz
+            ${{ github.event.repository.name }}-${{ github.ref }}.tar.gz
             checksum.txt
-
