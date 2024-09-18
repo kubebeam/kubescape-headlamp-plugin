@@ -41,33 +41,13 @@ jobs:
       - name: create-checksum
         id: create-checksum
         run: sha256sum ${{ github.event.repository.name }}-${{ github.event.inputs.releaseName }}.tar.gz > checksum.txt
-      - name: Create Release Draft
-        uses: softprops/action-gh-release@v2
+      - name: create-release
+        uses: pyTooling/Actions/releaser@r0
         with:
-          token: ${{ github.token }}
-          draft: true
-          name: ${{ github.event.inputs.releaseName }}
-          tag_name: ${{ github.event.inputs.releaseName }}
-          body: |
-            ## ✨ Enhancements:
-            * Feature 1
-            * Feature 2
-
-            ## 🐞 Bug fixes
-            * Fix 1
-            * Fix 2
-
-            ## 💻 Development
-            * Development experience related change 1
-            * Development experience related change 2
-
-            ## 📖 Documentation
-            * Docs change 1
-            * Docs change 2
-
-            <!-- end-release-notes -->
+          token: ${{ secrets.GITHUB_TOKEN }}
+          rm: true
+          tag: ${{ github.event.inputs.releaseName }}
           files: |
             ${{ github.event.repository.name }}-${{ github.event.inputs.releaseName }}.tar.gz
             checksum.txt
-        env:
-          GITHUB_REPOSITORY: $GITHUB_REPOSITORY
+
