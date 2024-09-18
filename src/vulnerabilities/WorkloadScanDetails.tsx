@@ -8,15 +8,17 @@ import {
   Table as HeadlampTable,
 } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import { createRouteURL } from '@kinvolk/headlamp-plugin/lib/Router';
-import { Link } from '@mui/material';
+import { Link, Tooltip } from '@mui/material';
 import React, { useEffect } from 'react';
 import expandableDescription from '../common/AccordionText';
 import makeSeverityLabel from '../common/SeverityLabel';
 import { RoutingPath } from '../index';
+import { OpenVulnerabilityExchangeContainer } from '../softwarecomposition/OpenVulnerabilityExchangeContainer';
 import { VulnerabilityManifest } from '../softwarecomposition/VulnerabilityManifest';
 import { VulnerabilityManifestSummary } from '../softwarecomposition/VulnerabilityManifestSummary';
 import { getURLSegments } from '../utils/url';
 import { getCVESummary } from './CVESummary';
+import { globalOpenVulnerabilityExchangeContainers } from './Vulnerabilities';
 
 export default function KubescapeVulnerabilityDetails() {
   const [name, namespace] = getURLSegments(-1, -2);
@@ -160,6 +162,25 @@ function Matches(props: {
             gridTemplate: 'auto',
           },
           {
+            header: 'Affected',
+            accessorFn: (item: VulnerabilityManifest.Match) => {
+              const statement = getStatement(manifest, item);
+              if (statement) {
+                return (
+                  <Tooltip
+                    title={statement.impact_statement}
+                    slotProps={{ tooltip: { sx: { fontSize: '0.9em' } } }}
+                  >
+                    {statement.status === OpenVulnerabilityExchangeContainer.AffectedStatus.Affected
+                      ? 'Yes'
+                      : 'No'}
+                  </Tooltip>
+                );
+              }
+              return '';
+            },
+          },
+          {
             header: 'Fix',
             accessorFn: (item: VulnerabilityManifest.Match) => item.vulnerability.fix.state,
             gridTemplate: 'auto',
@@ -181,6 +202,27 @@ function Matches(props: {
       />
     </SectionBox>
   );
+}
+
+function getStatement(
+  vm: VulnerabilityManifest,
+  match: VulnerabilityManifest.Match
+): OpenVulnerabilityExchangeContainer.Statement | null {
+  if (globalOpenVulnerabilityExchangeContainers) {
+    for (const vex of globalOpenVulnerabilityExchangeContainers) {
+      if (
+        vex.metadata.annotations['kubescape.io/image-tag'] ===
+        vm.metadata.annotations['kubescape.io/image-tag']
+      ) {
+        for (const statement of vex.spec.statements) {
+          if (statement.vulnerability['@id'] === match.vulnerability.id) {
+            return statement;
+          }
+        }
+      }
+    }
+  }
+  return null;
 }
 
 // Fetch vulnerabilitymanifestsummary and then vulnerabilitymanifest (if available)

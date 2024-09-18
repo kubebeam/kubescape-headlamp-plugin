@@ -12,7 +12,8 @@ import { useEffect, useState } from 'react';
 import expandableDescription from '../common/AccordionText';
 import makeSeverityLabel from '../common/SeverityLabel';
 import { RoutingPath } from '../index';
-import { deepListQuery } from '../model';
+import { deepListQuery, openVulnerabilityExchangeContainerClass } from '../model';
+import { OpenVulnerabilityExchangeContainer } from '../softwarecomposition/OpenVulnerabilityExchangeContainer';
 import { VulnerabilityManifest } from '../softwarecomposition/VulnerabilityManifest';
 import ImageListView from './ImageList';
 import WorkloadScanListView from './ResourceList';
@@ -20,7 +21,9 @@ import { VulnerabilityModel } from './view-types';
 
 // workloadScans are cached in global scope because it is an expensive query for the API server
 export let globalWorkloadScans: VulnerabilityModel.WorkloadScan[] | null = null;
-let currentClusterURL = '';
+export let globalOpenVulnerabilityExchangeContainers: OpenVulnerabilityExchangeContainer[] | null =
+  null;
+export let currentClusterURL = '';
 
 export default function KubescapeVulnerabilities() {
   const [workloadScans, setWorkloadScans] = useState<VulnerabilityModel.WorkloadScan[]>(null);
@@ -74,6 +77,10 @@ export async function fetchVulnerabilityManifests(): Promise<any> {
 
   const workloadScans: VulnerabilityModel.WorkloadScan[] = [];
   const imageScans: VulnerabilityModel.ImageScan[] = [];
+
+  globalOpenVulnerabilityExchangeContainers = await deepListQuery(
+    openVulnerabilityExchangeContainerClass.pluralName
+  );
 
   for (const v of vulnerabilityManifests) {
     if (v.spec.payload?.matches) {

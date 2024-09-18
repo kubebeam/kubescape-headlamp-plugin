@@ -30,6 +30,13 @@ export const vulnerabilitySummaryClass = makeCustomResourceClass({
   pluralName: 'vulnerabilitysummaries',
 });
 
+export const openVulnerabilityExchangeContainerClass = makeCustomResourceClass({
+  apiInfo: spdxGroupVersions,
+  isNamespaced: true, // kubescape
+  singularName: 'openvulnerabilityexchangecontainer',
+  pluralName: 'openvulnerabilityexchangecontainers',
+});
+
 export const workloadConfigurationScanSummaryClass = makeCustomResourceClass({
   apiInfo: spdxGroupVersions,
   isNamespaced: true,
@@ -44,7 +51,7 @@ export const configurationScanSummaries = makeCustomResourceClass({
   pluralName: 'configurationscansummaries',
 });
 
-// List methods for spdx.softwarecomposition.kubescape.io not retrieve detailed info in the spec. We need to fetch each workloadconfigurationscan individually.
+// List methods for spdx.softwarecomposition.kubescape.io not retrieve detailed info in the spec. We need to fetch each item individually.
 export async function deepListQuery(type: string): Promise<any[]> {
   let namespaces: string[] = [];
 
