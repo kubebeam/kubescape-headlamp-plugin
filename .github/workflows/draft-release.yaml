@@ -40,9 +40,7 @@ jobs:
         run: tar -czf "$ARCHIVE_NAME".tar.gz dist/main.js package.json
       - name: create-checksum
         id: create-checksum
-        run: |
-          sha256sum "$ARCHIVE_NAME".tar.gz > checksum.txt
-          echo "::set-output name=checksum::$(cut -d ' ' -f 1 checksum.txt)"
+        run: sha256sum "$ARCHIVE_NAME".tar.gz > checksum.txt
       - name: Create Release Draft
         uses: softprops/action-gh-release@v2
         with:
@@ -68,7 +66,8 @@ jobs:
 
             <!-- end-release-notes -->
           files: |
-            "$ARCHIVE_NAME".tar.gz
+            ${{ github.event.repository.name }}-${{ github.event.inputs.releaseName }}.tar.gz
+            checksum.txt
         env:
           GITHUB_REPOSITORY: $GITHUB_REPOSITORY
           ARCHIVE_NAME: ${{ github.event.repository.name }}-${{ github.event.inputs.releaseName }}
