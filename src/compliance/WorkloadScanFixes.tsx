@@ -7,7 +7,7 @@ import { createRouteURL } from '@kinvolk/headlamp-plugin/lib/Router';
 import { DiffEditor } from '@monaco-editor/react';
 import { Link } from '@mui/material';
 import { useEffect, useState } from 'react';
-import YAML from 'yaml';
+import YAML from 'js-yaml';
 import { RoutingPath } from '../index';
 import { fetchWorkloadConfigurationScan, proxyRequest } from '../model';
 import { WorkloadConfigurationScan } from '../softwarecomposition/WorkloadConfigurationScan';
@@ -182,14 +182,14 @@ function Fix(props: {
     );
 
     if (control?.rules) {
-      const original = YAML.stringify(strippedResource);
+      const original = YAML.dump(strippedResource);
 
       const fixedYAML = fixResource(strippedResource, control, rulePathPrefix ?? '');
       const lines = fixedYAML.match(/\n/g)?.length ?? 10;
 
       return (
         <>
-          {/* <Editor theme="vs-dark" language="yaml" value={YAML.stringify(control)} height={500} /> */}
+          {/* <Editor theme="vs-dark" language="yaml" value={YAML.dump(control)} height={500} /> */}
 
           <DiffEditor
             theme="vs-dark"
@@ -232,7 +232,7 @@ export function fixResource(
     }
   }
 
-  return YAML.stringify(resource);
+  return YAML.dump(resource);
 }
 
 function evaluateRule(resource: any, path: string, fixPathValue: string) {
