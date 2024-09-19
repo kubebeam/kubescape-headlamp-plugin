@@ -1,11 +1,11 @@
-version: v0.0.3-alpha
+version: v0.0.1-alpha
 name: headlamp_kubescape
 displayName: Kubescape
-createdAt: '2024-09-19T09:15:44Z'
+createdAt: '2024-09-19T09:49:36Z'
 description: Kubescape compliance and vulnerabilities in Headlamp.
 logoURL: https://avatars.githubusercontent.com/u/100554170
 annotations:
-  headlamp/plugin/archive-url: https://github.com/Kubebeam/kubescape-headlamp-plugin/releases/download/v0.0.3-alpha/kubescape-headlamp-plugin-v0.0.3-alpha.tar.gz
-  headlamp/plugin/archive-checksum: SHA256:5825248d29069775f3c0ac4570e7854a7aad6dee3e35b0639cf118a41b6b8dc3
+  headlamp/plugin/archive-url: https://github.com/Kubebeam/kubescape-headlamp-plugin/releases/download/v0.0.1-alpha/kubescape-headlamp-plugin-v0.0.1-alpha.tar.gz
+  headlamp/plugin/archive-checksum: SHA256:d52e15c0c1be139029d8df4021748c0ec5d98cfd9306337794e3171e22ecba1a
   headlamp/plugin/version-compat: '>=0.25'
   headlamp/plugin/distro-compat: in-cluster,web,docker-desktop,desktop
