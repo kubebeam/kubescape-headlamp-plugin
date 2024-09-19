@@ -1,11 +1,10 @@
 # Kubescape Headlamp Plugin
 
-This project provides an open source Kubescape plugin for Headlamp. It builds upon the work of [Kubescape](https://kubescape.io/) and [Headlamp](https://github.com/headlamp-k8s/headlamp).
+The Kubescape Headlamp plugin provides an open source plugin for Headlamp. It builds upon the work of [Kubescape](https://kubescape.io/) and [Headlamp](https://github.com/headlamp-k8s/headlamp).
 
-The purpose of the plugin is to assist in the overall use cases for Kubescape, as documented [here](https://kubescape.io/).
-The plugin will build extra menuitems in Headlamp for configuration and image scanning.
+Headlamp is a dashboard for Kubernetes, and is extensible with plugins. Kubescape is a security platform protecting against configuration issues and image vulnerabilities.
 
-The plugin is yet in alpha status and should not be used in production.
+The Kubescape Headlamp plugin provides views in Headlamp for configuration and vulnerabilities scanning, based on information delivered by the Kubescape operator.
 
 ## Demo
 
@@ -16,17 +15,17 @@ The plugin is yet in alpha status and should not be used in production.
 ## Prerequisites
 
 - [Kubescape operator](https://kubescape.io/docs/operator/) should be installed in the k8s cluster and enabled for configuration and image scanning.
-  We recommend kubescape operator helm chart v1.22.0 or later with `capabilities.continuousScan: enable`.
+  We recommend Kubescape operator helm chart v1.22.0 or later with `capabilities.continuousScan: enable`.
+
+  If the operator is working, custom resources are generated. You can test this with e.g. `kubectl get workloadconfigurationscans -A`.
 
 - [Headlamp](https://github.com/headlamp-k8s/headlamp) should be installed in the k8s cluster or workstation. For a quick test the desktop version is recommended.
 
-The plugin code has been tested with Headlamp v0.25.0 (browser and desktop) and kubescape operator helm chart v1.22.0.
+The plugin has been tested with Headlamp v0.25.0 (browser and desktop) and kubescape operator helm chart v1.22.0.
 
 ## Use cases
 
 The use cases support navigating to the information from different user perspectives.
-
-The queries to the Kubescape database use [Allowed namespaces](https://headlamp.dev/docs/latest/faq/#i-cannot-access-any-section-in-my-cluster-it-keeps-saying-access-denied) cluster setting, supporting multi tenant clusters.
 
 For inspecting namespaces or deployments, navigate in standard Headlamp:
 
@@ -44,17 +43,17 @@ For an overview of vulnerabilty scanning in a cluster:
 - View scanned workloads
 - View image scans
 
+The queries to the Kubescape database use [allowed namespaces](https://headlamp.dev/docs/latest/faq/#i-cannot-access-any-section-in-my-cluster-it-keeps-saying-access-denied) cluster setting, supporting multi tenant clusters.
+
 Pages allow for navigation to detailed and related information.
 
 ## Installation
 
-> This information will be updated after the first beta release has been published to artifacthub
+The installation files can be found on the release page in github. (https://github.com/Kubebeam/kubescape-headlamp-plugin/releases/). Here you can download the tarball.
 
-Latest build of the code in main branch is published as [`latest` release](https://github.com/Kubebeam/kubescape-headlamp-plugin/releases/tag/latest).
+For desktop versions of Headlamp, find the plugin folder, create a new folder kubescape-plugin, extract the `main.js` and `package.json` from the tarball.
 
-For desktop versions of Headlamp, find the plugin folder, create a new folder kubescape-plugin and copy the `main.js` and `package.json` from the release page.
-
-For in-cluster Headlamp deployments, the plugin files need to be added to the headlamp deployment. A simple solution is to download the plugin files with an initContainer. See [example helm values](./examples/headlamp-helm-values.yaml).
+For in-cluster Headlamp deployments, the installation files need to be added to the plugin folder of the headlamp deployment. A simple solution is to download the plugin files with an initContainer. See [example helm values](./examples/headlamp-helm-values.yaml).
 The guidance from headlamp for in-cluster deployment is to create a container image with the plugin artifacts: https://headlamp.dev/blog/2022/10/20/best-practices-for-deploying-headlamp-with-plugins/.
 
 ## Docs
