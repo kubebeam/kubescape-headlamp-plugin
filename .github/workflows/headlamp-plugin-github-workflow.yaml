@@ -1,0 +1,49 @@
+name: Kubescape-headlamp-plugin linting, type checking, testing, and pre-release
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ./
+
+    strategy:
+      matrix:
+        node-version: [21.x]
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+      - run: npx @kinvolk/headlamp-plugin lint .
+      - run: npx @kinvolk/headlamp-plugin format --check .
+      - run: npx @kinvolk/headlamp-plugin tsc .
+      - run: npx @kinvolk/headlamp-plugin test .
+      - run: npx @kinvolk/headlamp-plugin build .
+
+      - name: create-archive
+        run: |
+          mkdir -p kubescape-plugin
+          cp dist/main.js package.json kubescape-plugin
+          tar -czf ${{ github.event.repository.name }}-latest.tar.gz kubescape-plugin
+
+      - name: Create Latest Release
+        uses: softprops/action-gh-release@v2
+        with:
+          token: ${{ github.token }}
+          tag_name: latest
+          prerelease: true
+          files: |
+            ${{ github.event.repository.name }}-latest.tar.gz

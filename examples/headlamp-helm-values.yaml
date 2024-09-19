@@ -1,0 +1,20 @@
+config:
+  pluginsDir: /build/plugins
+initContainers:
+  - command:
+      - /bin/sh
+      - -c
+      - mkdir -p /build/plugins/kubescape-plugin
+        && wget https://github.com/Kubebeam/kubescape-headlamp-plugin/releases/download/latest/kubescape-headlamp-plugin-latest.tar.gz -O /tmp/kubescape-plugin.tar.gz
+        && tar xvf /tmp/kubescape-plugin.tar.gz -C /build/plugins/kubescape-plugin --strip-components=1
+    image: busybox
+    name: headlamp-plugins
+    volumeMounts:
+      - mountPath: /build/plugins
+        name: headlamp-plugins
+volumeMounts:
+  - mountPath: /build/plugins
+    name: headlamp-plugins
+volumes:
+  - name: headlamp-plugins
+    emptyDir: {}
