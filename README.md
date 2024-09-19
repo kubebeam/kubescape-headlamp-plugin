@@ -27,7 +27,7 @@ The plugin has been tested with Headlamp v0.25.0 (browser and desktop) and kubes
 
 The use cases support navigating to the information from different user perspectives.
 
-For inspecting namespaces or deployments, navigate in standard Headlamp:
+For inspecting namespaces or deployments, navigate in the k8s pages of Headlamp::
 
 - View a namespace, see a summary of configuration issues and vulnerabilities
 - View a resource (e.g. Deployment), see a summary of configuration issues
@@ -35,13 +35,14 @@ For inspecting namespaces or deployments, navigate in standard Headlamp:
 For an overview of compliance in a cluster:
 
 - View controls
-- View scanned resources
+- View resources
+- View namespaces
 
 For an overview of vulnerabilty scanning in a cluster:
 
 - View CVEs
-- View scanned workloads
-- View image scans
+- View workloads
+- View images
 
 The queries to the Kubescape database use [allowed namespaces](https://headlamp.dev/docs/latest/faq/#i-cannot-access-any-section-in-my-cluster-it-keeps-saying-access-denied) cluster setting, supporting multi tenant clusters.
 
