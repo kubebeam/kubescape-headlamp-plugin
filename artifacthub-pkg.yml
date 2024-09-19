@@ -1,6 +1,6 @@
 version: v0.0.1-alpha
 name: headlamp_kubescape
-displayName: Kubescape
+displayName: Kubescape Headlamp Plugin
 createdAt: '2024-09-19T09:49:36Z'
 description: Kubescape compliance and vulnerabilities in Headlamp.
 logoURL: https://avatars.githubusercontent.com/u/100554170
