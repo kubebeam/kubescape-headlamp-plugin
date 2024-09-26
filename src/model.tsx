@@ -51,6 +51,13 @@ export const configurationScanSummaries = makeCustomResourceClass({
   pluralName: 'configurationscansummaries',
 });
 
+export const generatedNetworkPolicy = makeCustomResourceClass({
+  apiInfo: spdxGroupVersions,
+  isNamespaced: true,
+  singularName: 'generatednetworkpolicy',
+  pluralName: 'generatednetworkpolicies',
+});
+
 // List methods for spdx.softwarecomposition.kubescape.io not retrieve detailed info in the spec. We need to fetch each item individually.
 export async function deepListQuery(type: string): Promise<any[]> {
   let namespaces: string[] = [];
@@ -117,4 +124,8 @@ export function proxyRequest(
   return ApiProxy.request(
     `${api}${group}/${version}/${namespace ? 'namespaces/' : ''}${namespace}/${pluralName}/${name}`
   );
+}
+
+export function listQuery(group: string, version: string, pluralName: string): Promise<any> {
+  return ApiProxy.request(`/apis/${group}/${version}/${pluralName}`);
 }
