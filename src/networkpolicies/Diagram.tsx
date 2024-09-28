@@ -3,7 +3,8 @@
 */
 import '@xyflow/react/dist/style.css';
 import './style.css';
-import { ColorMode, Edge, MarkerType, Node, ReactFlow } from '@xyflow/react';
+import { KubeObject } from '@kinvolk/headlamp-plugin/lib/lib/k8s/cluster';
+import { Edge, MarkerType, Node, ReactFlow } from '@xyflow/react';
 import { useState } from 'react';
 import { generatedNetworkPolicy } from '../model';
 import { GeneratedNetworkPolicy } from '../softwarecomposition/GeneratedNetworkPolicy';
@@ -12,8 +13,7 @@ import { nodeTypes } from './nodes';
 
 export default function KubescapeNetworkPolicyDiagram() {
   const [policyName, policyNamespace] = getURLSegments(-1, -2);
-  const [networkPolicyObject, setNetworkPolicy]: [any, any] =
-    useState<GeneratedNetworkPolicy>(null);
+  const [networkPolicyObject, setNetworkPolicy]: [KubeObject, any] = useState<KubeObject>(null);
 
   generatedNetworkPolicy.useApiGet(setNetworkPolicy, policyName, policyNamespace);
 
@@ -22,26 +22,51 @@ export default function KubescapeNetworkPolicyDiagram() {
   }
 
   const networkPolicy: GeneratedNetworkPolicy = networkPolicyObject.jsonData;
+  const { nodes, edges } = createNodes(networkPolicy);
+
+  return (
+    <>
+      <div style={{ height: 1200, width: 1600 }}>
+        <ReactFlow
+          nodes={nodes}
+          edges={edges}
+          nodeTypes={nodeTypes}
+          colorMode={localStorage.headlampThemePreference}
+          fitView
+          fitViewOptions={{ maxZoom: 1 }}
+        ></ReactFlow>
+      </div>
+    </>
+  );
+}
+
+function createNodes(networkPolicy: GeneratedNetworkPolicy): { nodes: Node[]; edges: Edge[] } {
   const nodes: Node[] = [];
   const edges: Edge[] = [];
+  const verticalDistance = 100;
+  const horizDistance = 400;
 
-  let nodeId = 1;
-  let edgeId = 1;
+  const numIngressEdges = networkPolicy.spec.spec.ingress
+    ? networkPolicy.spec.spec.ingress.flatMap(i => i.from).length
+    : 0;
+  const numEgressEdges = networkPolicy.spec.spec.egress
+    ? networkPolicy.spec.spec.egress.flatMap(e => e.to).length
+    : 0;
 
   const workloadNode: Node = {
-    id: (nodeId++).toString(),
+    id: 'main',
     data: {
       policy: networkPolicy,
     },
     position: {
-      x: 400,
-      y: 100,
+      x: 1 * horizDistance,
+      y: (Math.max(numEgressEdges, numIngressEdges) * verticalDistance) / 2,
     },
     type: 'mainNode',
   };
   nodes.push(workloadNode);
 
-  let ingressCount = 0;
+  let ingressCount = numEgressEdges > numIngressEdges ? (numEgressEdges - numIngressEdges) / 2 : 0;
   if (networkPolicy.spec.spec.ingress) {
     for (const ingress of networkPolicy.spec.spec.ingress) {
       if (!ingress.from) {
@@ -49,7 +74,7 @@ export default function KubescapeNetworkPolicyDiagram() {
       }
       for (const from of ingress.from) {
         const node: Node = {
-          id: (nodeId++).toString(),
+          id: nodes.length.toString(),
           data: {
             peer: from,
             policy: networkPolicy,
@@ -58,14 +83,14 @@ export default function KubescapeNetworkPolicyDiagram() {
           },
           position: {
             x: 0,
-            y: ingressCount++ * 100,
+            y: numIngressEdges === 1 ? workloadNode.position.y : ingressCount++ * verticalDistance,
           },
           type: 'sourceNode',
         };
         nodes.push(node);
 
         const edge: Edge = {
-          id: (edgeId++).toString(),
+          id: edges.length.toString(),
           source: node.id,
           target: workloadNode.id,
           type: 'step',
@@ -75,7 +100,8 @@ export default function KubescapeNetworkPolicyDiagram() {
       }
     }
   }
-  let egressCount = 0;
+
+  let egressCount = numIngressEdges > numEgressEdges ? (numIngressEdges - numEgressEdges) / 2 : 0;
   if (networkPolicy.spec.spec.egress) {
     for (const egress of networkPolicy.spec.spec.egress) {
       if (!egress.to) {
@@ -83,7 +109,7 @@ export default function KubescapeNetworkPolicyDiagram() {
       }
       for (const to of egress.to) {
         const node: Node = {
-          id: (nodeId++).toString(),
+          id: nodes.length.toString(),
           data: {
             peer: to,
             policy: networkPolicy,
@@ -91,15 +117,15 @@ export default function KubescapeNetworkPolicyDiagram() {
             type: 'target',
           },
           position: {
-            x: 800,
-            y: egressCount++ * 100,
+            x: 2 * horizDistance,
+            y: numEgressEdges === 1 ? workloadNode.position.y : egressCount++ * verticalDistance,
           },
           type: 'targetNode',
         };
         nodes.push(node);
 
         const edge: Edge = {
-          id: (edgeId++).toString(),
+          id: edges.length.toString(),
           source: workloadNode.id,
           target: node.id,
           type: 'step',
@@ -109,20 +135,5 @@ export default function KubescapeNetworkPolicyDiagram() {
       }
     }
   }
-
-  const darkMode: ColorMode = 'dark';
-
-  return (
-    <>
-      <div style={{ height: 1200, width: 1600 }}>
-        <ReactFlow
-          nodes={nodes}
-          edges={edges}
-          nodeTypes={nodeTypes}
-          colorMode={darkMode}
-          fitView
-        ></ReactFlow>
-      </div>
-    </>
-  );
+  return { nodes, edges };
 }

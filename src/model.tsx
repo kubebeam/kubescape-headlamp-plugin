@@ -58,6 +58,13 @@ export const generatedNetworkPolicy = makeCustomResourceClass({
   pluralName: 'generatednetworkpolicies',
 });
 
+export const networkNeighborhoods = makeCustomResourceClass({
+  apiInfo: spdxGroupVersions,
+  isNamespaced: true,
+  singularName: 'networkneighborhood',
+  pluralName: 'networkneighborhoods',
+});
+
 // List methods for spdx.softwarecomposition.kubescape.io not retrieve detailed info in the spec. We need to fetch each item individually.
 export async function deepListQuery(type: string): Promise<any[]> {
   let namespaces: string[] = [];

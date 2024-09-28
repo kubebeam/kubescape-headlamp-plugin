@@ -20,4 +20,7 @@
   background: #444242;
   color: white;
 }
- 
+
+.react-flow__handle {
+  visibility: hidden; /* hide handle as dragging nodes is not supported */ 
+}
