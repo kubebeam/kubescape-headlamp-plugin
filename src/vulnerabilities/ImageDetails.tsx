@@ -12,10 +12,10 @@ import { Link } from '@mui/material';
 import { useState } from 'react';
 import expandableDescription from '../common/AccordionText';
 import makeSeverityLabel from '../common/SeverityLabel';
+import { getLastURLSegment } from '../common/url';
 import { RoutingPath } from '../index';
 import { vulnerabilityManifestClass } from '../model';
 import { VulnerabilityManifest } from '../softwarecomposition/VulnerabilityManifest';
-import { getLastURLSegment } from '../utils/url';
 
 export default function ImageVulnerabilityDetails() {
   const name = getLastURLSegment();
@@ -75,11 +75,18 @@ function Matches(props: { manifestVulnerability: VulnerabilityManifest }) {
         data={results}
         columns={[
           {
+            header: 'Severity',
+            accessorKey: 'vulnerability.severity',
+            Cell: ({ cell }: any) => makeSeverityLabel(cell.getValue()),
+            gridTemplate: 'auto',
+          },
+          {
             header: 'CVE',
-            accessorFn: (item: VulnerabilityManifest.Match) => {
+            accessorKey: 'vulnerability.id',
+            Cell: ({ cell }: any) => {
               return (
-                <Link target="_blank" href={item.vulnerability.dataSource}>
-                  {item.vulnerability.id}
+                <Link target="_blank" href={cell.row.original.vulnerability.dataSource}>
+                  {cell.getValue()}
                 </Link>
               );
             },
@@ -87,23 +94,17 @@ function Matches(props: { manifestVulnerability: VulnerabilityManifest }) {
           },
           {
             header: 'Artifact',
-            accessorFn: (item: VulnerabilityManifest.Match) => item.artifact.name,
+            accessorKey: 'artifact.name',
             gridTemplate: 'auto',
           },
           {
             header: 'Version',
-            accessorFn: (item: VulnerabilityManifest.Match) => item.artifact.version,
-            gridTemplate: 'auto',
-          },
-          {
-            header: 'Severity',
-            accessorFn: (item: VulnerabilityManifest.Match) =>
-              makeSeverityLabel(item.vulnerability.severity),
+            accessorKey: 'artifact.version',
             gridTemplate: 'auto',
           },
           {
             header: 'Fix',
-            accessorFn: (item: VulnerabilityManifest.Match) => item.vulnerability.fix.state,
+            accessorKey: 'vulnerability.fix.state',
             gridTemplate: 'auto',
           },
           {

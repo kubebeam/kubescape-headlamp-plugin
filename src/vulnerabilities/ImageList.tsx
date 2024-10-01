@@ -27,15 +27,16 @@ export default function ImageListView(props: { workloadScans: VulnerabilityModel
           columns={[
             {
               header: 'Image',
-              accessorFn: (imageScan: VulnerabilityModel.ImageScan) => {
+              accessorKey: 'manifestName',
+              Cell: ({ cell }: any) => {
                 return (
                   <HeadlampLink
                     routeName={RoutingPath.ImageVulnerabilityDetails}
                     params={{
-                      name: imageScan.manifestName,
+                      name: cell.getValue(),
                     }}
                   >
-                    {imageScan.imageName.split('@sha')[0]}
+                    {cell.getValue().split('@sha')[0]}
                   </HeadlampLink>
                 );
               },

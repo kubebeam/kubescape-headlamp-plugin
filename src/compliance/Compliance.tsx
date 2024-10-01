@@ -103,37 +103,34 @@ function ConfigurationScanningListView() {
             },
             {
               header: 'ID',
-              accessorFn: (control: Control) => {
-                return (
-                  <Link
-                    target="_blank"
-                    href={'https://hub.armosec.io/docs/' + control.controlID.toLowerCase()}
-                  >
-                    {control.controlID}
-                  </Link>
-                );
-              },
+              accessorKey: 'controlID',
+              Cell: ({ cell }: any) => (
+                <Link
+                  target="_blank"
+                  href={'https://hub.armosec.io/docs/' + cell.getValue().toLowerCase()}
+                >
+                  {cell.getValue()}
+                </Link>
+              ),
               gridTemplate: 'min-content',
             },
             {
               header: 'Control Name',
-              accessorFn: (control: Control) => {
-                return (
-                  <Tooltip
-                    title={control.description}
-                    slotProps={{ tooltip: { sx: { fontSize: '0.9em' } } }}
-                  >
-                    {control.name}
-                  </Tooltip>
-                );
-              },
+              accessorKey: 'name',
+              Cell: ({ cell }: any) => (
+                <Tooltip
+                  title={cell.row.original.description}
+                  slotProps={{ tooltip: { sx: { fontSize: '0.9em' } } }}
+                >
+                  {cell.getValue()}
+                </Tooltip>
+              ),
               gridTemplate: 'auto',
             },
             {
               header: 'Category',
-              accessorFn: (control: Control) => {
-                return control.category?.subCategory?.name ?? control.category?.name;
-              },
+              accessorFn: (control: Control) =>
+                control.category?.subCategory?.name ?? control.category?.name,
               gridTemplate: 'auto',
             },
             {

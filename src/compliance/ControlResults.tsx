@@ -9,9 +9,10 @@ import {
 } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import { createRouteURL } from '@kinvolk/headlamp-plugin/lib/Router';
 import { Link } from '@mui/material';
+import { makeNamespaceLink } from '../common/Namespace';
+import { getLastURLSegment } from '../common/url';
 import { RoutingPath } from '../index';
 import { WorkloadConfigurationScanSummary } from '../softwarecomposition/WorkloadConfigurationScanSummary';
-import { getLastURLSegment } from '../utils/url';
 import { workloadScanData } from './Compliance';
 import controlLibrary from './controlLibrary';
 
@@ -67,19 +68,19 @@ export default function KubescapeControlResults() {
           columns={[
             {
               header: 'Name',
-              accessorFn: (workloadScan: WorkloadConfigurationScanSummary) => {
-                return (
-                  <HeadlampLink
-                    routeName={RoutingPath.KubescapeWorkloadConfigurationScanDetails}
-                    params={{
-                      name: workloadScan.metadata.name,
-                      namespace: workloadScan.metadata.namespace,
-                    }}
-                  >
-                    {workloadScan.metadata.labels['kubescape.io/workload-name']}
-                  </HeadlampLink>
-                );
-              },
+              Cell: ({ cell }: any) => (
+                <HeadlampLink
+                  routeName={RoutingPath.KubescapeWorkloadConfigurationScanDetails}
+                  params={{
+                    name: cell.row.original.metadata.name,
+                    namespace: cell.row.original.metadata.namespace,
+                  }}
+                >
+                  {cell.getValue()}
+                </HeadlampLink>
+              ),
+              accessorFn: (workloadScan: WorkloadConfigurationScanSummary) =>
+                workloadScan.metadata.labels['kubescape.io/workload-name'],
             },
             {
               header: 'Kind',
@@ -88,16 +89,8 @@ export default function KubescapeControlResults() {
             },
             {
               header: 'Namespace',
-              accessorFn: (workloadScan: WorkloadConfigurationScanSummary) => (
-                <HeadlampLink
-                  routeName="namespace"
-                  params={{
-                    name: workloadScan.metadata.namespace,
-                  }}
-                >
-                  {workloadScan.metadata.namespace}
-                </HeadlampLink>
-              ),
+              accessorKey: 'metadata.namespace',
+              Cell: ({ cell }: any) => makeNamespaceLink(cell.getValue()),
             },
             {
               header: 'Scan',

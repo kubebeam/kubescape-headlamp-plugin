@@ -1,5 +1,5 @@
 /* 
-  Information about a control and failed workloads. 
+  Information about a namespace and failed workloads. 
 */
 import {
   Link as HeadlampLink,
@@ -9,7 +9,6 @@ import {
 import { RoutingPath } from '../index';
 import { WorkloadConfigurationScanSummary } from '../softwarecomposition/WorkloadConfigurationScanSummary';
 import { workloadScanData } from './Compliance';
-
 class NamespaceResult {
   namespace: string;
   criticalCount: number = 0;
@@ -37,14 +36,15 @@ export default function NamespaceView() {
         columns={[
           {
             header: 'Namespace',
-            accessorFn: (namespaceResult: NamespaceResult) => (
+            accessorKey: 'namespace',
+            Cell: ({ cell }: any) => (
               <HeadlampLink
                 routeName={RoutingPath.KubescapeConfigurationScanNamespaceSummary}
                 params={{
-                  namespace: namespaceResult.namespace,
+                  namespace: cell.getValue(),
                 }}
               >
-                {namespaceResult.namespace}
+                {cell.getValue()}
               </HeadlampLink>
             ),
           },
@@ -56,32 +56,32 @@ export default function NamespaceView() {
           },
           {
             header: 'Critical',
-            accessorFn: (namespaceResult: NamespaceResult) => namespaceResult.criticalCount,
+            accessorKey: 'criticalCount',
             gridTemplate: 'min-content',
           },
           {
             header: 'High',
-            accessorFn: (namespaceResult: NamespaceResult) => namespaceResult.highCount,
+            accessorKey: 'highCount',
             gridTemplate: 'min-content',
           },
           {
             header: 'Medium',
-            accessorFn: (namespaceResult: NamespaceResult) => namespaceResult.mediumCount,
+            accessorKey: 'mediumCount',
             gridTemplate: 'min-content',
           },
           {
             header: 'Low',
-            accessorFn: (namespaceResult: NamespaceResult) => namespaceResult.lowCount,
+            accessorKey: 'lowCount',
             gridTemplate: 'min-content',
           },
           {
             header: 'Unknown',
-            accessorFn: (namespaceResult: NamespaceResult) => namespaceResult.unknownCount,
+            accessorKey: 'unknownCount',
             gridTemplate: 'min-content',
           },
           {
             header: 'Total',
-            accessorFn: (namespaceResult: NamespaceResult) => namespaceResult.total,
+            accessorKey: 'total',
             gridTemplate: 'min-content',
           },
         ]}

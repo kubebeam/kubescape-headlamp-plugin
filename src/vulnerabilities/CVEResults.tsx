@@ -8,8 +8,8 @@ import {
   Table as HeadlampTable,
 } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import { Link } from '@mui/material';
+import { getURLSegments } from '../common/url';
 import { RoutingPath } from '../index';
-import { getURLSegments } from '../utils/url';
 import { VulnerabilityModel } from './view-types';
 import { globalWorkloadScans } from './Vulnerabilities';
 
@@ -83,17 +83,17 @@ function Workloads(props: { cve: string; workloads: VulnerabilityModel.WorkloadS
           },
           {
             header: 'Kind',
-            accessorFn: (workload: VulnerabilityModel.WorkloadScan) => workload.kind,
+            accessorKey: 'kind',
             gridTemplate: 'auto',
           },
           {
             header: 'Namespace',
-            accessorFn: (workload: VulnerabilityModel.WorkloadScan) => workload.namespace,
+            accessorKey: 'namespace',
             gridTemplate: 'auto',
           },
           {
             header: 'Container',
-            accessorFn: (workload: VulnerabilityModel.WorkloadScan) => workload.container,
+            accessorKey: 'container',
             gridTemplate: 'auto',
           },
           {

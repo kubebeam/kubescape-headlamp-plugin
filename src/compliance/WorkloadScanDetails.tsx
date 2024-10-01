@@ -12,10 +12,10 @@ import {
 import { createRouteURL } from '@kinvolk/headlamp-plugin/lib/Router';
 import { Box, Link } from '@mui/material';
 import { useEffect, useState } from 'react';
+import { getURLSegments } from '../common/url';
 import { RoutingPath } from '../index';
 import { fetchWorkloadConfigurationScan } from '../model';
 import { WorkloadConfigurationScan } from '../softwarecomposition/WorkloadConfigurationScan';
-import { getURLSegments } from '../utils/url';
 import { controlLibrary } from './controlLibrary';
 
 export default function KubescapeWorkloadConfigurationScanDetails() {
@@ -87,13 +87,14 @@ function Controls(props: { workloadConfigurationScan: WorkloadConfigurationScan 
           },
           {
             header: 'Control',
-            accessorFn: (control: WorkloadConfigurationScan.Control) => {
+            accessorKey: 'controlID',
+            Cell: ({ cell }: any) => {
               return (
                 <Link
                   target="_blank"
-                  href={'https://hub.armosec.io/docs/' + control.controlID.toLowerCase()}
+                  href={'https://hub.armosec.io/docs/' + cell.getValue().toLowerCase()}
                 >
-                  {control.controlID}
+                  {cell.getValue().controlID}
                 </Link>
               );
             },
@@ -101,7 +102,7 @@ function Controls(props: { workloadConfigurationScan: WorkloadConfigurationScan 
           },
           {
             header: 'Name',
-            accessorFn: (control: WorkloadConfigurationScan.Control) => control.name,
+            accessorKey: 'name',
           },
           {
             header: 'Category',
@@ -115,13 +116,12 @@ function Controls(props: { workloadConfigurationScan: WorkloadConfigurationScan 
           },
           {
             header: 'Severity',
-            accessorFn: (control: WorkloadConfigurationScan.Control) => control.severity.severity,
+            accessorKey: 'severity.severity',
             gridTemplate: 'min-content',
           },
           {
             header: 'Score',
-            accessorFn: (control: WorkloadConfigurationScan.Control) =>
-              control.severity.scoreFactor,
+            accessorKey: 'severity.scoreFactor',
             gridTemplate: 'min-content',
           },
           {

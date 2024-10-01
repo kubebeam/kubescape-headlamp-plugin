@@ -226,26 +226,25 @@ function CVEListView(props: { workloadScans: VulnerabilityModel.WorkloadScan[] }
           data={cveList}
           columns={[
             {
-              header: 'CVE ID',
-              accessorFn: (item: VulnerabilityModel.VulnerabilityWithReferences) => {
-                return (
-                  <HeadlampLink
-                    routeName={RoutingPath.KubescapeCVEResults}
-                    params={{
-                      cve: item.CVE,
-                    }}
-                  >
-                    {item.CVE}
-                  </HeadlampLink>
-                );
-              },
-              gridTemplate: 'auto',
+              header: 'Severity',
+              accessorFn: (item: VulnerabilityModel.VulnerabilityWithReferences) => item.severity,
+              Cell: ({ cell }: any) => makeSeverityLabel(cell.row.original.severity),
+              gridTemplate: '0.2fr',
             },
             {
-              header: 'Severity',
-              accessorFn: (item: VulnerabilityModel.VulnerabilityWithReferences) =>
-                makeSeverityLabel(item.severity),
-              gridTemplate: '0.2fr',
+              header: 'CVE ID',
+              accessorFn: (item: VulnerabilityModel.VulnerabilityWithReferences) => item.CVE,
+              Cell: ({ cell }: any) => (
+                <HeadlampLink
+                  routeName={RoutingPath.KubescapeCVEResults}
+                  params={{
+                    cve: cell.getValue(),
+                  }}
+                >
+                  {cell.getValue()}
+                </HeadlampLink>
+              ),
+              gridTemplate: 'auto',
             },
             {
               header: 'CVSS',

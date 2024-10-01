@@ -11,7 +11,7 @@ import { useEffect, useState } from 'react';
 import { RoutingPath } from '../index';
 import { fetchWorkloadConfigurationScan, proxyRequest } from '../model';
 import { WorkloadConfigurationScan } from '../softwarecomposition/WorkloadConfigurationScan';
-import { getURLSegments } from '../utils/url';
+import { getURLSegments } from '../common/url';
 import controlLibrary from './controlLibrary';
 
 export default function KubescapeWorkloadConfigurationScanFixes() {

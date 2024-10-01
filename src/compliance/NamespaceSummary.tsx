@@ -9,10 +9,10 @@ import {
   Table,
 } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import { useState } from 'react';
+import { getLastURLSegment } from '../common/url';
 import { RoutingPath } from '../index';
 import { configurationScanSummaries } from '../model';
 import { ConfigurationScanSummary } from '../softwarecomposition/ConfigurationScanSummary';
-import { getLastURLSegment } from '../utils/url';
 
 export default function KubescapeConfigurationScanNamespaceSummary() {
   const namespace = getLastURLSegment();
@@ -52,19 +52,18 @@ function ConfigurationScans(props: { configurationScans: ConfigurationScanSummar
         columns={[
           {
             header: 'Namespace',
-            accessorFn: (item: ConfigurationScanSummary.SummaryRef) => {
-              return (
-                <HeadlampLink
-                  routeName={RoutingPath.KubescapeWorkloadConfigurationScanDetails}
-                  params={{
-                    name: item.name,
-                    namespace: item.namespace,
-                  }}
-                >
-                  {item.name}
-                </HeadlampLink>
-              );
-            },
+            accessorKey: 'name',
+            Cell: ({ cell }: any) => (
+              <HeadlampLink
+                routeName={RoutingPath.KubescapeWorkloadConfigurationScanDetails}
+                params={{
+                  name: cell.row.original.name,
+                  namespace: cell.row.original.namespace,
+                }}
+              >
+                {cell.getValue()}
+              </HeadlampLink>
+            ),
           },
         ]}
       />

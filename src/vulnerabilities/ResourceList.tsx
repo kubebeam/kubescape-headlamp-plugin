@@ -7,6 +7,7 @@ import {
   Table as HeadlampTable,
 } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import { Box, Stack, Tooltip } from '@mui/material';
+import { makeNamespaceLink } from '../common/Namespace';
 import { RoutingPath } from '../index';
 import { VulnerabilityModel } from './view-types';
 
@@ -26,16 +27,17 @@ export default function WorkloadScanListView(props: {
           columns={[
             {
               header: 'Name',
-              accessorFn: (workloadScan: VulnerabilityModel.WorkloadScan) => {
+              accessorKey: 'name',
+              Cell: ({ cell }: any) => {
                 return (
                   <Link
                     routeName={RoutingPath.KubescapeVulnerabilityDetails}
                     params={{
-                      name: workloadScan.manifestName,
-                      namespace: workloadScan.namespace,
+                      name: cell.row.original.manifestName,
+                      namespace: cell.row.original.namespace,
                     }}
                   >
-                    {workloadScan.name}
+                    {cell.getValue()}
                   </Link>
                 );
               },
@@ -43,26 +45,18 @@ export default function WorkloadScanListView(props: {
             },
             {
               header: 'Container',
-              accessorFn: (workloadScan: VulnerabilityModel.WorkloadScan) => workloadScan.container,
+              accessorKey: 'container',
               gridTemplate: 'min-content',
             },
             {
               header: 'Kind',
-              accessorFn: (workloadScan: VulnerabilityModel.WorkloadScan) => workloadScan.kind,
+              accessorKey: 'kind',
               gridTemplate: 'min-content',
             },
             {
               header: 'Namespace',
-              accessorFn: (workloadScan: VulnerabilityModel.WorkloadScan) => (
-                <Link
-                  routeName="namespace"
-                  params={{
-                    name: workloadScan.namespace,
-                  }}
-                >
-                  {workloadScan.namespace}
-                </Link>
-              ),
+              accessorKey: 'namespace',
+              Cell: ({ cell }: any) => makeNamespaceLink(cell.getValue()),
               gridTemplate: 'min-content',
             },
             {

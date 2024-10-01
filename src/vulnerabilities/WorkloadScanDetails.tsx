@@ -12,11 +12,11 @@ import { Link, Tooltip } from '@mui/material';
 import React, { useEffect } from 'react';
 import expandableDescription from '../common/AccordionText';
 import makeSeverityLabel from '../common/SeverityLabel';
+import { getURLSegments } from '../common/url';
 import { RoutingPath } from '../index';
 import { OpenVulnerabilityExchangeContainer } from '../softwarecomposition/OpenVulnerabilityExchangeContainer';
 import { VulnerabilityManifest } from '../softwarecomposition/VulnerabilityManifest';
 import { VulnerabilityManifestSummary } from '../softwarecomposition/VulnerabilityManifestSummary';
-import { getURLSegments } from '../utils/url';
 import { getCVESummary } from './CVESummary';
 import { globalOpenVulnerabilityExchangeContainers } from './Vulnerabilities';
 
@@ -122,29 +122,28 @@ function Matches(props: {
         columns={[
           {
             header: 'CVE',
-            accessorFn: (item: VulnerabilityManifest.Match) => {
-              return (
-                <Link target="_blank" href={item.vulnerability.dataSource}>
-                  {item.vulnerability.id}
-                </Link>
-              );
-            },
+            accessorKey: 'vulnerability.id',
+            Cell: ({ cell }: any) => (
+              <Link target="_blank" href={cell.row.original.vulnerability.dataSource}>
+                {cell.getValue()}
+              </Link>
+            ),
             gridTemplate: 'auto',
           },
           {
             header: 'Artifact',
-            accessorFn: (item: VulnerabilityManifest.Match) => item.artifact.name,
+            accessorKey: 'artifact.name',
             gridTemplate: 'auto',
           },
           {
             header: 'Version',
-            accessorFn: (item: VulnerabilityManifest.Match) => item.artifact.version,
+            accessorKey: 'artifact.version',
             gridTemplate: 'auto',
           },
           {
             header: 'Severity',
-            accessorFn: (item: VulnerabilityManifest.Match) =>
-              makeSeverityLabel(item.vulnerability.severity),
+            accessorKey: 'vulnerability.severity',
+            Cell: ({ cell }: any) => makeSeverityLabel(cell.getValue()),
             gridTemplate: 'auto',
           },
           {
@@ -182,7 +181,7 @@ function Matches(props: {
           },
           {
             header: 'Fix',
-            accessorFn: (item: VulnerabilityManifest.Match) => item.vulnerability.fix.state,
+            accessorKey: 'vulnerability.fix.state',
             gridTemplate: 'auto',
           },
           {
