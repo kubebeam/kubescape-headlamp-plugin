@@ -68,11 +68,21 @@ jobs:
             }
           commitChange: false
 
+      - name: Update package.json 
+        uses: fjogeleit/yaml-update-action@main
+        with:
+          valueFile: package.json
+          propertyPath: version
+          value: "${{ github.event.inputs.releaseName }}"
+          commitChange: false
+
       - name: Commit artifacthub-pkg.yml
         uses: EndBug/add-and-commit@v9
         with:
           message: Release ${{ github.event.inputs.releaseName }}
-          add: artifacthub-pkg.yml
+          add: |
+            - artifacthub-pkg.yml
+            - package.json
 
       - name: Create Release Draft
         uses: softprops/action-gh-release@v2
