@@ -4,12 +4,12 @@
 import {
   Link as HeadlampLink,
   SectionBox,
+  ShowHideLabel,
   Table as HeadlampTable,
   Tabs as HeadlampTabs,
 } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import { createRouteURL } from '@kinvolk/headlamp-plugin/lib/Router';
 import { useEffect, useState } from 'react';
-import expandableDescription from '../common/AccordionText';
 import makeSeverityLabel from '../common/SeverityLabel';
 import { RoutingPath } from '../index';
 import { deepListQuery, openVulnerabilityExchangeContainerClass } from '../model';
@@ -286,8 +286,8 @@ function CVEListView(props: { workloadScans: VulnerabilityModel.WorkloadScan[] }
             },
             {
               header: 'Description',
-              accessorFn: (item: VulnerabilityModel.VulnerabilityWithReferences) =>
-                expandableDescription(item.description),
+              accessorKey: 'description',
+              Cell: ({ cell }: any) => <ShowHideLabel>{cell.getValue()}</ShowHideLabel>,
               gridTemplate: 'auto',
             },
           ]}

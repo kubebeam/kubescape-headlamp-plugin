@@ -5,12 +5,12 @@ import { ApiProxy } from '@kinvolk/headlamp-plugin/lib';
 import {
   NameValueTable,
   SectionBox,
+  ShowHideLabel,
   Table as HeadlampTable,
 } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import { createRouteURL } from '@kinvolk/headlamp-plugin/lib/Router';
 import { Link, Tooltip } from '@mui/material';
 import React, { useEffect } from 'react';
-import expandableDescription from '../common/AccordionText';
 import makeSeverityLabel from '../common/SeverityLabel';
 import { getURLSegments } from '../common/url';
 import { RoutingPath } from '../index';
@@ -194,8 +194,8 @@ function Matches(props: {
           },
           {
             header: 'Description',
-            accessorFn: (item: VulnerabilityManifest.Match) =>
-              expandableDescription(item.vulnerability.description),
+            accessorKey: 'vulnerability.description',
+            Cell: ({ cell }: any) => <ShowHideLabel>{cell.getValue()}</ShowHideLabel>,
           },
         ]}
       />

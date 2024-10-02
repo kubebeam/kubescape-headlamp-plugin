@@ -4,13 +4,13 @@
 import {
   NameValueTable,
   SectionBox,
+  ShowHideLabel,
   Table as HeadlampTable,
 } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import { KubeObject } from '@kinvolk/headlamp-plugin/lib/lib/k8s/cluster';
 import { createRouteURL } from '@kinvolk/headlamp-plugin/lib/Router';
 import { Link } from '@mui/material';
 import { useState } from 'react';
-import expandableDescription from '../common/AccordionText';
 import makeSeverityLabel from '../common/SeverityLabel';
 import { getLastURLSegment } from '../common/url';
 import { RoutingPath } from '../index';
@@ -126,11 +126,9 @@ function Matches(props: { manifestVulnerability: VulnerabilityManifest }) {
                   }
                 }
               }
-              return expandableDescription(
-                item.vulnerability.description ?? relatedDescription,
-                '3'
-              );
+              return item.vulnerability.description ?? relatedDescription;
             },
+            Cell: ({ cell }: any) => <ShowHideLabel>{cell.getValue()}</ShowHideLabel>,
           },
         ]}
       />
