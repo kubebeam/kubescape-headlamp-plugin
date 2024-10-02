@@ -25,6 +25,8 @@ export namespace RoutingPath {
   export const KubescapeCVEResults = '/kubescape/vulnerabilities/cves/:cve';
   export const ImageVulnerabilityDetails = '/kubescape/vulnerabilities/images/:name';
   export const KubescapeVulnerabilities = '/kubescape/vulnerabilities';
+  export const KubescapeNetworkPolicies = '/kubescape/networkpolicies';
+  export const KubescapeNetworkPolicyDiagram = '/kubescape/networkpolicies/:namespace/:name';
 }
 
 // Kubescape main sidebar
@@ -48,6 +50,13 @@ registerSidebarEntry({
   name: vulnerabilities,
   label: 'Vulnerabilities',
   url: RoutingPath.KubescapeVulnerabilities,
+});
+
+registerSidebarEntry({
+  parent: kubescape,
+  name: 'networkpolicies',
+  label: 'Network Policies',
+  url: RoutingPath.KubescapeNetworkPolicies,
 });
 
 import ComplianceView from './compliance/Compliance';
@@ -158,6 +167,28 @@ registerRoute({
   component: () => <ImageVulnerabilityDetails />,
   exact: true,
   name: 'Image Vulnerabilities',
+});
+
+import KubescapeNetworkPolicies from './networkpolicies/NetworkPolicies';
+
+registerRoute({
+  path: RoutingPath.KubescapeNetworkPolicies,
+  parent: kubescape,
+  sidebar: 'networkpolicies',
+  component: () => <KubescapeNetworkPolicies />,
+  exact: true,
+  name: 'Network Policies',
+});
+
+import KubescapeNetworkPolicyDiagram from './networkpolicies/Diagram';
+
+registerRoute({
+  path: RoutingPath.KubescapeNetworkPolicyDiagram,
+  parent: kubescape,
+  sidebar: 'networkpolicies',
+  component: () => <KubescapeNetworkPolicyDiagram />,
+  exact: true,
+  name: 'Network Policy Diagram',
 });
 
 // Detail panel for workloads

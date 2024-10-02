@@ -6,3 +6,4 @@ hack
 .eslintcache
 integration-test 
 kubescape-headlamp-plugin.code-workspace
+.code-workspace

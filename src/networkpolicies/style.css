@@ -1,0 +1,26 @@
+.network-node {
+  height: 100%;
+  border: 1px solid black;
+  padding: 4px;
+  border-radius: 5px;
+  width: 300px; 
+}
+
+.network-node .text {
+  font-size: 12px; 
+}
+
+.network-node .title {
+  margin: 0;
+  vertical-align: top;
+  padding: 0px;
+}
+
+.dark .network-node {
+  background: #444242;
+  color: white;
+}
+
+.react-flow__handle {
+  visibility: hidden; /* hide handle as dragging nodes is not supported */ 
+}

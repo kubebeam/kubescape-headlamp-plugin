@@ -51,7 +51,22 @@ export const configurationScanSummaries = makeCustomResourceClass({
   pluralName: 'configurationscansummaries',
 });
 
-// List methods for spdx.softwarecomposition.kubescape.io not retrieve detailed info in the spec. We need to fetch each item individually.
+export const generatedNetworkPolicy = makeCustomResourceClass({
+  apiInfo: spdxGroupVersions,
+  isNamespaced: true,
+  singularName: 'generatednetworkpolicy',
+  pluralName: 'generatednetworkpolicies',
+});
+
+export const networkNeighborhoods = makeCustomResourceClass({
+  apiInfo: spdxGroupVersions,
+  isNamespaced: true,
+  singularName: 'networkneighborhood',
+  pluralName: 'networkneighborhoods',
+});
+
+// List methods for spdx.softwarecomposition.kubescape.io do not retrieve info in the spec.
+// As a workaround, deepListQuery() will fetch each item individually.
 export async function deepListQuery(type: string): Promise<any[]> {
   let namespaces: string[] = [];
 
@@ -68,15 +83,13 @@ export async function deepListQuery(type: string): Promise<any[]> {
     if (!namespaces.some(n => n === 'kubescape')) {
       namespaces.push('kubescape');
     }
-    const listOfLists = await Promise.all(
+    const listOfLists: any[] = await Promise.all(
       namespaces.map(namespace =>
         ApiProxy.request(`/apis/${spdxGroup}/${spdxVersion}/namespaces/${namespace}/${type}`)
       )
     );
 
-    for (const list of listOfLists) {
-      items = items.concat(list.items);
-    }
+    items = listOfLists.flatMap(list => list.items);
   } else {
     const overviewList = await ApiProxy.request(`/apis/${spdxGroup}/${spdxVersion}/${type}`);
 
@@ -84,11 +97,14 @@ export async function deepListQuery(type: string): Promise<any[]> {
   }
 
   const detailList = await Promise.all(
-    items.map((scan: KubeObject) =>
-      ApiProxy.request(
-        `/apis/${spdxGroup}/${spdxVersion}/namespaces/${scan.metadata.namespace}/${type}/${scan.metadata.name}`
-      )
-    )
+    items.map((scan: KubeObject) => {
+      const namespaceCondition = scan.metadata.namespace
+        ? `/namespaces/${scan.metadata.namespace}`
+        : '';
+      return ApiProxy.request(
+        `/apis/${spdxGroup}/${spdxVersion}${namespaceCondition}/${type}/${scan.metadata.name}`
+      );
+    })
   );
 
   return detailList;
@@ -117,4 +133,8 @@ export function proxyRequest(
   return ApiProxy.request(
     `${api}${group}/${version}/${namespace ? 'namespaces/' : ''}${namespace}/${pluralName}/${name}`
   );
+}
+
+export function listQuery(group: string, version: string, pluralName: string): Promise<any> {
+  return ApiProxy.request(`/apis/${group}/${version}/${pluralName}`);
 }
