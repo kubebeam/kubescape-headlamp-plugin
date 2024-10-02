@@ -11,9 +11,9 @@ import { Box } from '@mui/material';
 import { Edge, MarkerType, Node, ReactFlow } from '@xyflow/react';
 import * as yaml from 'js-yaml';
 import { useEffect, useState } from 'react';
+import { getURLSegments } from '../common/url';
 import { generatedNetworkPolicy } from '../model';
 import { GeneratedNetworkPolicy } from '../softwarecomposition/GeneratedNetworkPolicy';
-import { getURLSegments } from '../utils/url';
 import { nodeTypes } from './nodes';
 
 export default function KubescapeNetworkPolicyDiagram() {
