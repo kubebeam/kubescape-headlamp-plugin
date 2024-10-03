@@ -10,6 +10,7 @@ import {
 } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import { createRouteURL } from '@kinvolk/headlamp-plugin/lib/Router';
 import { useEffect, useState } from 'react';
+import { RotatingLines } from 'react-loader-spinner';
 import makeSeverityLabel from '../common/SeverityLabel';
 import { RoutingPath } from '../index';
 import { deepListQuery, openVulnerabilityExchangeContainerClass } from '../model';
@@ -211,7 +212,7 @@ function getCVEList(
 function CVEListView(props: { workloadScans: VulnerabilityModel.WorkloadScan[] }) {
   const { workloadScans } = props;
   if (!workloadScans) {
-    return <></>;
+    return <RotatingLines />;
   }
 
   const cveList = getCVEList(workloadScans);

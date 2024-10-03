@@ -178,6 +178,7 @@ function Matches(props: {
               }
               return '';
             },
+            gridTemplate: 'min-content',
           },
           {
             header: 'Fix',

@@ -10,7 +10,7 @@ import {
 } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import { useEffect, useState } from 'react';
 import { RoutingPath } from '../index';
-import { deepListQuery, generatedNetworkPolicy } from '../model';
+import { deepListQuery, generatedNetworkPolicyClass } from '../model';
 import { listQuery } from '../model';
 import { GeneratedNetworkPolicy } from '../softwarecomposition/GeneratedNetworkPolicy';
 import { KnownServer } from '../softwarecomposition/KnownServer';
@@ -41,8 +41,8 @@ function NetworkPolicyList() {
 
   useEffect(() => {
     listQuery(
-      generatedNetworkPolicy.apiEndpoint.apiInfo[0].group,
-      generatedNetworkPolicy.apiEndpoint.apiInfo[0].version,
+      generatedNetworkPolicyClass.apiEndpoint.apiInfo[0].group,
+      generatedNetworkPolicyClass.apiEndpoint.apiInfo[0].version,
       'generatednetworkpolicies'
     ).then((result: any) => {
       setNetworkPolicies(result.items);

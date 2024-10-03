@@ -10,7 +10,7 @@ import { Link, NameValueTable, SectionBox } from '@kinvolk/headlamp-plugin/lib/C
 import { useState } from 'react';
 import { getControlsSummary } from '../compliance/ControlsSummary';
 import { RoutingPath } from '../index';
-import { configurationScanSummaries, vulnerabilitySummaryClass } from '../model';
+import { configurationScanSummariesClass, vulnerabilitySummaryClass } from '../model';
 import { getCVESummary } from '../vulnerabilities/CVESummary';
 
 export default function addKubescapeNamespaceSection(
@@ -61,7 +61,7 @@ function KubescapeInfo(props: { resource: KubeObject }) {
   const [configurationScanSummary, setConfigurationScanSummary] = useState<KubeObject | null>(null);
   const [vulnerabilitySummary, setVulnerabilitySummary] = useState<KubeObject | null>(null);
 
-  configurationScanSummaries.useApiGet(setConfigurationScanSummary, resourceName);
+  configurationScanSummariesClass.useApiGet(setConfigurationScanSummary, resourceName);
   vulnerabilitySummaryClass.useApiGet(setVulnerabilitySummary, resourceName);
 
   return (

@@ -44,25 +44,39 @@ export const workloadConfigurationScanSummaryClass = makeCustomResourceClass({
   pluralName: 'workloadconfigurationscansummaries',
 });
 
-export const configurationScanSummaries = makeCustomResourceClass({
+export const configurationScanSummariesClass = makeCustomResourceClass({
   apiInfo: spdxGroupVersions,
   isNamespaced: false,
   singularName: 'configurationscansummary',
   pluralName: 'configurationscansummaries',
 });
 
-export const generatedNetworkPolicy = makeCustomResourceClass({
+export const generatedNetworkPolicyClass = makeCustomResourceClass({
   apiInfo: spdxGroupVersions,
   isNamespaced: true,
   singularName: 'generatednetworkpolicy',
   pluralName: 'generatednetworkpolicies',
 });
 
-export const networkNeighborhoods = makeCustomResourceClass({
+export const networkNeighborhoodsClass = makeCustomResourceClass({
   apiInfo: spdxGroupVersions,
   isNamespaced: true,
   singularName: 'networkneighborhood',
   pluralName: 'networkneighborhoods',
+});
+
+export const sbomSyftClass = makeCustomResourceClass({
+  apiInfo: spdxGroupVersions,
+  isNamespaced: true,
+  singularName: 'sbomsyft',
+  pluralName: 'sbomsyfts',
+});
+
+export const sbomSyftFilteredClass = makeCustomResourceClass({
+  apiInfo: spdxGroupVersions,
+  isNamespaced: true,
+  singularName: 'sbomsyftfiltered',
+  pluralName: 'sbomsyftfiltereds',
 });
 
 // List methods for spdx.softwarecomposition.kubescape.io do not retrieve info in the spec.

@@ -8,10 +8,10 @@ import { DiffEditor } from '@monaco-editor/react';
 import { Link } from '@mui/material';
 import * as yaml from 'js-yaml';
 import { useEffect, useState } from 'react';
+import { getURLSegments } from '../common/url';
 import { RoutingPath } from '../index';
 import { fetchWorkloadConfigurationScan, proxyRequest } from '../model';
 import { WorkloadConfigurationScan } from '../softwarecomposition/WorkloadConfigurationScan';
-import { getURLSegments } from '../common/url';
 import controlLibrary from './controlLibrary';
 
 export default function KubescapeWorkloadConfigurationScanFixes() {

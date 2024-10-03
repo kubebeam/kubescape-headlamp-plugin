@@ -12,6 +12,7 @@ import {
 import { createRouteURL } from '@kinvolk/headlamp-plugin/lib/Router';
 import { Box, FormControlLabel, Link, Switch, Tooltip } from '@mui/material';
 import { useEffect, useState } from 'react';
+import { RotatingLines } from 'react-loader-spinner';
 import { RoutingPath } from '../index';
 import { deepListQuery } from '../model';
 import { WorkloadConfigurationScanSummary } from '../softwarecomposition/WorkloadConfigurationScanSummary';
@@ -66,9 +67,7 @@ export default function ComplianceView() {
 }
 
 function ConfigurationScanningListView() {
-  if (!workloadScanData) {
-    return <></>;
-  }
+  if (!workloadScanData) return <RotatingLines />;
 
   const controlsWithFindings = getControlsWithFindings(workloadScanData);
   const [isFailedControlSwitchChecked, setIsFailedControlSwitchChecked] = useState(true);

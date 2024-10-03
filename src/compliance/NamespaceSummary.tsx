@@ -11,14 +11,14 @@ import {
 import { useState } from 'react';
 import { getLastURLSegment } from '../common/url';
 import { RoutingPath } from '../index';
-import { configurationScanSummaries } from '../model';
+import { configurationScanSummariesClass } from '../model';
 import { ConfigurationScanSummary } from '../softwarecomposition/ConfigurationScanSummary';
 
 export default function KubescapeConfigurationScanNamespaceSummary() {
   const namespace = getLastURLSegment();
   const [configurationScanSummary, setConfigurationScanSummary] = useState<KubeObject>(null);
 
-  configurationScanSummaries.useApiGet(setConfigurationScanSummary, namespace);
+  configurationScanSummariesClass.useApiGet(setConfigurationScanSummary, namespace);
 
   return (
     <>

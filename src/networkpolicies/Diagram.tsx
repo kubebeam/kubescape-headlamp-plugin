@@ -12,7 +12,7 @@ import { Edge, MarkerType, Node, ReactFlow } from '@xyflow/react';
 import * as yaml from 'js-yaml';
 import { useEffect, useState } from 'react';
 import { getURLSegments } from '../common/url';
-import { generatedNetworkPolicy } from '../model';
+import { generatedNetworkPolicyClass } from '../model';
 import { GeneratedNetworkPolicy } from '../softwarecomposition/GeneratedNetworkPolicy';
 import { nodeTypes } from './nodes';
 
@@ -20,7 +20,7 @@ export default function KubescapeNetworkPolicyDiagram() {
   const [networkPolicyObject, setNetworkPolicy]: [KubeObject, any] = useState<KubeObject>(null);
   const [policyName, policyNamespace] = getURLSegments(-1, -2);
 
-  generatedNetworkPolicy.useApiGet(setNetworkPolicy, policyName, policyNamespace);
+  generatedNetworkPolicyClass.useApiGet(setNetworkPolicy, policyName, policyNamespace);
 
   if (!networkPolicyObject) {
     return <></>;

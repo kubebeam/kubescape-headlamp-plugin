@@ -72,7 +72,7 @@ export default function WorkloadScanListView(props: {
             {
               header: 'Relevant',
               accessorFn: (workloadScan: VulnerabilityModel.WorkloadScan) => {
-                if (!workloadScan.imageScan || !workloadScan.relevant) return;
+                if (!workloadScan.imageScan || !workloadScan.relevant) return 'Unknown';
                 let count = 0;
                 for (const v of workloadScan.imageScan.vulnerabilities) {
                   if (workloadScan.relevant.vulnerabilities.some(r => r.CVE === v.CVE)) {
@@ -81,6 +81,27 @@ export default function WorkloadScanListView(props: {
                 }
                 return `${count} of ${workloadScan.imageScan.vulnerabilities.length}`;
               },
+            },
+            {
+              header: 'SBOM',
+              accessorFn: (workloadScan: VulnerabilityModel.WorkloadScan) => {
+                if (workloadScan.imageScan?.manifestName) {
+                  return (
+                    <Link
+                      routeName={RoutingPath.KubescapeSBOMDetails}
+                      params={{
+                        name:
+                          workloadScan.relevant?.manifestName ??
+                          workloadScan.imageScan?.manifestName,
+                      }}
+                      search={workloadScan.relevant ? '?filtered' : ''}
+                    >
+                      SBOM
+                    </Link>
+                  );
+                }
+              },
+              gridTemplate: 'min-content',
             },
           ]}
         />

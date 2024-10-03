@@ -18,6 +18,7 @@ export default function ImageListView(props: { workloadScans: VulnerabilityModel
   }
 
   const imageScans = getImageScans(workloadScans);
+
   return (
     <>
       <h5>{imageScans.length} image scans</h5>
@@ -64,6 +65,22 @@ export default function ImageListView(props: { workloadScans: VulnerabilityModel
             {
               header: 'Vulnerabilities',
               accessorFn: (imageScan: VulnerabilityModel.ImageScan) => resultStack(imageScan),
+            },
+            {
+              header: 'SBOM',
+              accessorFn: (imageScan: VulnerabilityModel.ImageScan) => {
+                return (
+                  <HeadlampLink
+                    routeName={RoutingPath.KubescapeSBOMDetails}
+                    params={{
+                      name: imageScan.manifestName,
+                    }}
+                  >
+                    SBOM
+                  </HeadlampLink>
+                );
+              },
+              gridTemplate: 'min-content',
             },
           ]}
         />
@@ -126,19 +143,11 @@ function cveList(imageScan: VulnerabilityModel.ImageScan, severity: string) {
 function getImageScans(
   workloadScans: VulnerabilityModel.WorkloadScan[]
 ): VulnerabilityModel.ImageScan[] {
-  const imageScans: VulnerabilityModel.ImageScan[] = [];
+  const imageScans = new Map<string, VulnerabilityModel.ImageScan>();
 
-  workloadScans.map(workloadScan => {
-    if (workloadScan.imageScan) {
-      if (
-        !imageScans.some(
-          imageScan => imageScan.manifestName === workloadScan.imageScan?.manifestName
-        )
-      ) {
-        imageScans.push(workloadScan.imageScan);
-      }
-    }
+  workloadScans.map(w => {
+    if (w.imageScan) imageScans.set(w.imageScan.manifestName, w.imageScan);
   });
 
-  return imageScans;
+  return Array.from(imageScans.values());
 }

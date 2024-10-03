@@ -27,6 +27,7 @@ export namespace RoutingPath {
   export const KubescapeVulnerabilities = '/kubescape/vulnerabilities';
   export const KubescapeNetworkPolicies = '/kubescape/networkpolicies';
   export const KubescapeNetworkPolicyDiagram = '/kubescape/networkpolicies/:namespace/:name';
+  export const KubescapeSBOMDetails = '/kubescape/sbom/:name';
 }
 
 // Kubescape main sidebar
@@ -167,6 +168,17 @@ registerRoute({
   component: () => <ImageVulnerabilityDetails />,
   exact: true,
   name: 'Image Vulnerabilities',
+});
+
+import SBOMDetail from './vulnerabilities/SBOMDetail';
+
+registerRoute({
+  path: RoutingPath.KubescapeSBOMDetails,
+  parent: kubescape,
+  sidebar: vulnerabilities,
+  component: () => <SBOMDetail />,
+  exact: true,
+  name: 'Software Bill of Materials',
 });
 
 import KubescapeNetworkPolicies from './networkpolicies/NetworkPolicies';
