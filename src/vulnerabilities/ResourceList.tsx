@@ -72,14 +72,18 @@ export default function WorkloadScanListView(props: {
             {
               header: 'Relevant',
               accessorFn: (workloadScan: VulnerabilityModel.WorkloadScan) => {
-                if (!workloadScan.imageScan || !workloadScan.relevant) return 'Unknown';
-                let count = 0;
-                for (const v of workloadScan.imageScan.vulnerabilities) {
-                  if (workloadScan.relevant.vulnerabilities.some(r => r.CVE === v.CVE)) {
-                    count++;
+                if (!workloadScan.imageScan) return 'Unknown';
+
+                if (workloadScan.relevant) {
+                  let count = 0;
+                  for (const v of workloadScan.imageScan.vulnerabilities) {
+                    if (workloadScan.relevant.vulnerabilities.some(r => r.CVE === v.CVE)) {
+                      count++;
+                    }
                   }
+                  return `${count} of ${workloadScan.imageScan.vulnerabilities.length}`;
                 }
-                return `${count} of ${workloadScan.imageScan.vulnerabilities.length}`;
+                return `? of ${workloadScan.imageScan.vulnerabilities.length}`;
               },
             },
             {

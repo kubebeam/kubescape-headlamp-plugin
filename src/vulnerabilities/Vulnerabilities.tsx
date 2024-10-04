@@ -9,12 +9,12 @@ import {
   Tabs as HeadlampTabs,
 } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import { createRouteURL } from '@kinvolk/headlamp-plugin/lib/Router';
+import { Box, FormControlLabel, Switch } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { RotatingLines } from 'react-loader-spinner';
 import makeSeverityLabel from '../common/SeverityLabel';
 import { RoutingPath } from '../index';
-import { deepListQuery, openVulnerabilityExchangeContainerClass } from '../model';
-import { OpenVulnerabilityExchangeContainer } from '../softwarecomposition/OpenVulnerabilityExchangeContainer';
+import { deepListQuery } from '../model';
 import { VulnerabilityManifest } from '../softwarecomposition/VulnerabilityManifest';
 import ImageListView from './ImageList';
 import WorkloadScanListView from './ResourceList';
@@ -22,8 +22,6 @@ import { VulnerabilityModel } from './view-types';
 
 // workloadScans are cached in global scope because it is an expensive query for the API server
 export let globalWorkloadScans: VulnerabilityModel.WorkloadScan[] | null = null;
-export let globalOpenVulnerabilityExchangeContainers: OpenVulnerabilityExchangeContainer[] | null =
-  null;
 export let currentClusterURL = '';
 
 export default function KubescapeVulnerabilities() {
@@ -78,10 +76,6 @@ export async function fetchVulnerabilityManifests(): Promise<any> {
 
   const workloadScans: VulnerabilityModel.WorkloadScan[] = [];
   const imageScans: VulnerabilityModel.ImageScan[] = [];
-
-  globalOpenVulnerabilityExchangeContainers = await deepListQuery(
-    openVulnerabilityExchangeContainerClass.pluralName
-  );
 
   for (const v of vulnerabilityManifests) {
     if (v.spec.payload?.matches) {
@@ -171,7 +165,7 @@ function getCVEList(
           v.artifacts.add(vulnerability.artifact.name + ' ' + vulnerability.artifact.version);
 
           v.fixed = v.fixed || !!vulnerability.fix?.versions;
-          v.relevant = v.relevant || isRelevant === true;
+          v.relevant = v.relevant || isRelevant;
         } else {
           const newV: VulnerabilityModel.VulnerabilityWithReferences = {
             CVE: vulnerability.CVE,
@@ -182,7 +176,7 @@ function getCVEList(
             images: new Set<string>(),
             artifacts: new Set<string>(),
             fixed: !!vulnerability.fix?.versions,
-            relevant: isRelevant === true,
+            relevant: isRelevant,
           };
 
           newV.workloads.add(workloadScan.name + '/' + workloadScan.container);
@@ -196,35 +190,42 @@ function getCVEList(
   }
 
   // default sort on CVSS (baseScore)
-  vulnerabilityList.sort((a, b) => {
-    if (a.baseScore > b.baseScore) {
-      return -1;
-    }
-    if (a.baseScore < b.baseScore) {
-      return 1;
-    }
-    return 0;
-  });
+  vulnerabilityList.sort((a, b) => b.baseScore - a.baseScore);
 
   return vulnerabilityList;
 }
 
 function CVEListView(props: { workloadScans: VulnerabilityModel.WorkloadScan[] }) {
   const { workloadScans } = props;
-  if (!workloadScans) {
-    return <RotatingLines />;
-  }
+  const [isRelevantCVESwitchChecked, setIsRelevantCVESwitchChecked] = useState(true);
+
+  if (!workloadScans)
+    return (
+      <Box sx={{ padding: 2 }}>
+        <RotatingLines />
+      </Box>
+    );
 
   const cveList = getCVEList(workloadScans);
+  const cveListRelevant = cveList.filter(cve => cve.relevant);
 
   return (
     <>
       <h5>
-        {workloadScans.length} workload scans, {cveList.length} CVE issues
+        {workloadScans.length} workload scans,{' '}
+        {(isRelevantCVESwitchChecked ? cveListRelevant : cveList).length} CVE issues
       </h5>
+      <FormControlLabel
+        checked={isRelevantCVESwitchChecked}
+        control={<Switch color="primary" />}
+        label={'Relevant CVE'}
+        onChange={(event: any, checked: boolean) => {
+          setIsRelevantCVESwitchChecked(checked);
+        }}
+      />
       <SectionBox>
         <HeadlampTable
-          data={cveList}
+          data={isRelevantCVESwitchChecked ? cveListRelevant : cveList}
           columns={[
             {
               header: 'Severity',
@@ -264,7 +265,7 @@ function CVEListView(props: { workloadScans: VulnerabilityModel.WorkloadScan[] }
             {
               header: 'Relevant',
               accessorFn: (item: VulnerabilityModel.VulnerabilityWithReferences) =>
-                item.relevant ? 'Yes' : '',
+                item.relevant === undefined ? 'Unknown' : item.relevant ? 'Yes' : 'No',
               gridTemplate: '1fr',
             },
             {

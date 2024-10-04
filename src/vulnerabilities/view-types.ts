@@ -50,6 +50,6 @@ export namespace VulnerabilityModel {
     images: Set<string>;
     artifacts: Set<string>;
     fixed: boolean;
-    relevant: boolean;
+    relevant: boolean | undefined;
   }
 }

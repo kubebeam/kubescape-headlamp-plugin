@@ -9,8 +9,8 @@ import {
   Table as HeadlampTable,
 } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import { createRouteURL } from '@kinvolk/headlamp-plugin/lib/Router';
-import { Link, Tooltip } from '@mui/material';
-import React, { useEffect } from 'react';
+import { FormControlLabel, Link, Switch } from '@mui/material';
+import { useEffect, useState } from 'react';
 import makeSeverityLabel from '../common/SeverityLabel';
 import { getURLSegments } from '../common/url';
 import { RoutingPath } from '../index';
@@ -18,16 +18,13 @@ import { OpenVulnerabilityExchangeContainer } from '../softwarecomposition/OpenV
 import { VulnerabilityManifest } from '../softwarecomposition/VulnerabilityManifest';
 import { VulnerabilityManifestSummary } from '../softwarecomposition/VulnerabilityManifestSummary';
 import { getCVESummary } from './CVESummary';
-import { globalOpenVulnerabilityExchangeContainers } from './Vulnerabilities';
 
 export default function KubescapeVulnerabilityDetails() {
   const [name, namespace] = getURLSegments(-1, -2);
 
-  const [summary, setSummary] = React.useState<VulnerabilityManifestSummary | null>(null);
-  const [manifestAll, setManifestAll] = React.useState<VulnerabilityManifest | null>(null);
-  const [manifestRelevant, setManifestRelevant] = React.useState<VulnerabilityManifest | null>(
-    null
-  );
+  const [summary, setSummary] = useState<VulnerabilityManifestSummary | null>(null);
+  const [manifestAll, setManifestAll] = useState<VulnerabilityManifest | null>(null);
+  const [manifestRelevant, setManifestRelevant] = useState<VulnerabilityManifest | null>(null);
 
   useEffect(() => {
     fetchVulnerabilityManifest(name, namespace).then((response: any[]) => {
@@ -78,6 +75,10 @@ export default function KubescapeVulnerabilityDetails() {
                 name: 'CVE',
                 value: getCVESummary(summary, true, true),
               },
+              {
+                name: 'Relevant CVE',
+                value: getCVESummary(summary, true, true, true),
+              },
             ]}
           />
 
@@ -102,23 +103,30 @@ function Matches(props: {
 }) {
   const { manifest, relevant } = props;
   const results: VulnerabilityManifest.Match[] = manifest?.spec.payload.matches;
+  const [isRelevantCVESwitchChecked, setIsRelevantCVESwitchChecked] = useState(true);
 
-  if (results) {
-    results.sort((a, b) => {
-      if (a.vulnerability.severity < b.vulnerability.severity) {
-        return -1;
-      }
-      if (a.vulnerability.severity > b.vulnerability.severity) {
-        return 1;
-      }
-      return 0;
-    });
+  if (results)
+    results.sort((a, b) => a.vulnerability.severity.localeCompare(b.vulnerability.severity));
+
+  let relevantResults;
+  if (isRelevantCVESwitchChecked && relevant?.spec.payload.matches && results) {
+    relevantResults = results.filter(r =>
+      relevant.spec.payload.matches.some(m => m.vulnerability.id === r.vulnerability.id)
+    );
   }
 
   return (
     <SectionBox title="Findings">
+      <FormControlLabel
+        checked={isRelevantCVESwitchChecked}
+        control={<Switch color="primary" />}
+        label={'Relevant CVE'}
+        onChange={(event: any, checked: boolean) => {
+          setIsRelevantCVESwitchChecked(checked);
+        }}
+      />
       <HeadlampTable
-        data={results}
+        data={relevantResults ?? results}
         columns={[
           {
             header: 'CVE',
@@ -149,36 +157,16 @@ function Matches(props: {
           {
             header: 'Relevant',
             accessorFn: (item: VulnerabilityManifest.Match) => {
-              if (
-                relevant?.spec.payload.matches &&
-                relevant?.spec.payload.matches.some(
-                  match => match.vulnerability.id === item.vulnerability.id
+              if (!relevant) return 'Unknown';
+
+              return relevant.spec.payload.matches &&
+                relevant.spec.payload.matches.some(
+                  m => m.vulnerability.id === item.vulnerability.id
                 )
-              ) {
-                return 'Yes';
-              }
+                ? 'Yes'
+                : 'No';
             },
             gridTemplate: 'auto',
-          },
-          {
-            header: 'Affected',
-            accessorFn: (item: VulnerabilityManifest.Match) => {
-              const statement = getStatement(manifest, item);
-              if (statement) {
-                return (
-                  <Tooltip
-                    title={statement.impact_statement}
-                    slotProps={{ tooltip: { sx: { fontSize: '0.9em' } } }}
-                  >
-                    {statement.status === OpenVulnerabilityExchangeContainer.AffectedStatus.Affected
-                      ? 'Yes'
-                      : 'No'}
-                  </Tooltip>
-                );
-              }
-              return '';
-            },
-            gridTemplate: 'min-content',
           },
           {
             header: 'Fix',

@@ -45,9 +45,6 @@ export default function ImageVulnerabilityDetails() {
         </SectionBox>
 
         <Matches manifestVulnerability={manifestVulnerability.jsonData} />
-        {/* <SectionBox title="Summary">
-          <pre>{manifestVulnerability ? YAML.stringify(manifestVulnerability) : 'Not found'}</pre>
-        </SectionBox> */}
       </>
     )
   );
@@ -57,17 +54,8 @@ function Matches(props: { manifestVulnerability: VulnerabilityManifest }) {
   const { manifestVulnerability } = props;
   const results = manifestVulnerability.spec.payload.matches;
 
-  if (results) {
-    results.sort((a, b) => {
-      if (a.vulnerability.severity < b.vulnerability.severity) {
-        return -1;
-      }
-      if (a.vulnerability.severity > b.vulnerability.severity) {
-        return 1;
-      }
-      return 0;
-    });
-  }
+  if (results)
+    results.sort((a, b) => a.vulnerability.severity.localeCompare(b.vulnerability.severity));
 
   return (
     <SectionBox title="Findings">

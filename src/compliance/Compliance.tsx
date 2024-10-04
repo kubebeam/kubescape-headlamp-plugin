@@ -67,7 +67,12 @@ export default function ComplianceView() {
 }
 
 function ConfigurationScanningListView() {
-  if (!workloadScanData) return <RotatingLines />;
+  if (!workloadScanData)
+    return (
+      <Box sx={{ padding: 2 }}>
+        <RotatingLines />
+      </Box>
+    );
 
   const controlsWithFindings = getControlsWithFindings(workloadScanData);
   const [isFailedControlSwitchChecked, setIsFailedControlSwitchChecked] = useState(true);

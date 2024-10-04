@@ -7,18 +7,19 @@ import { VulnerabilityManifestSummary } from '../softwarecomposition/Vulnerabili
 export function getCVESummary(
   configurationScanSummary: VulnerabilityManifestSummary,
   showUnknown: boolean,
-  showNegligible: boolean
+  showNegligible: boolean,
+  relevant: boolean = false
 ) {
   const severities = configurationScanSummary?.spec.severities;
 
-  const criticalCount = severities.critical.all;
-  const mediumCount = severities.medium.all;
-  const highCount = severities.high.all;
-  const lowCount = severities.low.all;
-  const negligibleCount = severities.negligible.all;
-  const unknownCount = severities.unknown.all;
+  const criticalCount = relevant ? severities.critical.relevant : severities.critical.all;
+  const highCount = relevant ? severities.high.relevant : severities.high.all;
+  const mediumCount = relevant ? severities.medium.relevant : severities.medium.all;
+  const lowCount = relevant ? severities.low.relevant : severities.low.all;
+  const negligibleCount = relevant ? severities.negligible.relevant : severities.negligible.all;
+  const unknownCount = relevant ? severities.unknown.relevant : severities.unknown.all;
 
-  function box(color: string, severity: string, countScan: number) {
+  function box(color: string, severity: string, countScan: number | undefined) {
     return (
       <Box
         sx={{
@@ -32,7 +33,7 @@ export function getCVESummary(
         }}
       >
         <Tooltip title={severity}>
-          {countScan} {severity}
+          {countScan ?? 0} {severity}
         </Tooltip>
       </Box>
     );
