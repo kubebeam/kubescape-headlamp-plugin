@@ -9,9 +9,9 @@ import {
 } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import { Box, Stack, Tooltip } from '@mui/material';
 import { RoutingPath } from '../index';
-import { VulnerabilityModel } from './view-types';
+import { ImageScan, WorkloadScan } from './fetch-vulnerabilities';
 
-export default function ImageListView(props: { workloadScans: VulnerabilityModel.WorkloadScan[] }) {
+export default function ImageListView(props: { workloadScans: WorkloadScan[] }) {
   const { workloadScans } = props;
   if (!workloadScans) {
     return <></>;
@@ -45,7 +45,7 @@ export default function ImageListView(props: { workloadScans: VulnerabilityModel
             },
             {
               header: 'Workload',
-              accessorFn: (imageScan: VulnerabilityModel.ImageScan) => {
+              accessorFn: (imageScan: ImageScan) => {
                 const workloads = workloadScans
                   .filter(scan => scan.imageScan?.manifestName === imageScan.manifestName)
                   .map(scan => scan.container);
@@ -57,18 +57,18 @@ export default function ImageListView(props: { workloadScans: VulnerabilityModel
             },
             {
               header: 'Last scan',
-              accessorFn: (imageScan: VulnerabilityModel.ImageScan) => (
+              accessorFn: (imageScan: ImageScan) => (
                 <DateLabel date={imageScan.creationTimestamp} />
               ),
               gridTemplate: 'max-content',
             },
             {
               header: 'Vulnerabilities',
-              accessorFn: (imageScan: VulnerabilityModel.ImageScan) => resultStack(imageScan),
+              accessorFn: (imageScan: ImageScan) => resultStack(imageScan),
             },
             {
               header: 'SBOM',
-              accessorFn: (imageScan: VulnerabilityModel.ImageScan) => {
+              accessorFn: (imageScan: ImageScan) => {
                 return (
                   <HeadlampLink
                     routeName={RoutingPath.KubescapeSBOMDetails}
@@ -89,7 +89,7 @@ export default function ImageListView(props: { workloadScans: VulnerabilityModel
   );
 }
 
-function resultStack(imageScan: VulnerabilityModel.ImageScan) {
+function resultStack(imageScan: ImageScan) {
   function box(color: string, severity: string) {
     return (
       <Box
@@ -104,7 +104,7 @@ function resultStack(imageScan: VulnerabilityModel.ImageScan) {
         }}
       >
         <Tooltip title={cveList(imageScan, severity)}>
-          {imageScan.vulnerabilities.filter(v => v.severity === severity).length}
+          {imageScan.matches.filter(match => match.vulnerability.severity === severity).length}
         </Tooltip>
       </Box>
     );
@@ -120,8 +120,10 @@ function resultStack(imageScan: VulnerabilityModel.ImageScan) {
   );
 }
 
-function cveList(imageScan: VulnerabilityModel.ImageScan, severity: string) {
-  const cves = imageScan.vulnerabilities.filter(v => v.severity === severity).map(v => v.CVE);
+function cveList(imageScan: ImageScan, severity: string) {
+  const cves = imageScan.matches
+    .filter(match => match.vulnerability.severity === severity)
+    .map(match => match.vulnerability.id);
 
   if (cves.length > 0) {
     return (
@@ -140,10 +142,8 @@ function cveList(imageScan: VulnerabilityModel.ImageScan, severity: string) {
   }
 }
 
-function getImageScans(
-  workloadScans: VulnerabilityModel.WorkloadScan[]
-): VulnerabilityModel.ImageScan[] {
-  const imageScans = new Map<string, VulnerabilityModel.ImageScan>();
+function getImageScans(workloadScans: WorkloadScan[]): ImageScan[] {
+  const imageScans = new Map<string, ImageScan>();
 
   workloadScans.map(w => {
     if (w.imageScan) imageScans.set(w.imageScan.manifestName, w.imageScan);

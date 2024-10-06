@@ -9,11 +9,9 @@ import {
 import { Box, Stack, Tooltip } from '@mui/material';
 import { makeNamespaceLink } from '../common/Namespace';
 import { RoutingPath } from '../index';
-import { VulnerabilityModel } from './view-types';
+import { WorkloadScan } from './fetch-vulnerabilities';
 
-export default function WorkloadScanListView(props: {
-  workloadScans: VulnerabilityModel.WorkloadScan[];
-}) {
+export default function WorkloadScanListView(props: { workloadScans: WorkloadScan[] }) {
   const { workloadScans } = props;
   if (!workloadScans) {
     return <></>;
@@ -61,34 +59,37 @@ export default function WorkloadScanListView(props: {
             },
             {
               header: 'Image',
-              accessorFn: (workloadScan: VulnerabilityModel.WorkloadScan) =>
-                workloadScan.imageScan?.imageName,
+              accessorFn: (workloadScan: WorkloadScan) => workloadScan.imageScan?.imageName,
             },
             {
               header: 'CVE',
-              accessorFn: (workloadScan: VulnerabilityModel.WorkloadScan) =>
-                resultStack(workloadScan),
+              accessorFn: (workloadScan: WorkloadScan) => resultStack(workloadScan),
             },
             {
               header: 'Relevant',
-              accessorFn: (workloadScan: VulnerabilityModel.WorkloadScan) => {
+              accessorFn: (workloadScan: WorkloadScan) => {
                 if (!workloadScan.imageScan) return 'Unknown';
 
                 if (workloadScan.relevant) {
                   let count = 0;
-                  for (const v of workloadScan.imageScan.vulnerabilities) {
-                    if (workloadScan.relevant.vulnerabilities.some(r => r.CVE === v.CVE)) {
+                  for (const match of workloadScan.imageScan.matches) {
+                    if (
+                      workloadScan.relevant.matches.some(
+                        r => r.vulnerability.id === match.vulnerability.id
+                      )
+                    ) {
                       count++;
                     }
                   }
-                  return `${count} of ${workloadScan.imageScan.vulnerabilities.length}`;
+                  return `${count} of ${workloadScan.imageScan.matches.length}`;
                 }
-                return `? of ${workloadScan.imageScan.vulnerabilities.length}`;
+                return `? of ${workloadScan.imageScan.matches.length}`;
               },
+              gridTemplate: 'min-content',
             },
             {
               header: 'SBOM',
-              accessorFn: (workloadScan: VulnerabilityModel.WorkloadScan) => {
+              accessorFn: (workloadScan: WorkloadScan) => {
                 if (workloadScan.imageScan?.manifestName) {
                   return (
                     <Link
@@ -114,12 +115,12 @@ export default function WorkloadScanListView(props: {
   );
 }
 
-function countScans(workloadScan: VulnerabilityModel.WorkloadScan, severity: string): number {
+function countScans(workloadScan: WorkloadScan, severity: string): number {
   let count: number = 0;
 
   if (workloadScan.imageScan) {
-    for (const v of workloadScan.imageScan.vulnerabilities) {
-      if (v.severity === severity) {
+    for (const match of workloadScan.imageScan.matches) {
+      if (match.vulnerability.severity === severity) {
         count++;
       }
     }
@@ -127,7 +128,7 @@ function countScans(workloadScan: VulnerabilityModel.WorkloadScan, severity: str
   return count;
 }
 
-function resultStack(workloadScan: VulnerabilityModel.WorkloadScan) {
+function resultStack(workloadScan: WorkloadScan) {
   if (!workloadScan.imageScan) {
     return <div />;
   }

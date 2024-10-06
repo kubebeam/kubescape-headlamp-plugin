@@ -14,18 +14,28 @@ import { useEffect, useState } from 'react';
 import { RotatingLines } from 'react-loader-spinner';
 import makeSeverityLabel from '../common/SeverityLabel';
 import { RoutingPath } from '../index';
-import { deepListQuery } from '../model';
-import { VulnerabilityManifest } from '../softwarecomposition/VulnerabilityManifest';
+import { fetchVulnerabilityManifests, WorkloadScan } from './fetch-vulnerabilities';
 import ImageListView from './ImageList';
 import WorkloadScanListView from './ResourceList';
-import { VulnerabilityModel } from './view-types';
+
+interface CVEScan {
+  CVE: string;
+  description: string;
+  severity: string;
+  baseScore: number;
+  workloads: Set<string>;
+  images: Set<string>;
+  artifacts: Set<string>;
+  fixed: boolean;
+  relevant: boolean | undefined;
+}
 
 // workloadScans are cached in global scope because it is an expensive query for the API server
-export let globalWorkloadScans: VulnerabilityModel.WorkloadScan[] | null = null;
+export let globalWorkloadScans: WorkloadScan[] | null = null;
 export let currentClusterURL = '';
 
 export default function KubescapeVulnerabilities() {
-  const [workloadScans, setWorkloadScans] = useState<VulnerabilityModel.WorkloadScan[]>(null);
+  const [workloadScans, setWorkloadScans] = useState<WorkloadScan[]>(null);
 
   useEffect(() => {
     if (
@@ -66,138 +76,10 @@ export default function KubescapeVulnerabilities() {
   );
 }
 
-// Query vulnerabilitymanifestsummaries and vulnerabilitymanifests
-// Convert the retrieved data to "[]WorkloadScan -> ImageScan > []Vulnerability"
-export async function fetchVulnerabilityManifests(): Promise<any> {
-  const vulnerabilityManifestSummaries = await deepListQuery('vulnerabilitymanifestsummaries');
-  const vulnerabilityManifests: VulnerabilityManifest[] = await deepListQuery(
-    'vulnerabilitymanifests'
-  );
-
-  const workloadScans: VulnerabilityModel.WorkloadScan[] = [];
-  const imageScans: VulnerabilityModel.ImageScan[] = [];
-
-  for (const v of vulnerabilityManifests) {
-    if (v.spec.payload?.matches) {
-      const imageScan: VulnerabilityModel.ImageScan = {
-        manifestName: v.metadata.name,
-        imageName: v.metadata.annotations['kubescape.io/image-tag'],
-        creationTimestamp: v.metadata.creationTimestamp,
-        vulnerabilities: [],
-      };
-
-      // convert the Matches into Vulnerability, keep only the info we need
-      for (const match of v.spec.payload.matches) {
-        const v: VulnerabilityModel.Vulnerability = {
-          CVE: match.vulnerability.id,
-          dataSource: match.vulnerability.dataSource,
-          description: match.vulnerability.description,
-          severity: match.vulnerability.severity,
-          baseScore: match.vulnerability.cvss ? match.vulnerability.cvss[0].metrics.baseScore : 0,
-          fix: {
-            state: match.vulnerability.fix.state,
-            versions: match.vulnerability.fix.versions,
-          },
-          artifact: {
-            name: match.artifact.name,
-            version: match.artifact.version,
-          },
-        };
-
-        // if we have no description, try get it from related
-        if (!v.description && match.relatedVulnerabilities) {
-          v.description = match.relatedVulnerabilities
-            .filter(rv => rv.id === v.CVE)
-            .map(rv => rv.description)
-            .join();
-        }
-        imageScan.vulnerabilities.push(v);
-      }
-
-      imageScans.push(imageScan);
-    }
-  }
-
-  for (const summary of vulnerabilityManifestSummaries) {
-    // vulnerabilitiesRef.all field refers to the manifest
-    const imageScanAll: VulnerabilityModel.ImageScan | undefined = imageScans.find(
-      element => element.manifestName === summary.spec.vulnerabilitiesRef?.all?.name
-    );
-
-    const imageScanRelevant: VulnerabilityModel.ImageScan | undefined = imageScans.find(
-      element => element.manifestName === summary.spec.vulnerabilitiesRef?.relevant?.name
-    );
-
-    const w: VulnerabilityModel.WorkloadScan = {
-      manifestName: summary.metadata.name,
-      name: summary.metadata.labels['kubescape.io/workload-name'],
-      namespace: summary.metadata.labels['kubescape.io/workload-namespace'],
-      container: summary.metadata.labels['kubescape.io/workload-container-name'],
-      kind: summary.metadata.labels['kubescape.io/workload-kind'],
-      imageScan: imageScanAll,
-      relevant: imageScanRelevant,
-    };
-
-    workloadScans.push(w);
-  }
-
-  return workloadScans;
-}
-
-// flatten workloadScans into a list of VulnerabilityDetails with primary key CVE-ID
-function getCVEList(
-  workloadScans: VulnerabilityModel.WorkloadScan[]
-): VulnerabilityModel.VulnerabilityWithReferences[] {
-  const vulnerabilityList: VulnerabilityModel.VulnerabilityWithReferences[] = [];
-
-  for (const workloadScan of workloadScans) {
-    if (workloadScan.imageScan) {
-      for (const vulnerability of workloadScan.imageScan.vulnerabilities) {
-        const v = vulnerabilityList.find(element => element.CVE === vulnerability.CVE);
-
-        const isRelevant = workloadScan.relevant?.vulnerabilities.some(
-          v => v.CVE === vulnerability.CVE
-        );
-
-        if (v) {
-          v.workloads.add(workloadScan.name + '/' + workloadScan.container);
-          v.images.add(workloadScan.imageScan.imageName);
-          v.artifacts.add(vulnerability.artifact.name + ' ' + vulnerability.artifact.version);
-
-          v.fixed = v.fixed || !!vulnerability.fix?.versions;
-          v.relevant = v.relevant || isRelevant;
-        } else {
-          const newV: VulnerabilityModel.VulnerabilityWithReferences = {
-            CVE: vulnerability.CVE,
-            description: vulnerability.description,
-            severity: vulnerability.severity,
-            baseScore: vulnerability.baseScore,
-            workloads: new Set<string>(),
-            images: new Set<string>(),
-            artifacts: new Set<string>(),
-            fixed: !!vulnerability.fix?.versions,
-            relevant: isRelevant,
-          };
-
-          newV.workloads.add(workloadScan.name + '/' + workloadScan.container);
-          newV.images.add(workloadScan.imageScan.imageName);
-          newV.artifacts.add(vulnerability.artifact.name + ' ' + vulnerability.artifact.version);
-
-          vulnerabilityList.push(newV);
-        }
-      }
-    }
-  }
-
-  // default sort on CVSS (baseScore)
-  vulnerabilityList.sort((a, b) => b.baseScore - a.baseScore);
-
-  return vulnerabilityList;
-}
-
-function CVEListView(props: { workloadScans: VulnerabilityModel.WorkloadScan[] }) {
+function CVEListView(props: { workloadScans: WorkloadScan[] }) {
   const { workloadScans } = props;
-  const [isRelevantCVESwitchChecked, setIsRelevantCVESwitchChecked] = useState(true);
+  const [isRelevantCVESwitchChecked, setIsRelevantCVESwitchChecked] = useState(false);
+  const [isFixedCVESwitchChecked, setIsFixedCVESwitchChecked] = useState(false);
 
   if (!workloadScans)
     return (
@@ -207,35 +89,45 @@ function CVEListView(props: { workloadScans: VulnerabilityModel.WorkloadScan[] }
     );
 
   const cveList = getCVEList(workloadScans);
-  const cveListRelevant = cveList.filter(cve => cve.relevant);
+
+  let cveListFiltered = cveList;
+  if (isRelevantCVESwitchChecked) cveListFiltered = cveListFiltered.filter(cve => cve.relevant);
+  if (isFixedCVESwitchChecked) cveListFiltered = cveListFiltered.filter(cve => cve.fixed);
 
   return (
     <>
       <h5>
-        {workloadScans.length} workload scans,{' '}
-        {(isRelevantCVESwitchChecked ? cveListRelevant : cveList).length} CVE issues
+        {workloadScans.length} workload scans, {cveListFiltered.length} CVE issues
       </h5>
       <FormControlLabel
         checked={isRelevantCVESwitchChecked}
         control={<Switch color="primary" />}
-        label={'Relevant CVE'}
+        label={'Relevant'}
         onChange={(event: any, checked: boolean) => {
           setIsRelevantCVESwitchChecked(checked);
         }}
       />
+      <FormControlLabel
+        checked={isFixedCVESwitchChecked}
+        control={<Switch color="primary" />}
+        label={'Fixed'}
+        onChange={(event: any, checked: boolean) => {
+          setIsFixedCVESwitchChecked(checked);
+        }}
+      />
       <SectionBox>
         <HeadlampTable
-          data={isRelevantCVESwitchChecked ? cveListRelevant : cveList}
+          data={cveListFiltered}
           columns={[
             {
               header: 'Severity',
-              accessorFn: (item: VulnerabilityModel.VulnerabilityWithReferences) => item.severity,
+              accessorFn: (item: CVEScan) => item.severity,
               Cell: ({ cell }: any) => makeSeverityLabel(cell.row.original.severity),
               gridTemplate: '0.2fr',
             },
             {
               header: 'CVE ID',
-              accessorFn: (item: VulnerabilityModel.VulnerabilityWithReferences) => item.CVE,
+              accessorFn: (item: CVEScan) => item.CVE,
               Cell: ({ cell }: any) => (
                 <HeadlampLink
                   routeName={RoutingPath.KubescapeCVEResults}
@@ -249,13 +141,14 @@ function CVEListView(props: { workloadScans: VulnerabilityModel.WorkloadScan[] }
               gridTemplate: 'auto',
             },
             {
+              id: 'Score',
               header: 'CVSS',
-              accessorFn: (item: VulnerabilityModel.VulnerabilityWithReferences) => item.baseScore,
+              accessorFn: (item: CVEScan) => item.baseScore,
               gridTemplate: 'min-content',
             },
             {
               header: 'Component',
-              accessorFn: (item: VulnerabilityModel.VulnerabilityWithReferences) => (
+              accessorFn: (item: CVEScan) => (
                 <div style={{ whiteSpace: 'pre-line' }}>
                   {Array.from(item.artifacts).join('\n')}
                 </div>
@@ -264,26 +157,23 @@ function CVEListView(props: { workloadScans: VulnerabilityModel.WorkloadScan[] }
             },
             {
               header: 'Relevant',
-              accessorFn: (item: VulnerabilityModel.VulnerabilityWithReferences) =>
+              accessorFn: (item: CVEScan) =>
                 item.relevant === undefined ? 'Unknown' : item.relevant ? 'Yes' : 'No',
               gridTemplate: '1fr',
             },
             {
               header: 'Fixed',
-              accessorFn: (item: VulnerabilityModel.VulnerabilityWithReferences) =>
-                item.fixed ? 'Yes' : '',
+              accessorFn: (item: CVEScan) => (item.fixed ? 'Yes' : ''),
               gridTemplate: '1fr',
             },
             {
               header: 'Images',
-              accessorFn: (item: VulnerabilityModel.VulnerabilityWithReferences) =>
-                item.images.size,
+              accessorFn: (item: CVEScan) => item.images.size,
               gridTemplate: 'min-content',
             },
             {
               header: 'Workloads',
-              accessorFn: (item: VulnerabilityModel.VulnerabilityWithReferences) =>
-                item.workloads.size,
+              accessorFn: (item: CVEScan) => item.workloads.size,
               gridTemplate: 'min-content',
             },
             {
@@ -293,8 +183,70 @@ function CVEListView(props: { workloadScans: VulnerabilityModel.WorkloadScan[] }
               gridTemplate: 'auto',
             },
           ]}
+          initialState={{
+            sorting: [
+              {
+                id: 'Score',
+                desc: true,
+              },
+            ],
+          }}
         />
       </SectionBox>
     </>
   );
+}
+
+// create a list of CVE-ID with affected workloads and images
+function getCVEList(workloadScans: WorkloadScan[]): CVEScan[] {
+  const vulnerabilityList: CVEScan[] = [];
+
+  for (const workloadScan of workloadScans) {
+    if (workloadScan.imageScan?.matches) {
+      for (const match of workloadScan.imageScan.matches) {
+        const cve = vulnerabilityList.find(element => element.CVE === match.vulnerability.id);
+
+        const isRelevant = workloadScan.relevant?.matches?.some(
+          match => match.vulnerability.id === cve?.CVE
+        );
+
+        if (cve) {
+          cve.workloads.add(workloadScan.name + '/' + workloadScan.container);
+          cve.images.add(workloadScan.imageScan.imageName);
+          cve.artifacts.add(match.artifact.name + ' ' + match.artifact.version);
+
+          cve.fixed = cve.fixed || !!match.vulnerability.fix?.versions;
+          cve.relevant = cve.relevant || isRelevant;
+        } else {
+          const newCve: CVEScan = {
+            CVE: match.vulnerability.id,
+            description: match.vulnerability.description,
+            severity: match.vulnerability.severity,
+            baseScore: match.vulnerability.cvss ? match.vulnerability.cvss[0].metrics.baseScore : 0,
+            workloads: new Set<string>(),
+            images: new Set<string>(),
+            artifacts: new Set<string>(),
+            fixed: !!match.vulnerability.fix?.versions,
+            relevant: isRelevant,
+          };
+
+          // if vulnerability has no description, try get it from related
+          if (!newCve.description && match.relatedVulnerabilities) {
+            newCve.description = match.relatedVulnerabilities
+              .filter(rv => rv.id === newCve.CVE)
+              .map(rv => rv.description)
+              .join();
+          }
+
+          newCve.workloads.add(workloadScan.name + '/' + workloadScan.container);
+          newCve.images.add(workloadScan.imageScan.imageName);
+          newCve.artifacts.add(match.artifact.name + ' ' + match.artifact.version);
+
+          vulnerabilityList.push(newCve);
+        }
+      }
+    }
+  }
+
+  return vulnerabilityList;
 }

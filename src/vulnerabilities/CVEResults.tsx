@@ -10,7 +10,7 @@ import {
 import { Link } from '@mui/material';
 import { getURLSegments } from '../common/url';
 import { RoutingPath } from '../index';
-import { VulnerabilityModel } from './view-types';
+import { WorkloadScan } from './fetch-vulnerabilities';
 import { globalWorkloadScans } from './Vulnerabilities';
 
 export default function KubescapeCVEResults() {
@@ -20,12 +20,14 @@ export default function KubescapeCVEResults() {
     return <div></div>;
   }
   const workloadScansFiltered = globalWorkloadScans.filter(workloadScan =>
-    workloadScan.imageScan?.vulnerabilities.some(v => v.CVE === cve)
+    workloadScan.imageScan?.matches.some(match => match.vulnerability.id === cve)
   );
   if (!workloadScansFiltered) {
     return <div></div>;
   }
-  const firstCVE = workloadScansFiltered[0].imageScan?.vulnerabilities.find(v => v.CVE === cve);
+  const firstCVE = workloadScansFiltered[0].imageScan?.matches?.find(
+    match => match.vulnerability.id === cve
+  );
 
   if (!firstCVE) {
     return <div></div>;
@@ -40,15 +42,15 @@ export default function KubescapeCVEResults() {
         rows={[
           {
             name: 'CVE ID',
-            value: <Link href={firstCVE.dataSource}>{cve}</Link>,
+            value: <Link href={firstCVE.vulnerability.dataSource}>{cve}</Link>,
           },
           {
             name: 'Severity',
-            value: firstCVE.severity,
+            value: firstCVE.vulnerability.severity,
           },
           {
             name: 'Description',
-            value: firstCVE.description,
+            value: firstCVE.vulnerability.description,
           },
         ]}
       />
@@ -58,7 +60,7 @@ export default function KubescapeCVEResults() {
   );
 }
 
-function Workloads(props: { cve: string; workloads: VulnerabilityModel.WorkloadScan[] }) {
+function Workloads(props: { cve: string; workloads: WorkloadScan[] }) {
   const { cve, workloads } = props;
 
   return (
@@ -68,7 +70,7 @@ function Workloads(props: { cve: string; workloads: VulnerabilityModel.WorkloadS
         columns={[
           {
             header: 'Workload',
-            accessorFn: (workload: VulnerabilityModel.WorkloadScan) => (
+            accessorFn: (workload: WorkloadScan) => (
               <HeadlampLink
                 routeName={RoutingPath.KubescapeVulnerabilityDetails}
                 params={{
@@ -98,11 +100,11 @@ function Workloads(props: { cve: string; workloads: VulnerabilityModel.WorkloadS
           },
           {
             header: 'Component',
-            accessorFn: (workload: VulnerabilityModel.WorkloadScan) =>
+            accessorFn: (workload: WorkloadScan) =>
               `${Array.from(
                 new Set(
-                  workload.imageScan?.vulnerabilities
-                    .filter(v => v.CVE === cve)
+                  workload.imageScan?.matches
+                    .filter(v => v.vulnerability.id === cve)
                     .map(v => v.artifact.name + ' ' + v.artifact.version)
                 )
               )}`,
@@ -110,20 +112,19 @@ function Workloads(props: { cve: string; workloads: VulnerabilityModel.WorkloadS
           },
           {
             header: 'Fix',
-            accessorFn: (workload: VulnerabilityModel.WorkloadScan) =>
+            accessorFn: (workload: WorkloadScan) =>
               `${Array.from(
                 new Set(
-                  workload.imageScan?.vulnerabilities
-                    .filter(v => v.CVE === cve && v.fix.versions)
-                    .map(v => v.fix.versions.join())
+                  workload.imageScan?.matches
+                    .filter(v => v.vulnerability.id === cve && v.vulnerability.fix.versions)
+                    .map(v => v.vulnerability.fix.versions.join())
                 )
               )}`,
             gridTemplate: 'auto',
           },
           {
             header: 'Image',
-            accessorFn: (workload: VulnerabilityModel.WorkloadScan) =>
-              workload.imageScan?.imageName,
+            accessorFn: (workload: WorkloadScan) => workload.imageScan?.imageName,
             gridTemplate: 'auto',
           },
         ]}

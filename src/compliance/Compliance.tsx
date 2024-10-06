@@ -40,8 +40,6 @@ export default function ComplianceView() {
     }
   }, []);
 
-  sortControlLibrary();
-
   return (
     <>
       <h1>Compliance</h1>
@@ -74,7 +72,14 @@ function ConfigurationScanningListView() {
       </Box>
     );
 
-  const controlsWithFindings = getControlsWithFindings(workloadScanData);
+  const controlsWithFindings = controlLibrary.filter(control =>
+    workloadScanData?.some(w =>
+      Object.values(w.spec.controls).some(
+        scan => control.controlID === scan.controlID && scan.status.status === 'failed'
+      )
+    )
+  );
+
   const [isFailedControlSwitchChecked, setIsFailedControlSwitchChecked] = useState(true);
   const controls = isFailedControlSwitchChecked ? controlsWithFindings : controlLibrary;
 
@@ -106,6 +111,7 @@ function ConfigurationScanningListView() {
               gridTemplate: 'min-content',
             },
             {
+              id: 'ID',
               header: 'ID',
               accessorKey: 'controlID',
               Cell: ({ cell }: any) => (
@@ -148,22 +154,18 @@ function ConfigurationScanningListView() {
               gridTemplate: 'auto',
             },
           ]}
+          initialState={{
+            sorting: [
+              {
+                id: 'ID',
+                desc: false,
+              },
+            ],
+          }}
         />
       </SectionBox>
     </>
   );
-}
-
-function getControlsWithFindings(workloadScanData: WorkloadConfigurationScanSummary[]): Control[] {
-  return controlLibrary.filter(control => {
-    for (const workload of workloadScanData) {
-      for (const scan of Object.values(workload.spec.controls) as any) {
-        if (control.controlID === scan.controlID && scan.status.status === 'failed') {
-          return true;
-        }
-      }
-    }
-  });
 }
 
 function makeCVSSLabel(baseScore: number, failCount: number) {
@@ -229,44 +231,19 @@ function makeResultsLabel(workloadScanData: WorkloadConfigurationScanSummary[], 
   }
 }
 
-function sortControlLibrary() {
-  controlLibrary.sort((a, b) => {
-    if (a.controlID < b.controlID) {
-      return -1;
-    }
-    if (a.controlID > b.controlID) {
-      return 1;
-    }
-    return 0;
-  });
-}
-
 function countScans(
   workloadScanData: WorkloadConfigurationScanSummary[],
   control: Control,
   status: string
 ): number {
-  let count: number = 0;
-
-  for (const workload of workloadScanData) {
-    for (const scan of Object.values(workload.spec.controls) as any) {
-      if (scan.controlID === control.controlID && scan.status.status === status) {
-        count++;
-      }
-    }
-  }
-  return count;
+  return workloadScanData
+    .flatMap(w => Object.values(w.spec.controls))
+    .filter(scan => scan.controlID === control.controlID)
+    .filter(scan => scan.status.status === status).length;
 }
 
 function countFailedScans(workloadScanData: WorkloadConfigurationScanSummary[]): number {
-  let count: number = 0;
-
-  for (const workload of workloadScanData) {
-    for (const scan of Object.values(workload.spec.controls) as any) {
-      if (scan.status.status === 'failed') {
-        count++;
-      }
-    }
-  }
-  return count;
+  return workloadScanData
+    .flatMap(w => Object.values(w.spec.controls))
+    .filter(scan => scan.status.status === 'failed').length;
 }

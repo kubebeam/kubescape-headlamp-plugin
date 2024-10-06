@@ -14,7 +14,6 @@ import { useEffect, useState } from 'react';
 import makeSeverityLabel from '../common/SeverityLabel';
 import { getURLSegments } from '../common/url';
 import { RoutingPath } from '../index';
-import { OpenVulnerabilityExchangeContainer } from '../softwarecomposition/OpenVulnerabilityExchangeContainer';
 import { VulnerabilityManifest } from '../softwarecomposition/VulnerabilityManifest';
 import { VulnerabilityManifestSummary } from '../softwarecomposition/VulnerabilityManifestSummary';
 import { getCVESummary } from './CVESummary';
@@ -192,29 +191,8 @@ function Matches(props: {
   );
 }
 
-function getStatement(
-  vm: VulnerabilityManifest,
-  match: VulnerabilityManifest.Match
-): OpenVulnerabilityExchangeContainer.Statement | null {
-  if (globalOpenVulnerabilityExchangeContainers) {
-    for (const vex of globalOpenVulnerabilityExchangeContainers) {
-      if (
-        vex.metadata.annotations['kubescape.io/image-tag'] ===
-        vm.metadata.annotations['kubescape.io/image-tag']
-      ) {
-        for (const statement of vex.spec.statements) {
-          if (statement.vulnerability['@id'] === match.vulnerability.id) {
-            return statement;
-          }
-        }
-      }
-    }
-  }
-  return null;
-}
-
 // Fetch vulnerabilitymanifestsummary and then vulnerabilitymanifest (if available)
-export async function fetchVulnerabilityManifest(name: string, namespace: string) {
+async function fetchVulnerabilityManifest(name: string, namespace: string) {
   function getVulnerabilityManifestSummary(): Promise<any> {
     return ApiProxy.request(
       `/apis/spdx.softwarecomposition.kubescape.io/v1beta1/namespaces/${namespace}/vulnerabilitymanifestsummaries/${name}`
