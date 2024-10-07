@@ -222,5 +222,5 @@ async function fetchVulnerabilityManifest(name: string, namespace: string) {
     })
     .catch(error => console.log(error.message));
 
-  return [summary, allManifest, relevantManifest]; // TODO reduce
+  return [summary, allManifest, relevantManifest];
 }
