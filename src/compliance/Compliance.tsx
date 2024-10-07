@@ -38,6 +38,8 @@ export default function ComplianceView() {
         currentClusterURL = createRouteURL(RoutingPath.ComplianceView);
         setWorkloadScanData(response);
       });
+    } else {
+      setWorkloadScanData(globalWorkloadScanData);
     }
   }, []);
 
