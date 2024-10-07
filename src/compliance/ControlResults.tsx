@@ -13,7 +13,7 @@ import { makeNamespaceLink } from '../common/Namespace';
 import { getLastURLSegment } from '../common/url';
 import { RoutingPath } from '../index';
 import { WorkloadConfigurationScanSummary } from '../softwarecomposition/WorkloadConfigurationScanSummary';
-import { workloadScanData } from './Compliance';
+import { globalWorkloadScanData } from './Compliance';
 import controlLibrary from './controlLibrary';
 
 export default function KubescapeControlResults() {
@@ -64,7 +64,7 @@ export default function KubescapeControlResults() {
 
       <SectionBox title="Failed resources">
         <Table
-          data={getFailedWorkloads(workloadScanData, controlID)}
+          data={getFailedWorkloads(globalWorkloadScanData, controlID)}
           columns={[
             {
               header: 'Name',

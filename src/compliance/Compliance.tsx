@@ -13,6 +13,7 @@ import { createRouteURL } from '@kinvolk/headlamp-plugin/lib/Router';
 import { Box, FormControlLabel, Link, Switch, Tooltip } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { RotatingLines } from 'react-loader-spinner';
+import { WorkloadScan } from 'src/vulnerabilities/fetch-vulnerabilities';
 import { RoutingPath } from '../index';
 import { deepListQuery } from '../model';
 import { WorkloadConfigurationScanSummary } from '../softwarecomposition/WorkloadConfigurationScanSummary';
@@ -21,21 +22,21 @@ import NamespaceView from './NamespaceView';
 import KubescapeWorkloadConfigurationScanList from './ResourceList';
 
 // workloadScans are cached in global scope because it is an expensive query for the API server
-export let workloadScanData: WorkloadConfigurationScanSummary[] | null = null;
+export let globalWorkloadScanData: WorkloadConfigurationScanSummary[] | null = null;
 let currentClusterURL = '';
 
 export default function ComplianceView() {
-  const [, setState] = useState({});
+  const [workloadScanData, setWorkloadScanData] = useState<WorkloadScan[]>(null);
 
   useEffect(() => {
     if (
-      workloadScanData === null ||
+      globalWorkloadScanData === null ||
       currentClusterURL !== createRouteURL(RoutingPath.ComplianceView) // check if user switched to another cluster
     ) {
       deepListQuery('workloadconfigurationscansummaries').then(response => {
-        workloadScanData = response;
+        globalWorkloadScanData = response;
         currentClusterURL = createRouteURL(RoutingPath.ComplianceView);
-        setState({}); // Force component to re-render
+        setWorkloadScanData(response);
       });
     }
   }, []);
@@ -47,15 +48,17 @@ export default function ComplianceView() {
         tabs={[
           {
             label: 'Controls',
-            component: <ConfigurationScanningListView />,
+            component: <ConfigurationScanningListView workloadScanData={workloadScanData} />,
           },
           {
             label: 'Resources',
-            component: <KubescapeWorkloadConfigurationScanList />,
+            component: (
+              <KubescapeWorkloadConfigurationScanList workloadScanData={workloadScanData} />
+            ),
           },
           {
             label: 'Namespaces',
-            component: <NamespaceView />,
+            component: <NamespaceView workloadScanData={workloadScanData} />,
           },
         ]}
         ariaLabel="Navigation Tabs"
@@ -64,7 +67,8 @@ export default function ComplianceView() {
   );
 }
 
-function ConfigurationScanningListView() {
+function ConfigurationScanningListView(props: { workloadScanData: WorkloadScan[] }) {
+  const { workloadScanData } = props;
   if (!workloadScanData)
     return (
       <Box sx={{ padding: 2 }}>
