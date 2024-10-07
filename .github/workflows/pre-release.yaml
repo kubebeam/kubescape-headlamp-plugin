@@ -46,6 +46,14 @@ jobs:
       - name: release date
         run: echo "RELEASE_DATE=$(date +'%Y-%m-%dT%H:%M:%SZ')" >> ${GITHUB_ENV}
 
+      - name: Update package.json
+        uses: fjogeleit/yaml-update-action@main
+        with:
+          valueFile: package.json
+          propertyPath: version
+          value: '${{ github.event.inputs.releaseName }}'
+          commitChange: false
+
       - name: create-archive
         run: |
           mkdir -p kubescape-plugin
@@ -66,14 +74,6 @@ jobs:
               "annotations[\"headlamp/plugin/archive-url\"]": "https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.releaseName }}/${{ env.RELEASE_TAR }}", 
               "annotations[\"headlamp/plugin/archive-checksum\"]": "SHA256:${{ env.CHECKSUM }}"
             }
-          commitChange: false
-
-      - name: Update package.json 
-        uses: fjogeleit/yaml-update-action@main
-        with:
-          valueFile: package.json
-          propertyPath: version
-          value: "${{ github.event.inputs.releaseName }}"
           commitChange: false
 
       - name: Commit artifacthub-pkg.yml
