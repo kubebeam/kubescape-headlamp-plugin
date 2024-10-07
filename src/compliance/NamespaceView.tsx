@@ -6,9 +6,9 @@ import {
   SectionBox,
   Table,
 } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
-import { WorkloadScan } from 'src/vulnerabilities/fetch-vulnerabilities';
 import { RoutingPath } from '../index';
 import { WorkloadConfigurationScanSummary } from '../softwarecomposition/WorkloadConfigurationScanSummary';
+import { WorkloadScan } from '../vulnerabilities/fetch-vulnerabilities';
 class NamespaceResult {
   namespace: string;
   criticalCount: number = 0;

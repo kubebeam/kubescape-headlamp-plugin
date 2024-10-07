@@ -3,13 +3,12 @@
 */
 import { Link, SectionBox, Table } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import { Box, Stack, Tooltip } from '@mui/material';
-import { WorkloadScan } from 'src/vulnerabilities/fetch-vulnerabilities';
 import { RoutingPath } from '../index';
 import { WorkloadConfigurationScanSummary } from '../softwarecomposition/WorkloadConfigurationScanSummary';
 import controlLibrary from './controlLibrary';
 
 export default function KubescapeWorkloadConfigurationScanList(props: {
-  workloadScanData: WorkloadScan[];
+  workloadScanData: WorkloadConfigurationScanSummary[];
 }) {
   const { workloadScanData } = props;
   if (!workloadScanData) {

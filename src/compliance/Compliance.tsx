@@ -13,7 +13,6 @@ import { createRouteURL } from '@kinvolk/headlamp-plugin/lib/Router';
 import { Box, FormControlLabel, Link, Switch, Tooltip } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { RotatingLines } from 'react-loader-spinner';
-import { WorkloadScan } from 'src/vulnerabilities/fetch-vulnerabilities';
 import { RoutingPath } from '../index';
 import { deepListQuery } from '../model';
 import { WorkloadConfigurationScanSummary } from '../softwarecomposition/WorkloadConfigurationScanSummary';
@@ -26,7 +25,8 @@ export let globalWorkloadScanData: WorkloadConfigurationScanSummary[] | null = n
 let currentClusterURL = '';
 
 export default function ComplianceView() {
-  const [workloadScanData, setWorkloadScanData] = useState<WorkloadScan[]>(null);
+  const [workloadScanData, setWorkloadScanData] =
+    useState<WorkloadConfigurationScanSummary[]>(null);
 
   useEffect(() => {
     if (
@@ -67,7 +67,9 @@ export default function ComplianceView() {
   );
 }
 
-function ConfigurationScanningListView(props: { workloadScanData: WorkloadScan[] }) {
+function ConfigurationScanningListView(props: {
+  workloadScanData: WorkloadConfigurationScanSummary[];
+}) {
   const { workloadScanData } = props;
   if (!workloadScanData)
     return (
