@@ -1,7 +1,7 @@
-version: v0.1.0-beta
+version: v0.2.0-beta
 name: headlamp_kubescape
 displayName: Kubescape Headlamp Plugin
-createdAt: '2024-09-19T16:35:19Z'
+createdAt: '2024-10-07T07:24:59Z'
 description: Kubescape compliance and vulnerabilities in Headlamp.
 homeURL: https://github.com/Kubebeam/kubescape-headlamp-plugin
 logoURL: https://avatars.githubusercontent.com/u/100554170
@@ -15,10 +15,9 @@ screenshots:
     url: https://github.com/Kubebeam/kubescape-headlamp-plugin/blob/main/demo/compliance.png
   - title: Vulnerabilities
     url: https://github.com/Kubebeam/kubescape-headlamp-plugin/blob/main/demo/vulnerabilities.png
-
 annotations:
-  headlamp/plugin/archive-url: https://github.com/Kubebeam/kubescape-headlamp-plugin/releases/download/v0.1.0-beta/kubescape-headlamp-plugin-v0.1.0-beta.tar.gz
-  headlamp/plugin/archive-checksum: SHA256:40c6806893397f21db4ed0ab970b243bdc6615e1c201b932c4e291b56ff5d055
+  headlamp/plugin/archive-url: https://github.com/kubebeam/kubescape-headlamp-plugin/releases/download/v0.2.0-beta/kubescape-headlamp-plugin-v0.2.0-beta.tar.gz
+  headlamp/plugin/archive-checksum: SHA256:3bd6e6e73bc7a9a3e6b4feb7266305c8d73421e0630f682c31fe181c96c1fb93
   headlamp/plugin/version-compat: '>=0.25'
   headlamp/plugin/distro-compat: in-cluster,web,docker-desktop,desktop
 readme: |
@@ -77,7 +76,6 @@ readme: |
   - View a resource (e.g. Deployment), see a summary of configuration issues
 
   Multitenant clusters are supported with help of [allowed namespaces](https://headlamp.dev/docs/latest/faq/#i-cannot-access-any-section-in-my-cluster-it-keeps-saying-access-denied) cluster setting.
-
 install: |
   Desktop Headlamp 
   - Install Headlamp (https://headlamp.dev/docs/latest/installation/desktop/)
