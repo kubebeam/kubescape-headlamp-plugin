@@ -2,8 +2,6 @@
 
 Kubescape provides several reporting objects that can be retrieved via the K8s API server.
 
-### Image Scanning
-
 ```mermaid
 
  classDiagram
@@ -32,21 +30,13 @@ Kubescape provides several reporting objects that can be retrieved via the K8s A
     VulnerabilityManifestSummary --> VulnerabilityManifest
     VulnerabilitySummary --> VulnerabilityManifestSummary
     VulnerabilityManifest --> SBOMSyft
-```
 
-### Configuration Scanning
-
-```mermaid
- classDiagram
+    K8sNamespace --> VulnerabilitySummary
+    K8sWorkload --> VulnerabilityManifest
+    K8sWorkload --> VulnerabilityManifestSummary
 
     class ConfigurationScanSummary {
         metadata
-    }
-
-    class WorkloadConfigurationScanSummary {
-        metadata
-        spec.controls: []Rego Control
-        spec.severities: []int
     }
 
     class WorkloadConfigurationScan {
@@ -55,22 +45,19 @@ Kubescape provides several reporting objects that can be retrieved via the K8s A
         spec.severities: []int
     }
 
+    class WorkloadConfigurationScanSummary {
+        metadata
+        spec.controls: []Rego Control
+        spec.severities: []int
+    }
+
+    K8sNamespace --> ConfigurationScanSummary
+    K8sWorkload --> WorkloadConfigurationScan
+    K8sWorkload --> WorkloadConfigurationScanSummary
     ConfigurationScanSummary --> WorkloadConfigurationScanSummary
     WorkloadConfigurationScanSummary --> WorkloadConfigurationScan
 
 ```
-
-### Information Flow
-
-Users have different information needs, dependening on their role and task.
-
-| User Flow                                                                   | Model                                                               | Notes |
-| --------------------------------------------------------------------------- | ------------------------------------------------------------------- | ----- |
-| User views deployment in Headlamp and wants to check for vulnerabilities    | Deployment -> VulnerabilityManifestSummary -> VulnerabilityManifest |       |
-| User views resource in Headlamp and wants to check for configuration issues | Resource -> WorkloadConfigurationScan                               |       |
-| User views an overview of configuration issues in the cluster               | List WorkloadConfigurationScan -> WorkloadConfigurationScan[]       |       |
-| User views an overview of vulnerabilities in K8s Cluster                    | List VulnerabilityManifestSummaries                                 |       |
-| User navigates from cluster vulnerabilities overview to details             | VulnerabilityManifestSummary -> VulnerabilityManifest               |       |
 
 ### Notes
 
