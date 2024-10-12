@@ -5,6 +5,7 @@ Kubescape provides several reporting objects that can be retrieved via the K8s A
 ### Image Scanning
 
 ```mermaid
+
  classDiagram
 
     class VulnerabilityManifestSummary {
@@ -19,12 +20,18 @@ Kubescape provides several reporting objects that can be retrieved via the K8s A
     }
 
     class VulnerabilitySummary {
-        metadata.name: Namespace
+        metadata
         spec.vulnerabilitiesRef: []VulnerabilityManifestSummary
+    }
+
+    class SBOMSyft {
+        metadata
+        syft: SBOMSyft.Syft
     }
 
     VulnerabilityManifestSummary --> VulnerabilityManifest
     VulnerabilitySummary --> VulnerabilityManifestSummary
+    VulnerabilityManifest --> SBOMSyft
 ```
 
 ### Configuration Scanning
@@ -33,7 +40,7 @@ Kubescape provides several reporting objects that can be retrieved via the K8s A
  classDiagram
 
     class ConfigurationScanSummary {
-
+        metadata
     }
 
     class WorkloadConfigurationScanSummary {
@@ -71,8 +78,6 @@ Users have different information needs, dependening on their role and task.
 
 - The list queries do not provide details but only metadata. This makes it challenging for the GUI. As a workaround the plugin makes multiple calls to individual resources.
 
-- WorkloadConfigurationScan and VulnerabilityManifest provide most of the information.
-
 - ConfigurationScanSummary and VulnerabilitySummary are returned by Kubescape without UID in the metadata. This makes it harder to retrieve these objects with the HeadLamp api proxy, because the retrieved list is put in a map by UID. As a workaround we use ApiProxy.request() instead of useApiList().
 
-- Overview page for ConfigurationScan (Compliance) makes a lot of K8s calls, the list queries cannot be used. This might become an issue for big clusters. Maybe we can improve a bit by caching.
+- Overview page for ConfigurationScan (Compliance) makes a lot of K8s calls, the list queries cannot be used. This might become an issue for big clusters.

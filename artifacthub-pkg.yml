@@ -12,9 +12,9 @@ links:
     url: https://kubescape.io/docs/operator/
 screenshots:
   - title: Compliance
-    url: https://github.com/kubebeam/kubescape-headlamp-plugin/blob/693d664b433f3f3c03e7a8337cd665eb4be32b8e/demo/compliance.png
+    url: https://raw.githubusercontent.com/kubebeam/kubescape-headlamp-plugin/693d664b433f3f3c03e7a8337cd665eb4be32b8e/demo/compliance.png
   - title: Vulnerabilities
-    url: https://github.com/kubebeam/kubescape-headlamp-plugin/blob/693d664b433f3f3c03e7a8337cd665eb4be32b8e/demo/vulnerabilities.png
+    url: https://raw.githubusercontent.com/kubebeam/kubescape-headlamp-plugin/693d664b433f3f3c03e7a8337cd665eb4be32b8e/demo/vulnerabilities.png
 
 annotations:
   headlamp/plugin/archive-url: https://github.com/kubebeam/kubescape-headlamp-plugin/releases/download/v0.2.0-beta/kubescape-headlamp-plugin-v0.2.0-beta.tar.gz
