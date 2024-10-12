@@ -50,12 +50,18 @@ Pages allow for navigation to detailed and related information.
 
 ## Installation
 
-The installation files can be found on the release page in github. (https://github.com/Kubebeam/kubescape-headlamp-plugin/releases/). Here you can download the tarball.
+#### Desktop Headlamp
 
-For desktop versions of Headlamp, find the plugin folder, create a new folder kubescape-plugin, extract the `main.js` and `package.json` from the tarball.
+- Install Headlamp (https://headlamp.dev/docs/latest/installation/desktop/)
+- Open Plugin Catalog
+- Select the KubeScape Headlamp plugin and click the install button
+- After install you may need to restart Headlamp
 
-For in-cluster Headlamp deployments, the installation files need to be added to the plugin folder of the headlamp deployment. A simple solution is to download the plugin files with an initContainer. See [example helm values](./examples/headlamp-helm-values.yaml).
-The guidance from headlamp for in-cluster deployment is to create a container image with the plugin artifacts: https://headlamp.dev/blog/2022/10/20/best-practices-for-deploying-headlamp-with-plugins/.
+#### In-cluster Headlamp
+
+- Install Headlamp (https://headlamp.dev/docs/latest/installation/in-cluster/)
+- The installation files can be found on the release page in github. Here you can download the tarball. Add an initContainer to the headlamp install to download the plugin files. See [example helm values](https://github.com/Kubebeam/kubescape-headlamp-plugin/blob/main/examples/headlamp-helm-values.yaml).
+- Alternatively follow the guidance from headlamp to create a container image with the plugin artifacts: https://headlamp.dev/blog/2022/10/20/best-practices-for-deploying-headlamp-with-plugins/.
 
 ## Docs
 
