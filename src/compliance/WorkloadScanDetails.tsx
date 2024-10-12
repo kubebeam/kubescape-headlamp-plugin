@@ -47,7 +47,7 @@ export default function KubescapeWorkloadConfigurationScanDetails() {
             },
             {
               name: 'Namespace',
-              value: configurationScan.metadata.namespace,
+              value: configurationScan.metadata.labels['kubescape.io/workload-namespace'],
             },
             {
               name: 'Kind',
@@ -94,7 +94,7 @@ function Controls(props: { workloadConfigurationScan: WorkloadConfigurationScan 
                   target="_blank"
                   href={'https://hub.armosec.io/docs/' + cell.getValue().toLowerCase()}
                 >
-                  {cell.getValue().controlID}
+                  {cell.getValue()}
                 </Link>
               );
             },
@@ -119,11 +119,11 @@ function Controls(props: { workloadConfigurationScan: WorkloadConfigurationScan 
             accessorKey: 'severity.severity',
             gridTemplate: 'min-content',
           },
-          {
-            header: 'Score',
-            accessorKey: 'severity.scoreFactor',
-            gridTemplate: 'min-content',
-          },
+          // {
+          //   header: 'Score',
+          //   accessorKey: 'severity.scoreFactor',
+          //   gridTemplate: 'min-content',
+          // },
           {
             header: 'Explain',
             accessorFn: (control: WorkloadConfigurationScan.Control) =>

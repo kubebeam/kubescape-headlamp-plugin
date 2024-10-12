@@ -104,9 +104,6 @@ function Matches(props: {
   const results: VulnerabilityManifest.Match[] = manifest?.spec.payload.matches;
   const [isRelevantCVESwitchChecked, setIsRelevantCVESwitchChecked] = useState(true);
 
-  if (results)
-    results.sort((a, b) => a.vulnerability.severity.localeCompare(b.vulnerability.severity));
-
   let relevantResults;
   if (isRelevantCVESwitchChecked && relevant?.spec.payload.matches && results) {
     relevantResults = results.filter(r =>
@@ -128,6 +125,12 @@ function Matches(props: {
         data={relevantResults ?? results}
         columns={[
           {
+            header: 'Severity',
+            accessorKey: 'vulnerability.severity',
+            Cell: ({ cell }: any) => makeSeverityLabel(cell.getValue()),
+            gridTemplate: 'auto',
+          },
+          {
             header: 'CVE',
             accessorKey: 'vulnerability.id',
             Cell: ({ cell }: any) => (
@@ -138,6 +141,13 @@ function Matches(props: {
             gridTemplate: 'auto',
           },
           {
+            id: 'Score',
+            header: 'CVSS',
+            accessorFn: (match: VulnerabilityManifest.Match) =>
+              match.vulnerability.cvss ? match.vulnerability.cvss[0].metrics.baseScore : 0,
+            gridTemplate: 'auto',
+          },
+          {
             header: 'Artifact',
             accessorKey: 'artifact.name',
             gridTemplate: 'auto',
@@ -145,12 +155,6 @@ function Matches(props: {
           {
             header: 'Version',
             accessorKey: 'artifact.version',
-            gridTemplate: 'auto',
-          },
-          {
-            header: 'Severity',
-            accessorKey: 'vulnerability.severity',
-            Cell: ({ cell }: any) => makeSeverityLabel(cell.getValue()),
             gridTemplate: 'auto',
           },
           {
@@ -186,6 +190,14 @@ function Matches(props: {
             Cell: ({ cell }: any) => <ShowHideLabel>{cell.getValue()}</ShowHideLabel>,
           },
         ]}
+        initialState={{
+          sorting: [
+            {
+              id: 'Score',
+              desc: true,
+            },
+          ],
+        }}
       />
     </SectionBox>
   );

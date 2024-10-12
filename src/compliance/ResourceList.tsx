@@ -2,7 +2,8 @@
   List configuration scans for all workloads.  
 */
 import { Link, SectionBox, Table } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
-import { Box, Stack, Tooltip } from '@mui/material';
+import { Box, FormControlLabel, Stack, Switch, Tooltip } from '@mui/material';
+import { useState } from 'react';
 import { RoutingPath } from '../index';
 import { WorkloadConfigurationScanSummary } from '../softwarecomposition/WorkloadConfigurationScanSummary';
 import controlLibrary from './controlLibrary';
@@ -10,6 +11,7 @@ import controlLibrary from './controlLibrary';
 export default function KubescapeWorkloadConfigurationScanList(props: {
   workloadScanData: WorkloadConfigurationScanSummary[];
 }) {
+  const [isFailedControlSwitchChecked, setIsFailedControlSwitchChecked] = useState(true);
   const { workloadScanData } = props;
   if (!workloadScanData) {
     return <></>;
@@ -21,25 +23,33 @@ export default function KubescapeWorkloadConfigurationScanList(props: {
       <h5>
         {workloadScanData.length} resources scanned, {workloadsWithFindings.length} failed
       </h5>
+      <FormControlLabel
+        checked={isFailedControlSwitchChecked}
+        control={<Switch color="primary" />}
+        label={'Failed controls'}
+        onChange={(event: any, checked: boolean) => {
+          setIsFailedControlSwitchChecked(checked);
+        }}
+      />
       <SectionBox>
         <Table
-          data={workloadsWithFindings}
+          data={isFailedControlSwitchChecked ? workloadsWithFindings : workloadScanData}
           columns={[
             {
               header: 'Name',
-              accessorFn: (workloadScan: WorkloadConfigurationScanSummary) => {
-                return (
-                  <Link
-                    routeName={RoutingPath.KubescapeWorkloadConfigurationScanDetails}
-                    params={{
-                      name: workloadScan.metadata.name,
-                      namespace: workloadScan.metadata.namespace,
-                    }}
-                  >
-                    {workloadScan.metadata.labels['kubescape.io/workload-name']}
-                  </Link>
-                );
-              },
+              accessorFn: (workloadScan: WorkloadConfigurationScanSummary) =>
+                workloadScan.metadata.labels['kubescape.io/workload-name'],
+              Cell: ({ cell, row }: any) => (
+                <Link
+                  routeName={RoutingPath.KubescapeWorkloadConfigurationScanDetails}
+                  params={{
+                    name: row.original.metadata.name,
+                    namespace: row.original.metadata.namespace,
+                  }}
+                >
+                  {cell.getValue()}
+                </Link>
+              ),
               gridTemplate: 'auto',
             },
             {
@@ -50,16 +60,21 @@ export default function KubescapeWorkloadConfigurationScanList(props: {
             },
             {
               header: 'Namespace',
-              accessorFn: (workloadScan: WorkloadConfigurationScanSummary) => (
-                <Link
-                  routeName="namespace"
-                  params={{
-                    name: workloadScan.metadata.namespace,
-                  }}
-                >
-                  {workloadScan.metadata.labels['kubescape.io/workload-namespace']}
-                </Link>
-              ),
+              accessorFn: (workloadScan: WorkloadConfigurationScanSummary) =>
+                workloadScan.metadata.labels['kubescape.io/workload-namespace'],
+              Cell: ({ cell }: any) => {
+                if (cell.getValue())
+                  return (
+                    <Link
+                      routeName="namespace"
+                      params={{
+                        name: cell.getValue(),
+                      }}
+                    >
+                      {cell.getValue()}
+                    </Link>
+                  );
+              },
               gridTemplate: 'auto',
             },
             {

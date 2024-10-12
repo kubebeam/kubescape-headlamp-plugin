@@ -91,6 +91,19 @@ function ConfigurationScanningListView(props: {
   const [isFailedControlSwitchChecked, setIsFailedControlSwitchChecked] = useState(true);
   const controls = isFailedControlSwitchChecked ? controlsWithFindings : controlLibrary;
 
+  // const scores = controls.map(control => {
+  //   const evaluated = workloadScanData
+  //     .flatMap(w => Object.values(w.spec.controls))
+  //     .filter(scan => scan.controlID === control.controlID).length;
+  //   const passed = workloadScanData
+  //     .flatMap(w => Object.values(w.spec.controls))
+  //     .filter(scan => scan.controlID === control.controlID)
+  //     .filter(scan => scan.status.status === 'passed').length;
+  //   return passed / evaluated;
+  // });
+  // const sumScore =
+  //   ((scores.reduce((sum, item) => sum + item, 0) / controls.length) * 100).toFixed(0) + '%';
+
   return (
     <>
       <h5>
@@ -161,6 +174,16 @@ function ConfigurationScanningListView(props: {
                 workloadScanData ? makeResultsLabel(workloadScanData, control) : '',
               gridTemplate: 'auto',
             },
+            // {
+            //   header: 'Score',
+            //   accessorFn: (control: Control) => {
+            //     const evaluated = workloadScanData
+            //       .flatMap(w => Object.values(w.spec.controls))
+            //       .filter(scan => scan.controlID === control.controlID).length;
+            //     const passed = countScans(workloadScanData, control, 'passed');
+            //     return ((passed * 100) / evaluated).toFixed(0) + '%';
+            //   },
+            // },
           ]}
           initialState={{
             sorting: [

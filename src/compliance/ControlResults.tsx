@@ -23,6 +23,12 @@ export default function KubescapeControlResults() {
   if (!control) {
     return <p>The control {controlID} was not found.</p>;
   }
+
+  const resourceList =
+    globalWorkloadScanData?.filter(w =>
+      Object.values(w.spec.controls).some(scan => scan.controlID === controlID)
+    ) ?? [];
+
   return (
     <>
       <SectionBox
@@ -40,10 +46,6 @@ export default function KubescapeControlResults() {
               value: control.category?.name,
             },
             {
-              name: 'Score',
-              value: control.baseScore.toString(),
-            },
-            {
               name: 'Remediation',
               value: control.remediation,
             },
@@ -58,14 +60,27 @@ export default function KubescapeControlResults() {
                 </Link>
               ),
             },
+            {
+              name: 'Passed',
+              value: `${getPassedResources(resourceList, controlID).length} of ${
+                resourceList.length
+              }`,
+            },
           ]}
         />
       </SectionBox>
 
-      <SectionBox title="Failed resources">
+      <SectionBox title="Resources">
         <Table
-          data={getFailedWorkloads(globalWorkloadScanData, controlID)}
+          data={resourceList}
           columns={[
+            {
+              header: 'Status',
+              accessorFn: (workloadScan: WorkloadConfigurationScanSummary) =>
+                Object.values(workloadScan.spec.controls).find(
+                  control => control.controlID === controlID
+                )?.status.status,
+            },
             {
               header: 'Name',
               Cell: ({ cell }: any) => (
@@ -89,17 +104,24 @@ export default function KubescapeControlResults() {
             },
             {
               header: 'Namespace',
-              accessorKey: 'metadata.namespace',
-              Cell: ({ cell }: any) => makeNamespaceLink(cell.getValue()),
+              accessorFn: (workloadScan: WorkloadConfigurationScanSummary) =>
+                workloadScan.metadata.labels['kubescape.io/workload-namespace'],
+              Cell: ({ cell }: any) => (cell.getValue() ? makeNamespaceLink(cell.getValue()) : ''),
             },
             {
-              header: 'Scan',
+              header: 'Scan name',
               accessorFn: (workloadScan: WorkloadConfigurationScanSummary) =>
                 workloadScan.metadata.name,
             },
             {
               header: '',
               accessorFn: (workloadScan: WorkloadConfigurationScanSummary) => {
+                if (
+                  Object.values(workloadScan.spec.controls).find(
+                    control => control.controlID === controlID
+                  )?.status.status === WorkloadConfigurationScanSummary.Status.Passed
+                )
+                  return;
                 //if (control.rules.some(rule => rule.paths)) {
                 return (
                   <HeadlampLink
@@ -123,20 +145,15 @@ export default function KubescapeControlResults() {
   );
 }
 
-function getFailedWorkloads(
-  workloadScanData: WorkloadConfigurationScanSummary[] | null,
+function getPassedResources(
+  workloadScanData: WorkloadConfigurationScanSummary[],
   controlID: string
-) {
-  const workloads = [];
-  if (workloadScanData) {
-    for (const workload of workloadScanData) {
-      for (const scan of Object.values(workload.spec.controls) as any) {
-        if (scan.controlID === controlID && scan.status.status === 'failed') {
-          workloads.push(workload);
-          break;
-        }
-      }
-    }
-  }
-  return workloads;
+): WorkloadConfigurationScanSummary[] {
+  return workloadScanData.filter(w =>
+    Object.values(w.spec.controls).some(
+      scan =>
+        scan.controlID === controlID &&
+        scan.status.status === WorkloadConfigurationScanSummary.Status.Passed
+    )
+  );
 }

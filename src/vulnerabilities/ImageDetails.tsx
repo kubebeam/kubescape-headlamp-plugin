@@ -54,9 +54,6 @@ function Matches(props: { manifestVulnerability: VulnerabilityManifest }) {
   const { manifestVulnerability } = props;
   const results = manifestVulnerability.spec.payload.matches;
 
-  if (results)
-    results.sort((a, b) => a.vulnerability.severity.localeCompare(b.vulnerability.severity));
-
   return (
     <SectionBox title="Findings">
       <HeadlampTable
@@ -78,6 +75,13 @@ function Matches(props: { manifestVulnerability: VulnerabilityManifest }) {
                 </Link>
               );
             },
+            gridTemplate: 'auto',
+          },
+          {
+            id: 'Score',
+            header: 'CVSS',
+            accessorFn: (match: VulnerabilityManifest.Match) =>
+              match.vulnerability.cvss ? match.vulnerability.cvss[0].metrics.baseScore : 0,
             gridTemplate: 'auto',
           },
           {
@@ -119,6 +123,14 @@ function Matches(props: { manifestVulnerability: VulnerabilityManifest }) {
             Cell: ({ cell }: any) => <ShowHideLabel>{cell.getValue()}</ShowHideLabel>,
           },
         ]}
+        initialState={{
+          sorting: [
+            {
+              id: 'Score',
+              desc: true,
+            },
+          ],
+        }}
       />
     </SectionBox>
   );
