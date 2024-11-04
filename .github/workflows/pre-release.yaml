@@ -30,6 +30,7 @@ jobs:
     strategy:
       matrix:
         node-version: [21.x]
+        go-version: [1.23.x]
 
     steps:
       - uses: actions/checkout@v4
@@ -38,6 +39,19 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
+
+      - name: Setup Go ${{ matrix.go-version }}
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ matrix.go-version }}
+
+      - name: Download WASM and KubeScape files
+        run: |
+          mkdir -p dist 
+          make download
+
+      - name: Build Golang WASM
+        run: make build
 
       - run: npm ci
 
@@ -57,7 +71,7 @@ jobs:
       - name: create-archive
         run: |
           mkdir -p kubescape-plugin
-          cp dist/main.js package.json kubescape-plugin
+          cp package.json dist/*.js dist/*.wasm dist/*.yaml kubescape-plugin
           tar -czf ${RELEASE_TAR} kubescape-plugin
 
       - name: create-checksum

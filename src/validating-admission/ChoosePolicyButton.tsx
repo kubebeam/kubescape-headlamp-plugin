@@ -1,0 +1,47 @@
+import { FormControl, MenuItem, SelectChangeEvent, Stack, TextField } from '@mui/material';
+import * as yaml from 'js-yaml';
+import { useContext, useEffect, useState } from 'react';
+import { ValidatingAdmissionPolicy } from '../types/ValidatingAdmissionPolicy';
+import { CurrentEvalContext } from './ValidatingAdmissionPolicy';
+
+export function ChoosePolicyButton() {
+  const { setValidatingAdmissionPolicy } = useContext(CurrentEvalContext);
+  const [policies, setKubescapeValidatingAdmissionPolicies]: [ValidatingAdmissionPolicy[], any] =
+    useState([]);
+
+  useEffect(() => {
+    const kubescapeValidatingAdmissionPoliciesURL =
+      '/plugins/kubescape-plugin/validating-admission-policies.yaml';
+    fetch(kubescapeValidatingAdmissionPoliciesURL)
+      .then(response => response.text())
+      .then(data => setKubescapeValidatingAdmissionPolicies(yaml.loadAll(data)));
+  }, []);
+
+  const handleChange = (event: SelectChangeEvent) => {
+    setSelectedValue(event.target.value);
+    setValidatingAdmissionPolicy(
+      policies?.find(policy => policy.metadata.name === event.target.value)
+    );
+  };
+
+  const [selectedValue, setSelectedValue] = useState('');
+
+  return (
+    <Stack direction="row" spacing={0}>
+      <FormControl variant="outlined" sx={{ width: 600 }}>
+        <TextField
+          select
+          value={selectedValue}
+          onChange={handleChange}
+          label="Choose Sample Policy"
+        >
+          {policies?.map((policy, indx) => (
+            <MenuItem key={indx} value={policy.metadata.name}>
+              {policy.metadata.name}
+            </MenuItem>
+          ))}
+        </TextField>
+      </FormControl>
+    </Stack>
+  );
+}
