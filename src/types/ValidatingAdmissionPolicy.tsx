@@ -13,16 +13,11 @@ export interface ValidatingAdmissionPolicy {
   metadata: Metadata;
   spec: {
     paramKind?: ValidatingAdmissionPolicy.ParamKind;
-    matchConstraints: ValidatingAdmissionPolicy.MatchResources[];
     validations?: ValidatingAdmissionPolicy.Validation[];
     failurePolicy?: 'Fail' | 'Ignore';
     auditAnnotations?: ValidatingAdmissionPolicy.AuditAnnotation[];
     matchConditions?: ValidatingAdmissionPolicy.MatchCondition[];
     variables?: ValidatingAdmissionPolicy.Variable[];
-  };
-
-  status: {
-    typeChecking: ValidatingAdmissionPolicy.TypeChecking;
   };
 }
 
@@ -53,49 +48,4 @@ export namespace ValidatingAdmissionPolicy {
     expression: string;
     name: string;
   }
-
-  export interface TypeChecking {
-    expressionWarnings: ExpressionWarning[];
-  }
-
-  export interface ExpressionWarning {
-    fieldRef: string;
-    warning: string;
-  }
-
-  export interface MatchResources {
-    // TODO
-  }
 }
-
-// FIELDS:
-//   spec	<ValidatingAdmissionPolicySpec>
-//     matchConstraints	<MatchResources>
-//       excludeResourceRules	<[]NamedRuleWithOperations>
-//         apiGroups	<[]string>
-//         apiVersions	<[]string>
-//         operations	<[]string>
-//         resourceNames	<[]string>
-//         resources	<[]string>
-//         scope	<string>
-//       matchPolicy	<string>
-//       enum: Equivalent, Exact
-//       namespaceSelector	<LabelSelector>
-//         matchExpressions	<[]LabelSelectorRequirement>
-//           key	<string> -required-
-//           operator	<string> -required-
-//           values	<[]string>
-//         matchLabels	<map[string]string>
-//       objectSelector	<LabelSelector>
-//         matchExpressions	<[]LabelSelectorRequirement>
-//           key	<string> -required-
-//           operator	<string> -required-
-//           values	<[]string>
-//         matchLabels	<map[string]string>
-//       resourceRules	<[]NamedRuleWithOperations>
-//         apiGroups	<[]string>
-//         apiVersions	<[]string>
-//         operations	<[]string>
-//         resourceNames	<[]string>
-//         resources	<[]string>
-//         scope	<string>
