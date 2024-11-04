@@ -28,6 +28,7 @@ export namespace RoutingPath {
   export const KubescapeNetworkPolicies = '/kubescape/networkpolicies';
   export const KubescapeNetworkPolicyDiagram = '/kubescape/networkpolicies/:namespace/:name';
   export const KubescapeSBOMDetails = '/kubescape/sbom/:name';
+  export const VAP = '/kubescape/vap';
 }
 
 // Kubescape main sidebar
@@ -58,6 +59,13 @@ registerSidebarEntry({
   name: 'networkpolicies',
   label: 'Network Policies',
   url: RoutingPath.KubescapeNetworkPolicies,
+});
+
+registerSidebarEntry({
+  parent: kubescape,
+  name: 'vap-policies',
+  label: 'Policies',
+  url: RoutingPath.VAP,
 });
 
 import ComplianceView from './compliance/Compliance';
@@ -203,6 +211,17 @@ registerRoute({
   name: 'Network Policy Diagram',
 });
 
+import { ValidatingAdmissionPolicyEditor } from './validating-admission/ValidatingAdmissionPolicy';
+
+registerRoute({
+  path: RoutingPath.VAP,
+  parent: 'vap',
+  sidebar: 'vap-policies',
+  component: () => <ValidatingAdmissionPolicyEditor />,
+  exact: true,
+  name: 'Validation Admission Policies',
+});
+
 // Detail panel for workloads
 import addKubescapeWorkloadSection from './sections/WorkloadSection';
 
@@ -212,3 +231,7 @@ registerDetailsViewSectionsProcessor(addKubescapeWorkloadSection);
 import addKubescapeNamespaceSection from './sections/NamespaceSection';
 
 registerDetailsViewSectionsProcessor(addKubescapeNamespaceSection);
+
+import { loadWasm } from './wasm/initWasmModule';
+
+loadWasm();
