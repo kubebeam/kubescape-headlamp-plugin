@@ -36,7 +36,9 @@ jobs:
           go-version: ${{ matrix.go-version }}
 
       - name: Download WASM and KubeScape files
-        run: make download
+        run: |
+          mkdir -p dist 
+          make download
 
       - name: Build Golang WASM
         run: make build
