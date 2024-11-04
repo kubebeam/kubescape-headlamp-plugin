@@ -64,7 +64,7 @@ registerSidebarEntry({
 registerSidebarEntry({
   parent: kubescape,
   name: 'vap-policies',
-  label: 'Policies',
+  label: 'Policy Playground',
   url: RoutingPath.VAP,
 });
 

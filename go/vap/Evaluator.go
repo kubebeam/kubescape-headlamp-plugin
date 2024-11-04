@@ -1,25 +1,9 @@
-// Copyright 2023 Undistro Authors
-//matchConditionsCelVar
-
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 package vap
 
 import (
 	"fmt"
 	"log"
 	"reflect"
-	"strings"
 
 	"github.com/google/cel-go/cel"
 	"github.com/google/cel-go/common/types"
@@ -130,76 +114,6 @@ func NewAdmissionPolicyEvaluator(policy, object, oldObject, request, params, nam
 	}
 
 	return &evaluator, nil
-}
-
-func (evaluator *AdmissionPolicyEvaluator) CheckMatchConstraints() {
-
-	if _, ok := evaluator.object["apiVersion"]; !ok {
-		return
-	}
-	if _, ok := evaluator.object["kind"]; !ok {
-		return
-	}
-
-	kind := evaluator.object["kind"].(string)
-	apiVersion := evaluator.object["apiVersion"].(string)
-
-	group := ""
-	version := ""
-
-	if strings.Index(apiVersion, "/") > 0 {
-		group = strings.Split(apiVersion, "/")[0]
-		version = strings.Split(apiVersion, "/")[1]
-	} else {
-		version = apiVersion
-	}
-
-	for _, resourceRule := range evaluator.policy.Spec.MatchConstraints.ResourceRules {
-		if match(resourceRule, group, version, kind) {
-			evaluator.Results.MatchConstraints = true
-			return
-		}
-	}
-}
-
-func match(resourceRule NamedRuleWithOperations, group string, version string, kind string) bool {
-	groupOK := false
-	versionOK := false
-	resourceOK := false
-
-	kindPlural := kind + "s"
-
-	for _, apiGroup := range resourceRule.APIGroups {
-		if apiGroup == group {
-			groupOK = true
-			break
-		}
-	}
-	if !versionOK {
-		log.Printf("Group %s NOT Matched", group)
-	}
-
-	for _, apiVersion := range resourceRule.APIVersions {
-		if apiVersion == version {
-			versionOK = true
-			break
-		}
-	}
-	if !versionOK {
-		log.Printf("Version %s NOT Matched", version)
-	}
-
-	for _, resource := range resourceRule.Resources {
-		if strings.EqualFold(resource, kindPlural) {
-			resourceOK = true
-			break
-		}
-	}
-	if !resourceOK {
-		log.Printf("Resource kind %s NOT Matched", kindPlural)
-	}
-
-	return groupOK && versionOK && resourceOK
 }
 
 func (evaluator *AdmissionPolicyEvaluator) Evaluate() {
