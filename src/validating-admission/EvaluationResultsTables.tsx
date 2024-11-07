@@ -1,7 +1,6 @@
-import { Icon } from '@iconify/react';
-import { Table as HeadlampTable } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
+import { ShowHideLabel } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import { TabContext, TabList } from '@mui/lab';
-import { Tab, useTheme } from '@mui/material';
+import { Box, Tab, Table, TableBody, TableCell, TableHead, TableRow } from '@mui/material';
 import { useState } from 'react';
 import { TabPanel } from '../common/TabPanel';
 
@@ -42,103 +41,61 @@ export function EvaluationResultsTables(props: { evaluationResult: EvaluationRes
           setTabValue(newValue);
         }}
       >
-        <Tab
-          label="Variables"
-          disabled={!evaluationResult?.variables}
-          value={1}
-          iconPosition="end"
-          icon={<StatusIcon evaluations={evaluationResult?.variables} />}
-        />
-        <Tab
-          label="Match Conditions"
-          disabled={!evaluationResult?.matchConditions}
-          value={2}
-          iconPosition="end"
-          icon={<StatusIcon evaluations={evaluationResult?.matchConditions} />}
-        />
-        <Tab
-          label="Validations"
-          disabled={!evaluationResult?.validations}
-          value={3}
-          iconPosition="end"
-          icon={<StatusIcon evaluations={evaluationResult?.validations} showValid />}
-        />
-        <Tab
-          label="Audit Annotations"
-          disabled={!evaluationResult?.auditAnnotations}
-          value={4}
-          iconPosition="end"
-          icon={<StatusIcon evaluations={evaluationResult?.auditAnnotations} />}
-        />
+        <Tab label="Variables" disabled={!evaluationResult?.variables} value={1} />
+        <Tab label="Match Conditions" disabled={!evaluationResult?.matchConditions} value={2} />
+        <Tab label="Validations" disabled={!evaluationResult?.validations} value={3} />
+        <Tab label="Audit Annotations" disabled={!evaluationResult?.auditAnnotations} value={4} />
       </TabList>
 
       <TabPanel value={1}>
-        <EvaluationResult data={evaluationResult?.variables} />
+        <EvaluationResult results={evaluationResult?.variables} />
       </TabPanel>
       <TabPanel value={2}>
-        <EvaluationResult data={evaluationResult?.matchConditions} />
+        <EvaluationResult results={evaluationResult?.matchConditions} />
       </TabPanel>
       <TabPanel value={3}>
-        <EvaluationResult data={evaluationResult?.validations} />
+        <EvaluationResult results={evaluationResult?.validations} />
       </TabPanel>
       <TabPanel value={4}>
-        <EvaluationResult data={evaluationResult?.auditAnnotations} />
+        <EvaluationResult results={evaluationResult?.auditAnnotations} />
       </TabPanel>
     </TabContext>
   );
 }
 
-function EvaluationResult(props: { data: any[] }) {
-  const { data } = props;
+function EvaluationResult(props: { results: EvalResult[] }) {
+  const { results } = props;
+
+  const bgColor = localStorage.headlampThemePreference === 'dark' ? 'black' : 'white';
 
   return (
-    <HeadlampTable
-      enablePagination={false}
-      enableColumnActions={false}
-      data={data}
-      columns={[
-        {
-          header: 'Name',
-          accessorFn: (variable: any) => variable.name,
-          gridTemplate: 'min-content',
-        },
-        {
-          header: 'Expression',
-          accessorFn: (variable: any) => variable.expression,
-        },
-        {
-          header: 'Value',
-          accessorFn: (variable: any) => JSON.stringify(variable.result),
-        },
-        {
-          header: 'Error',
-          accessorFn: (variable: any) => variable.error,
-        },
-        {
-          header: 'Message',
-          accessorFn: (variable: any) => (!variable.result ? variable.message : ''),
-        },
-      ]}
-    />
+    <Box sx={{ pt: 2 }}>
+      <Table>
+        <TableHead>
+          <TableRow sx={{ backgroundColor: bgColor }}>
+            <TableCell>Name</TableCell>
+            <TableCell>Expression</TableCell>
+            <TableCell>Result</TableCell>
+            <TableCell>Message</TableCell>
+            <TableCell>Error</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {results?.map(result => (
+            <TableRow key={result.name}>
+              <TableCell style={{ width: '10%' }} component="th" scope="row">
+                {result.name}
+              </TableCell>
+              <TableCell style={{ width: '25%' }}>
+                <ShowHideLabel>{result.expression}</ShowHideLabel>
+              </TableCell>
+              <TableCell style={{ width: '20%' }}>{result.result}</TableCell>
+              <TableCell style={{ width: '25%' }}>{result.message}</TableCell>
+              <TableCell style={{ width: '20%' }}>{result.error}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </Box>
   );
-}
-
-function StatusIcon(props: { evaluations: EvalResult[]; showValid?: boolean }) {
-  const { evaluations, showValid } = props;
-  const theme = useTheme();
-
-  let icon = 'mdi:check';
-  let color = theme.palette.info.main;
-
-  if (evaluations?.some(e => e.error)) {
-    icon = 'mdi:alert';
-    color = theme.palette.error.main;
-    return <Icon icon={icon} color={color} />;
-  }
-  if (showValid && evaluations?.some(e => !e.result)) {
-    icon = 'mdi:thumb-down';
-    color = theme.palette.error.main;
-    return <Icon icon={icon} color={color} />;
-  }
-  return '';
 }

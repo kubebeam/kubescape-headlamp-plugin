@@ -182,8 +182,9 @@ function AdmissionEvaluator() {
           </TabContext>
         </Grid>
       </Grid>
-
-      <EvaluationResultsTables evaluationResult={evaluationResult} />
+      {validatingAdmissionPolicy && resource && (
+        <EvaluationResultsTables evaluationResult={evaluationResult} />
+      )}
     </>
   );
 }
