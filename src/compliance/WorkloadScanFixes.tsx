@@ -16,10 +16,8 @@ import controlLibrary from './controlLibrary';
 
 export default function KubescapeWorkloadConfigurationScanFixes() {
   const [controlID, name, namespace] = getURLSegments(-1, -2, -3);
-  const [workloadConfigurationScan, setWorkloadConfigurationScan]: [
-    WorkloadConfigurationScan | null,
-    any
-  ] = useState<WorkloadConfigurationScan | null>(null);
+  const [workloadConfigurationScan, setWorkloadConfigurationScan] =
+    useState<WorkloadConfigurationScan | null>(null);
 
   const control = controlLibrary.find(element => element.controlID === controlID);
 

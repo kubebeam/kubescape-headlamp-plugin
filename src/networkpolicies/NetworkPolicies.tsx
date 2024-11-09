@@ -37,7 +37,7 @@ export default function KubescapeNetworkPolicies() {
 }
 
 function NetworkPolicyList() {
-  const [networkPolicies, setNetworkPolicies]: [any, any] = useState<GeneratedNetworkPolicy>(null);
+  const [networkPolicies, setNetworkPolicies] = useState<GeneratedNetworkPolicy[]>([]);
 
   useEffect(() => {
     listQuery(
@@ -108,7 +108,7 @@ function NetworkPolicyList() {
 }
 
 function KnownServerList() {
-  const [knownServers, setKnownServers]: [KnownServer[], any] = useState<KnownServer[]>(null);
+  const [knownServers, setKnownServers]: [KnownServer[], any] = useState<KnownServer[]>([]);
 
   useEffect(() => {
     deepListQuery('knownservers').then((result: any) => {

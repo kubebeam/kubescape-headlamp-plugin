@@ -1,5 +1,3 @@
-import './wasm_exec.js';
-import './wasmTypes.d.ts';
 import { ApiProxy } from '@kinvolk/headlamp-plugin/lib';
 import Editor from '@monaco-editor/react';
 import { TabContext, TabList } from '@mui/lab';
@@ -12,17 +10,25 @@ import { ChoosePolicyButton } from './ChoosePolicyButton';
 import { ChooseTestResource } from './ChooseTestResource';
 import { EvaluationResultsTables } from './EvaluationResultsTables';
 
-export const CurrentEvalContext = createContext(null);
+type EvalContext = {
+  resource: any;
+  setResource: (resource: any) => void;
+  setResourceForNamespace: (namespace: any) => void;
+  paramsObject: any;
+  namespaceObject: any;
+  validatingAdmissionPolicy: ValidatingAdmissionPolicy | null;
+  setValidatingAdmissionPolicy: (policy: any) => void;
+};
+
+export const CurrentEvalContext = createContext<EvalContext | null>(null);
 
 export function ValidatingAdmissionPolicyEditor() {
-  const [validatingAdmissionPolicy, setValidatingAdmissionPolicy]: [
-    ValidatingAdmissionPolicy,
-    any
-  ] = useState(null);
-  const [paramsObject, setParamsObject] = useState(null);
-  const [namespaceObject, setNamespaceObject] = useState(null);
-  const [resource, setResource] = useState(null);
-  const [resourceForNamespace, setResourceForNamespace] = useState(null);
+  const [validatingAdmissionPolicy, setValidatingAdmissionPolicy] =
+    useState<ValidatingAdmissionPolicy | null>(null);
+  const [paramsObject, setParamsObject] = useState<any | null>(null);
+  const [namespaceObject, setNamespaceObject] = useState<any | null>(null);
+  const [resource, setResource] = useState<any>(null);
+  const [resourceForNamespace, setResourceForNamespace] = useState<any | null>(null);
 
   // Get params, if defined in validatingAdmissionPolicy
   useEffect(() => {
@@ -55,11 +61,11 @@ export function ValidatingAdmissionPolicyEditor() {
       value={{
         resource,
         setResource,
+        setResourceForNamespace,
         paramsObject,
         namespaceObject,
         validatingAdmissionPolicy,
         setValidatingAdmissionPolicy,
-        setResourceForNamespace,
       }}
     >
       <Toolbar>
@@ -86,14 +92,14 @@ function AdmissionEvaluator() {
     namespaceObject,
     validatingAdmissionPolicy,
     setResourceForNamespace,
-  } = useContext(CurrentEvalContext);
+  } = useContext(CurrentEvalContext) as EvalContext;
   const [evaluationResult, setEvaluationResult] = useState(null);
 
   // Editors
-  const policyEditorRef = useRef(null);
-  const resourceEditorRef = useRef(null);
-  const paramsEditorRef = useRef(null);
-  const namespaceEditorRef = useRef(null);
+  const policyEditorRef = useRef<any>(null);
+  const resourceEditorRef = useRef<any>(null);
+  const paramsEditorRef = useRef<any>(null);
+  const namespaceEditorRef = useRef<any>(null);
 
   // Tab switching
   const [policyTabValue, setPolicyTabValue] = useState(1);
@@ -135,7 +141,6 @@ function AdmissionEvaluator() {
             <TabPanel value={1}>
               <YAMLEditor
                 editorRef={policyEditorRef}
-                //handleChange={setValidatingAdmissionPolicy}
                 submitFn={submitEvaluation}
                 value={yaml.dump(stripK8sObject(validatingAdmissionPolicy))}
               />

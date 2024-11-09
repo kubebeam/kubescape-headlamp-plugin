@@ -8,7 +8,6 @@ import {
 } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import { RoutingPath } from '../index';
 import { WorkloadConfigurationScanSummary } from '../softwarecomposition/WorkloadConfigurationScanSummary';
-import { WorkloadScan } from '../vulnerabilities/fetch-vulnerabilities';
 class NamespaceResult {
   namespace: string;
   criticalCount: number = 0;
@@ -25,7 +24,9 @@ class NamespaceResult {
   }
 }
 
-export default function NamespaceView(props: { workloadScanData: WorkloadScan[] }) {
+export default function NamespaceView(props: {
+  workloadScanData: WorkloadConfigurationScanSummary[];
+}) {
   const { workloadScanData } = props;
   if (!workloadScanData) {
     return <></>;
