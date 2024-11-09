@@ -16,7 +16,7 @@ import { VulnerabilitySummary } from '../softwarecomposition/VulnerabilitySummar
 
 export default function VulnerabilitiesNamespaceSummary() {
   const namespace = getLastURLSegment();
-  const [kubeObject, setKubeObject]: [KubeObject, any] = useState(null);
+  const [kubeObject, setKubeObject] = useState<KubeObject | null>(null);
 
   vulnerabilitySummaryClass.useApiGet(setKubeObject, namespace);
 

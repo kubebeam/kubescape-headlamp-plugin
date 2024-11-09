@@ -35,7 +35,7 @@ export let globalWorkloadScans: WorkloadScan[] | null = null;
 export let currentClusterURL = '';
 
 export default function KubescapeVulnerabilities() {
-  const [workloadScans, setWorkloadScans] = useState<WorkloadScan[]>(null);
+  const [workloadScans, setWorkloadScans] = useState<WorkloadScan[]>([]);
 
   useEffect(() => {
     if (

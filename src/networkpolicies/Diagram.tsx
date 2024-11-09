@@ -8,7 +8,7 @@ import { SectionBox, Tabs as HeadlampTabs } from '@kinvolk/headlamp-plugin/lib/C
 import { KubeObject } from '@kinvolk/headlamp-plugin/lib/lib/k8s/cluster';
 import Editor from '@monaco-editor/react';
 import { Box } from '@mui/material';
-import { Edge, MarkerType, Node, ReactFlow } from '@xyflow/react';
+import { Edge, MarkerType, Node, ReactFlow, ReactFlowInstance } from '@xyflow/react';
 import * as yaml from 'js-yaml';
 import { useEffect, useState } from 'react';
 import { getURLSegments } from '../common/url';
@@ -17,7 +17,7 @@ import { GeneratedNetworkPolicy } from '../softwarecomposition/GeneratedNetworkP
 import { nodeTypes } from './nodes';
 
 export default function KubescapeNetworkPolicyDiagram() {
-  const [networkPolicyObject, setNetworkPolicy]: [KubeObject, any] = useState<KubeObject>(null);
+  const [networkPolicyObject, setNetworkPolicy] = useState<KubeObject | null>(null);
   const [policyName, policyNamespace] = getURLSegments(-1, -2);
 
   generatedNetworkPolicyClass.useApiGet(setNetworkPolicy, policyName, policyNamespace);
@@ -67,7 +67,7 @@ function NetworkPolicyEditor(props: { generatedNetworkPolicy: GeneratedNetworkPo
 
 function NetworkPolicyDiagram(props: { generatedNetworkPolicy: GeneratedNetworkPolicy }) {
   const { generatedNetworkPolicy } = props;
-  const [reactFlowInstance, setReactFlowInstance] = useState();
+  const [reactFlowInstance, setReactFlowInstance] = useState<ReactFlowInstance>();
   const [dimensions, setDimensions] = useState({
     width: window.innerWidth,
     height: window.innerHeight,

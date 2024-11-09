@@ -14,7 +14,7 @@ export default function SBOMDetail() {
   const urlParams = new URLSearchParams(window.location.search);
   const filtered = urlParams.has('filtered');
 
-  const [sbomSyftObject, setSbomSyftObject]: [any, any] = useState<KubeObject>(null);
+  const [sbomSyftObject, setSbomSyftObject] = useState<KubeObject | null>(null);
 
   const sbomClass = filtered ? sbomSyftFilteredClass : sbomSyftClass;
   sbomClass.useApiGet(setSbomSyftObject, name, 'kubescape');

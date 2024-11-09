@@ -25,8 +25,7 @@ export let globalWorkloadScanData: WorkloadConfigurationScanSummary[] | null = n
 let currentClusterURL = '';
 
 export default function ComplianceView() {
-  const [workloadScanData, setWorkloadScanData] =
-    useState<WorkloadConfigurationScanSummary[]>(null);
+  const [workloadScanData, setWorkloadScanData] = useState<WorkloadConfigurationScanSummary[]>([]);
 
   useEffect(() => {
     if (

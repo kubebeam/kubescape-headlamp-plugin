@@ -19,7 +19,7 @@ import { VulnerabilityManifest } from '../softwarecomposition/VulnerabilityManif
 
 export default function ImageVulnerabilityDetails() {
   const name = getLastURLSegment();
-  const [manifestVulnerability, setVulnerabilityManifest] = useState<KubeObject>(null);
+  const [manifestVulnerability, setVulnerabilityManifest] = useState<KubeObject | null>(null);
 
   vulnerabilityManifestClass.useApiGet(setVulnerabilityManifest, name, 'kubescape');
 

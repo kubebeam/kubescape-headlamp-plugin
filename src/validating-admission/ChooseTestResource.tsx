@@ -4,9 +4,9 @@ import { useContext, useEffect, useState } from 'react';
 import { CurrentEvalContext } from './ValidatingAdmissionPolicy';
 
 export function ChooseTestResource() {
-  const { setResource } = useContext(CurrentEvalContext);
-  const [testFiles, setTestFiles]: [string[], any] = useState([]);
-  const [testFileNames, setTestFileNames]: [string[], any] = useState([]);
+  const { setResource } = useContext<any>(CurrentEvalContext);
+  const [testFiles, setTestFiles] = useState<unknown[]>([]);
+  const [testFileNames, setTestFileNames] = useState<string[]>([]);
 
   useEffect(() => {
     const testFilesURL = '/plugins/kubescape-plugin/vap-test-files.yaml';

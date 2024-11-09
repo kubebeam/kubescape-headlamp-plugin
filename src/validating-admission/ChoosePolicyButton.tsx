@@ -5,16 +5,19 @@ import { ValidatingAdmissionPolicy } from '../types/ValidatingAdmissionPolicy';
 import { CurrentEvalContext } from './ValidatingAdmissionPolicy';
 
 export function ChoosePolicyButton() {
-  const { setValidatingAdmissionPolicy } = useContext(CurrentEvalContext);
-  const [policies, setKubescapeValidatingAdmissionPolicies]: [ValidatingAdmissionPolicy[], any] =
-    useState([]);
+  const { setValidatingAdmissionPolicy } = useContext<any>(CurrentEvalContext);
+  const [policies, setKubescapeValidatingAdmissionPolicies] = useState<ValidatingAdmissionPolicy[]>(
+    []
+  );
 
   useEffect(() => {
     const kubescapeValidatingAdmissionPoliciesURL =
       '/plugins/kubescape-plugin/validating-admission-policies.yaml';
     fetch(kubescapeValidatingAdmissionPoliciesURL)
       .then(response => response.text())
-      .then(data => setKubescapeValidatingAdmissionPolicies(yaml.loadAll(data)));
+      .then(data =>
+        setKubescapeValidatingAdmissionPolicies(yaml.loadAll(data) as ValidatingAdmissionPolicy[])
+      );
   }, []);
 
   const handleChange = (event: SelectChangeEvent) => {
