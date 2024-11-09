@@ -89,7 +89,7 @@ function EvaluationResult(props: { results: EvalResult[] }) {
               <TableCell style={{ width: '25%' }}>
                 <ShowHideLabel>{result.expression}</ShowHideLabel>
               </TableCell>
-              <TableCell style={{ width: '20%' }}>{result.result.toString()}</TableCell>
+              <TableCell style={{ width: '20%' }}>{result.result?.toString()}</TableCell>
               <TableCell style={{ width: '25%' }}>{result.message}</TableCell>
               <TableCell style={{ width: '20%' }}>{result.error}</TableCell>
             </TableRow>
