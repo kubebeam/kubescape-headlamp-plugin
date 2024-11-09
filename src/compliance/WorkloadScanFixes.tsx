@@ -171,40 +171,40 @@ function Fix(props: {
     });
   }, []);
 
-  if (resource) {
-    // strip status
-    const strippedResource: any = Object.fromEntries(
-      Object.entries(resource).filter(([key]) => key !== 'status')
-    );
-    // strip managedFields
-    strippedResource.metadata = Object.fromEntries(
-      Object.entries(strippedResource.metadata).filter(([key]) => key !== 'managedFields')
-    );
-
-    if (control?.rules) {
-      const original = yaml.dump(strippedResource);
-
-      const fixedYAML = fixResource(strippedResource, control, rulePathPrefix ?? '');
-      const lines = fixedYAML.match(/\n/g)?.length ?? 10;
-
-      return (
-        <>
-          {/* <Editor theme="vs-dark" language="yaml" value={yaml.dump(control)} height={500} /> */}
-
-          <DiffEditor
-            theme="vs-dark"
-            language="yaml"
-            original={original}
-            modified={fixedYAML}
-            height={lines * 30}
-            options={{
-              renderSideBySide: true,
-            }}
-          />
-        </>
-      );
-    }
+  if (!resource || !control?.rules) {
+    return <></>;
   }
+
+  // strip status
+  const strippedResource: any = Object.fromEntries(
+    Object.entries(resource).filter(([key]) => key !== 'status')
+  );
+  // strip managedFields
+  strippedResource.metadata = Object.fromEntries(
+    Object.entries(strippedResource.metadata).filter(([key]) => key !== 'managedFields')
+  );
+
+  const original = yaml.dump(strippedResource);
+
+  const fixedYAML = fixResource(strippedResource, control, rulePathPrefix ?? '');
+  const lines = fixedYAML.match(/\n/g)?.length ?? 10;
+
+  return (
+    <>
+      {/* <Editor theme="vs-dark" language="yaml" value={yaml.dump(control)} height={500} /> */}
+
+      <DiffEditor
+        theme="vs-dark"
+        language="yaml"
+        original={original}
+        modified={fixedYAML}
+        height={lines * 30}
+        options={{
+          renderSideBySide: true,
+        }}
+      />
+    </>
+  );
 }
 
 // Amend the resource as per fixPath recommendations
