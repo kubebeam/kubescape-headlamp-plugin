@@ -46,6 +46,7 @@ readme: |
 
   Desktop Headlamp 
   - Install Headlamp (https://headlamp.dev/docs/latest/installation/desktop/)
+  - Configure Settings/Plugins/Plugin Catalog and make sure "Display only Official Plugins" is unchecked. 
   - Open Plugin Catalog 
   - Select the KubeScape Headlamp plugin and click the install button
   - After install you may need to restart Headlamp 
@@ -55,27 +56,15 @@ readme: |
   - The installation files can be found on the release page in github. Here you can download the tarball. Add an initContainer to the headlamp install to download the plugin files. See [example helm values](https://github.com/Kubebeam/kubescape-headlamp-plugin/blob/main/examples/headlamp-helm-values.yaml).
   - Alternatively follow the guidance from headlamp to create a container image with the plugin artifacts: https://headlamp.dev/blog/2022/10/20/best-practices-for-deploying-headlamp-with-plugins/.
 
-  ## Use cases
+  ## Functionality
 
-  For an overview of compliance in a cluster:
+  - Compliancy overview page with views on controls, resources and namespaces.
+  - Vulnerabilities overview with views on CVEs, resources and images.
+  - Generated Network policies viewer.
+  - Playground for Validation Admission Policies.
+  - The standard Headlamp pages for Namespace and Deployment provide a summary of configuration issues and vulnerabilities
 
-  - View controls
-  - View resources
-  - View namespaces
-
-  For an overview of vulnerabilty scanning in a cluster:
-
-  - View CVEs
-  - View workloads
-  - View images
-  - View SBOM
-
-  For inspecting namespaces or deployments: 
-
-  - View a namespace, see a summary of configuration issues and vulnerabilities
-  - View a resource (e.g. Deployment), see a summary of configuration issues
-
-  Multitenant clusters are supported with help of [allowed namespaces](https://headlamp.dev/docs/latest/faq/#i-cannot-access-any-section-in-my-cluster-it-keeps-saying-access-denied) cluster setting.
+  The queries to the Kubescape database use Headlamps feature for `Allowed namespaces`, supporting multi tenant clusters. Configuration of this setting is done per user in Settings/Cluster.
 install: |
   Desktop Headlamp 
   - Install Headlamp (https://headlamp.dev/docs/latest/installation/desktop/)

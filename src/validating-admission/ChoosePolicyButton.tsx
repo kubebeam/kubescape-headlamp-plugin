@@ -1,6 +1,7 @@
 import { FormControl, MenuItem, SelectChangeEvent, Stack, TextField } from '@mui/material';
 import * as yaml from 'js-yaml';
 import { useContext, useEffect, useState } from 'react';
+import { getKubescapePluginUrl } from '../common/PluginHelper';
 import { ValidatingAdmissionPolicy } from '../types/ValidatingAdmissionPolicy';
 import { CurrentEvalContext } from './ValidatingAdmissionPolicy';
 
@@ -12,7 +13,7 @@ export function ChoosePolicyButton() {
 
   useEffect(() => {
     const kubescapeValidatingAdmissionPoliciesURL =
-      '/plugins/kubescape-plugin/validating-admission-policies.yaml';
+      getKubescapePluginUrl() + '/validating-admission-policies.yaml';
     fetch(kubescapeValidatingAdmissionPoliciesURL)
       .then(response => response.text())
       .then(data =>

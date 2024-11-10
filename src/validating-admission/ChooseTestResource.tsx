@@ -1,6 +1,7 @@
 import { FormControl, MenuItem, SelectChangeEvent, Stack, TextField } from '@mui/material';
 import * as yaml from 'js-yaml';
 import { useContext, useEffect, useState } from 'react';
+import { getKubescapePluginUrl } from '../common/PluginHelper';
 import { CurrentEvalContext } from './ValidatingAdmissionPolicy';
 
 export function ChooseTestResource() {
@@ -9,11 +10,11 @@ export function ChooseTestResource() {
   const [testFileNames, setTestFileNames] = useState<string[]>([]);
 
   useEffect(() => {
-    const testFilesURL = '/plugins/kubescape-plugin/vap-test-files.yaml';
+    const testFilesURL = getKubescapePluginUrl() + '/vap-test-files.yaml';
     fetch(testFilesURL)
       .then(response => response.text())
       .then(data => setTestFiles(yaml.loadAll(data)));
-    const testFilesIndexURL = '/plugins/kubescape-plugin/vap-test-files-index.yaml';
+    const testFilesIndexURL = getKubescapePluginUrl() + '/vap-test-files-index.yaml';
     fetch(testFilesIndexURL)
       .then(response => response.text())
       .then(data => setTestFileNames(data.split(/\r?\n/)));

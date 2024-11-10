@@ -23,36 +23,22 @@ The Kubescape Headlamp plugin provides views in Headlamp for configuration and v
 
 The plugin has been tested with Headlamp v0.25.0 (browser and desktop) and kubescape operator helm chart v1.22.0.
 
-## Use cases
+## Functionality
 
-The use cases support navigating to the information from different user perspectives.
+- Compliancy overview page with views on controls, resources and namespaces.
+- Vulnerabilities overview with views on CVEs, resources and images.
+- Generated Network policies viewer.
+- Playground for Validation Admission Policies.
+- The standard Headlamp pages for Namespace and Deployment provide a summary of configuration issues and vulnerabilities
 
-For inspecting namespaces or deployments, navigate in the k8s pages of Headlamp::
-
-- View a namespace, see a summary of configuration issues and vulnerabilities
-- View a resource (e.g. Deployment), see a summary of configuration issues
-
-For an overview of compliance in a cluster:
-
-- View controls
-- View resources
-- View namespaces
-
-For an overview of vulnerabilty scanning in a cluster:
-
-- View CVEs
-- View workloads
-- View images
-
-The queries to the Kubescape database use [allowed namespaces](https://headlamp.dev/docs/latest/faq/#i-cannot-access-any-section-in-my-cluster-it-keeps-saying-access-denied) cluster setting, supporting multi tenant clusters.
-
-Pages allow for navigation to detailed and related information.
+The queries to the Kubescape database use Headlamps feature for `Allowed namespaces`, supporting multi tenant clusters. Configuration of this setting is done per user in Settings/Cluster.
 
 ## Installation
 
 #### Desktop Headlamp
 
 - Install Headlamp (https://headlamp.dev/docs/latest/installation/desktop/)
+- Configure Settings/Plugins/Plugin Catalog and make sure "Display only Official Plugins" is unchecked.
 - Open Plugin Catalog
 - Select the KubeScape Headlamp plugin and click the install button
 - After install you may need to restart Headlamp

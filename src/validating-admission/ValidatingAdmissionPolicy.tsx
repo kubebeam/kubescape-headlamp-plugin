@@ -4,6 +4,7 @@ import { TabContext, TabList } from '@mui/lab';
 import { Alert, Grid, Stack, Tab, Toolbar, Typography } from '@mui/material';
 import * as yaml from 'js-yaml';
 import { createContext, useContext, useEffect, useRef, useState } from 'react';
+import { getKubescapePluginUrl } from '../common/PluginHelper';
 import { TabPanel } from '../common/TabPanel';
 import { ValidatingAdmissionPolicy } from '../types/ValidatingAdmissionPolicy';
 import { ChoosePolicyButton } from './ChoosePolicyButton';
@@ -34,7 +35,7 @@ export function ValidatingAdmissionPolicyEditor() {
   useEffect(() => {
     if (validatingAdmissionPolicy?.spec.paramKind?.apiVersion) {
       const kubescapeValidatingAdmissionPoliciesURL =
-        '/plugins/kubescape-plugin/basic-control-configuration.yaml';
+        getKubescapePluginUrl() + '/basic-control-configuration.yaml';
       fetch(kubescapeValidatingAdmissionPoliciesURL)
         .then(response => response.text())
         .then(data => setParamsObject(yaml.load(data)));
