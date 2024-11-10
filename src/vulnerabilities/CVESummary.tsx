@@ -33,7 +33,9 @@ export function getCVESummary(
         }}
       >
         <Tooltip title={severity}>
-          {countScan ?? 0} {severity}
+          <Box>
+            {countScan ?? 0} {severity}
+          </Box>
         </Tooltip>
       </Box>
     );

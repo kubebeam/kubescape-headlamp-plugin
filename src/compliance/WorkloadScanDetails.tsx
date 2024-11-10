@@ -10,7 +10,7 @@ import {
   Table as HeadlampTable,
 } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import { createRouteURL } from '@kinvolk/headlamp-plugin/lib/Router';
-import { Box, Link } from '@mui/material';
+import { Link } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { getURLSegments } from '../common/url';
 import { RoutingPath } from '../index';
@@ -196,18 +196,5 @@ function makeStatusLabel(control: WorkloadConfigurationScan.Control) {
     status = 'success';
   }
 
-  return (
-    <StatusLabel status={status}>
-      {statusLabel}
-      {statusLabel === 'failed' && (
-        <Box
-          aria-label="hidden"
-          display="inline"
-          paddingTop={1}
-          paddingLeft={0.5}
-          style={{ verticalAlign: 'text-top' }}
-        ></Box>
-      )}
-    </StatusLabel>
-  );
+  return <StatusLabel status={status}>{statusLabel}</StatusLabel>;
 }

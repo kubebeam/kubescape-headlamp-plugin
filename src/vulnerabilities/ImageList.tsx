@@ -11,7 +11,7 @@ import { Box, Stack, Tooltip } from '@mui/material';
 import { RoutingPath } from '../index';
 import { ImageScan, WorkloadScan } from './fetch-vulnerabilities';
 
-export default function ImageListView(props: { workloadScans: WorkloadScan[] }) {
+export default function ImageListView(props: { workloadScans: WorkloadScan[] | null }) {
   const { workloadScans } = props;
   if (!workloadScans) {
     return <></>;
@@ -104,7 +104,9 @@ function resultStack(imageScan: ImageScan) {
         }}
       >
         <Tooltip title={cveList(imageScan, severity)}>
-          {imageScan.matches.filter(match => match.vulnerability.severity === severity).length}
+          <Box>
+            {imageScan.matches.filter(match => match.vulnerability.severity === severity).length}
+          </Box>
         </Tooltip>
       </Box>
     );
@@ -133,7 +135,7 @@ function cveList(imageScan: ImageScan, severity: string) {
         <div style={{ whiteSpace: 'normal', textAlign: 'left', fontSize: 'small' }}>
           <Stack spacing={1}>
             {cves.map(cve => (
-              <div>{cve} </div>
+              <div key={cve}>{cve} </div>
             ))}
           </Stack>
         </div>

@@ -1,7 +1,7 @@
 /* 
   Create nodes for the networkpolicy diagram. 
 */
-import { Tooltip } from '@mui/material';
+import { Box, Tooltip } from '@mui/material';
 import { Handle, Node, NodeProps, Position } from '@xyflow/react';
 import * as yaml from 'js-yaml';
 import {
@@ -49,7 +49,7 @@ const ConnectedNode = (props: NodeProps<ConnectedNode>) => {
 
   return (
     <Tooltip title={<pre>{peerYaml}</pre>} slotProps={{ tooltip: { sx: { fontSize: '0.9em' } } }}>
-      <div className="network-node">
+      <Box className="network-node">
         <div className="title">
           {peerIcon(data.peer)} {peerOrigin(data.peer)}
         </div>
@@ -58,7 +58,7 @@ const ConnectedNode = (props: NodeProps<ConnectedNode>) => {
         <div className="text">{ipSelector(data.policy, data.peer)}</div>
         <div className="text">{portsToString(data.ports)}</div>
         {type === 'sourceNode' ? sourceHandle : targetHandle}
-      </div>
+      </Box>
     </Tooltip>
   );
 };

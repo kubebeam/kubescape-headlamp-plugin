@@ -11,7 +11,7 @@ import { makeNamespaceLink } from '../common/Namespace';
 import { RoutingPath } from '../index';
 import { WorkloadScan } from './fetch-vulnerabilities';
 
-export default function WorkloadScanListView(props: { workloadScans: WorkloadScan[] }) {
+export default function WorkloadScanListView(props: { workloadScans: WorkloadScan[] | null }) {
   const { workloadScans } = props;
   if (!workloadScans) {
     return <></>;
@@ -145,7 +145,9 @@ function resultStack(workloadScan: WorkloadScan) {
           width: 25,
         }}
       >
-        <Tooltip title={severity}>{countScans(workloadScan, severity)}</Tooltip>
+        <Tooltip title={severity}>
+          <Box>{countScans(workloadScan, severity)}</Box>
+        </Tooltip>
       </Box>
     );
   }

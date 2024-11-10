@@ -27,7 +27,9 @@ export function getControlsSummary(scanSummary: WorkloadConfigurationScanSummary
         }}
       >
         <Tooltip title={severity}>
-          {countScan} {severity}
+          <Box>
+            {countScan} {severity}
+          </Box>
         </Tooltip>
       </Box>
     );

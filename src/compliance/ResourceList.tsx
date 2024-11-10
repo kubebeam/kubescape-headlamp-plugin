@@ -1,7 +1,7 @@
 /* 
   List configuration scans for all workloads.  
 */
-import { Link, SectionBox, Table } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
+import { Link, Table } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import { Box, FormControlLabel, Stack, Switch, Tooltip } from '@mui/material';
 import { useState } from 'react';
 import { RoutingPath } from '../index';
@@ -9,7 +9,7 @@ import { WorkloadConfigurationScanSummary } from '../softwarecomposition/Workloa
 import controlLibrary from './controlLibrary';
 
 export default function KubescapeWorkloadConfigurationScanList(props: {
-  workloadScanData: WorkloadConfigurationScanSummary[];
+  workloadScanData: WorkloadConfigurationScanSummary[] | null;
 }) {
   const [isFailedControlSwitchChecked, setIsFailedControlSwitchChecked] = useState(true);
   const { workloadScanData } = props;
@@ -31,7 +31,7 @@ export default function KubescapeWorkloadConfigurationScanList(props: {
           setIsFailedControlSwitchChecked(checked);
         }}
       />
-      <SectionBox>
+      <Box>
         <Table
           data={isFailedControlSwitchChecked ? workloadsWithFindings : workloadScanData}
           columns={[
@@ -97,7 +97,7 @@ export default function KubescapeWorkloadConfigurationScanList(props: {
             },
           ]}
         />
-      </SectionBox>
+      </Box>
     </>
   );
 }
@@ -124,7 +124,7 @@ function controlsList(workloadScan: WorkloadConfigurationScanSummary, severity: 
         <div style={{ whiteSpace: 'normal', textAlign: 'left', fontSize: 'small' }}>
           <Stack spacing={1}>
             {controls.map(control => (
-              <div>{`${control.controlID}: ${control.name}`} </div>
+              <div key={control.controlID}>{`${control.controlID}: ${control.name}`} </div>
             ))}
           </Stack>
         </div>
@@ -148,13 +148,15 @@ function resultStack(workloadScan: WorkloadConfigurationScanSummary) {
         }}
       >
         <Tooltip title={controlsList(workloadScan, severity)}>
-          {
-            Object.values(workloadScan.spec.controls).filter(
-              scan =>
-                scan.status.status === WorkloadConfigurationScanSummary.Status.Failed &&
-                scan.severity.severity === severity
-            ).length
-          }
+          <Box>
+            {
+              Object.values(workloadScan.spec.controls).filter(
+                scan =>
+                  scan.status.status === WorkloadConfigurationScanSummary.Status.Failed &&
+                  scan.severity.severity === severity
+              ).length
+            }
+          </Box>
         </Tooltip>
       </Box>
     );

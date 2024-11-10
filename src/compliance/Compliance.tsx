@@ -4,8 +4,6 @@
 import {
   Link as HeadlampLink,
   SectionBox,
-  StatusLabel,
-  StatusLabelProps,
   Table,
   Tabs as HeadlampTabs,
 } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
@@ -13,6 +11,7 @@ import { createRouteURL } from '@kinvolk/headlamp-plugin/lib/Router';
 import { Box, FormControlLabel, Link, Switch, Tooltip } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { RotatingLines } from 'react-loader-spinner';
+import { StatusLabel, StatusLabelProps } from '../common/StatusLabel';
 import { RoutingPath } from '../index';
 import { deepListQuery } from '../model';
 import { WorkloadConfigurationScanSummary } from '../softwarecomposition/WorkloadConfigurationScanSummary';
@@ -25,7 +24,9 @@ export let globalWorkloadScanData: WorkloadConfigurationScanSummary[] | null = n
 let currentClusterURL = '';
 
 export default function ComplianceView() {
-  const [workloadScanData, setWorkloadScanData] = useState<WorkloadConfigurationScanSummary[]>([]);
+  const [workloadScanData, setWorkloadScanData] = useState<
+    WorkloadConfigurationScanSummary[] | null
+  >(null);
 
   useEffect(() => {
     if (
@@ -69,7 +70,7 @@ export default function ComplianceView() {
 }
 
 function ConfigurationScanningListView(props: {
-  workloadScanData: WorkloadConfigurationScanSummary[];
+  workloadScanData: WorkloadConfigurationScanSummary[] | null;
 }) {
   const { workloadScanData } = props;
   if (!workloadScanData)
@@ -139,7 +140,7 @@ function ConfigurationScanningListView(props: {
                   target="_blank"
                   href={'https://hub.armosec.io/docs/' + cell.getValue().toLowerCase()}
                 >
-                  {cell.getValue()}
+                  <div>{cell.getValue()}</div>
                 </Link>
               ),
               gridTemplate: 'min-content',
@@ -147,12 +148,12 @@ function ConfigurationScanningListView(props: {
             {
               header: 'Control Name',
               accessorKey: 'name',
-              Cell: ({ cell }: any) => (
+              Cell: ({ cell, row }: any) => (
                 <Tooltip
-                  title={cell.row.original.description}
+                  title={row.original.description}
                   slotProps={{ tooltip: { sx: { fontSize: '0.9em' } } }}
                 >
-                  {cell.getValue()}
+                  <Box>{cell.getValue()}</Box>
                 </Tooltip>
               ),
               gridTemplate: 'auto',
@@ -222,20 +223,7 @@ function makeCVSSLabel(baseScore: number, failCount: number) {
   }
 
   if (baseScore >= 7.0 && failCount > 0) {
-    return (
-      <StatusLabel status={status}>
-        {severity}
-        {baseScore >= 7.0 && (
-          <Box
-            aria-label="hidden"
-            display="inline"
-            paddingTop={1}
-            paddingLeft={0.5}
-            style={{ verticalAlign: 'text-top' }}
-          ></Box>
-        )}
-      </StatusLabel>
-    );
+    return <StatusLabel status={status}>{severity}</StatusLabel>;
   } else {
     return severity;
   }
@@ -253,7 +241,9 @@ function makeResultsLabel(workloadScanData: WorkloadConfigurationScanSummary[], 
           control: control.controlID,
         }}
       >
-        {failCount} Failed, {passedCount} Accepted
+        <div>
+          {failCount} Failed, {passedCount} Accepted
+        </div>
       </HeadlampLink>
     );
   } else {

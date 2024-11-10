@@ -35,7 +35,7 @@ export let globalWorkloadScans: WorkloadScan[] | null = null;
 export let currentClusterURL = '';
 
 export default function KubescapeVulnerabilities() {
-  const [workloadScans, setWorkloadScans] = useState<WorkloadScan[]>([]);
+  const [workloadScans, setWorkloadScans] = useState<WorkloadScan[] | null>(null);
 
   useEffect(() => {
     if (
@@ -76,7 +76,7 @@ export default function KubescapeVulnerabilities() {
   );
 }
 
-function CVEListView(props: { workloadScans: WorkloadScan[] }) {
+function CVEListView(props: { workloadScans: WorkloadScan[] | null }) {
   const { workloadScans } = props;
   const [isRelevantCVESwitchChecked, setIsRelevantCVESwitchChecked] = useState(false);
   const [isFixedCVESwitchChecked, setIsFixedCVESwitchChecked] = useState(false);
