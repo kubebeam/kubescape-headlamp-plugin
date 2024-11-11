@@ -7,6 +7,7 @@ import { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { getKubescapePluginUrl } from '../common/PluginHelper';
 import { TabPanel } from '../common/TabPanel';
 import { ValidatingAdmissionPolicy } from '../types/ValidatingAdmissionPolicy';
+import { loadWasm } from '../wasm/initWasmModule';
 import { ChoosePolicyButton } from './ChoosePolicyButton';
 import { ChooseTestResource } from './ChooseTestResource';
 import { EvaluationResultsTables } from './EvaluationResultsTables';
@@ -24,6 +25,8 @@ type EvalContext = {
 export const CurrentEvalContext = createContext<EvalContext | null>(null);
 
 export function ValidatingAdmissionPolicyEditor() {
+  loadWasm();
+
   const [validatingAdmissionPolicy, setValidatingAdmissionPolicy] =
     useState<ValidatingAdmissionPolicy | null>(null);
   const [paramsObject, setParamsObject] = useState<any | null>(null);

@@ -231,7 +231,3 @@ registerDetailsViewSectionsProcessor(addKubescapeWorkloadSection);
 import addKubescapeNamespaceSection from './sections/NamespaceSection';
 
 registerDetailsViewSectionsProcessor(addKubescapeNamespaceSection);
-
-import { loadWasm } from './wasm/initWasmModule';
-
-loadWasm();
