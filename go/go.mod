@@ -3,12 +3,13 @@ module admission-policy-wasm
 go 1.23.2
 
 require (
-	github.com/google/cel-go v0.21.0
+	github.com/google/cel-go v0.22.0
 	google.golang.org/protobuf v1.35.1
 	sigs.k8s.io/yaml v1.4.0
 )
 
 require (
+	cel.dev/expr v0.18.0 // indirect
 	github.com/antlr4-go/antlr/v4 v4.13.1 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/kr/pretty v0.3.1 // indirect
