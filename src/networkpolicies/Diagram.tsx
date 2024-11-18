@@ -59,7 +59,7 @@ function NetworkPolicyEditor(props: { generatedNetworkPolicy: GeneratedNetworkPo
         language={'yaml'}
         theme={localStorage.headlampThemePreference === 'dark' ? 'vs-dark' : ''}
         value={policyYaml}
-        height={window.innerWidth * 0.8}
+        height={window.innerHeight * 0.8}
       />
     </Box>
   );

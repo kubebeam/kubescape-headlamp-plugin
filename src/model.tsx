@@ -79,6 +79,13 @@ export const sbomSyftFilteredClass = makeCustomResourceClass({
   pluralName: 'sbomsyftfiltereds',
 });
 
+export const applicationProfileClass = makeCustomResourceClass({
+  apiInfo: spdxGroupVersions,
+  isNamespaced: true,
+  singularName: 'applicationprofile',
+  pluralName: 'applicationprofiles',
+});
+
 // List methods for spdx.softwarecomposition.kubescape.io do not retrieve info in the spec.
 // As a workaround, deepListQuery() will fetch each item individually.
 export async function deepListQuery(type: string): Promise<any[]> {
