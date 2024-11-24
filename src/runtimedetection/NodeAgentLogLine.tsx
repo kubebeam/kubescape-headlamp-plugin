@@ -1,4 +1,5 @@
 export interface NodeAgentLogLine {
+  nodeName: string;
   BaseRuntimeMetadata: BaseRuntimeMetadata;
   RuleID: string;
   RuntimeK8sDetails: RuntimeK8SDetails;

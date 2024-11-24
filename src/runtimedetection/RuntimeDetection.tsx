@@ -12,7 +12,7 @@ import { Box, Stack, Tooltip, Typography } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
 import * as yaml from 'js-yaml';
 import { useSnackbar } from 'notistack';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { getURLSegments } from '../common/url';
 import { applicationProfileClass } from '../model';
 import { ApplicationProfile } from '../softwarecomposition/ApplicationProfile';
@@ -36,9 +36,17 @@ export function RuntimeDetection() {
     <>
       <SectionBox title="Runtime Detection">
         <Typography variant="body1" component="div" sx={{ flexGrow: 1 }}>
-          You can perform a test with runtime detection on this page. Start a terminal in a pod in
-          the list below and view the alerts that will appear on this page.
+          You can perform a runtime detection test on this page. Start a terminal in a pod from the
+          list below and view the alerts that will appear on this page.
+          <br></br>
+          Kubescape operator should be configured with "capabilities.runtimeDetection: enable" and
+          "alertCRD.installDefault: true". For testing a short learning period is recommended:
+          "nodeAgent.config.maxLearningPeriod: 10m".
         </Typography>
+      </SectionBox>
+
+      <SectionBox title="Application Profile">
+        <ProfilePopup content={yaml.dump(profile)}></ProfilePopup>
         <NameValueTable
           rows={[
             {
@@ -53,16 +61,13 @@ export function RuntimeDetection() {
               name: 'Namespace',
               value: profile.metadata.namespace,
             },
-            {
-              name: <ProfilePopup content={yaml.dump(profile)}></ProfilePopup>,
-            },
           ]}
         />
       </SectionBox>
 
       <PodList profile={profile} />
 
-      <NodeAgentLogging />
+      <NodeAgentLogging workload={profile.metadata.labels['kubescape.io/workload-name']} />
     </>
   );
 }
@@ -159,59 +164,42 @@ function PodExec(props: { pod: any }) {
   openPodTerminal();
 }
 
-function NodeAgentLogging() {
+function NodeAgentLogging(props: { workload: string }) {
+  const { workload } = props;
+  const [alerts, setAlerts] = useState<NodeAgentLogLine[]>([]);
   const [nodeAgents] = K8s.ResourceClasses.Pod.useList({
     labelSelector: 'app.kubernetes.io/component=node-agent,app.kubernetes.io/instance=kubescape',
   });
+  const nodeAlerts = useRef<Map<string, NodeAgentLogLine[]>>(new Map());
 
   if (!nodeAgents) {
     return <></>;
   }
 
-  return nodeAgents.map((nodeAgent: KubeObject) => <NodeLog nodeAgent={nodeAgent} />);
-}
-
-function NodeLog(props: { nodeAgent: KubeObject }) {
-  const { nodeAgent } = props;
-
-  const [nodeAgentAlerts, setNodeAgentAlerts] = useState<NodeAgentLogLine[]>([]);
-
-  useEffect(() => {
-    let callback: any = null;
-
-    function setlogChunks(lines: string[]) {
-      const nodeAgentAlerts = parseLogChunks(lines).filter(line => line.BaseRuntimeMetadata);
-
-      setNodeAgentAlerts(nodeAgentAlerts);
-    }
-
-    callback = nodeAgent.getLogs('node-agent', setlogChunks, {
-      tailLines: 200,
-    });
-
-    return function cleanup() {
-      if (callback) {
-        console.log('Cleanup callback for ' + nodeAgent.jsonData.spec.nodeName);
-        callback();
-      }
-    };
-  }, [nodeAgent]);
-
-  if (!nodeAgentAlerts || nodeAgentAlerts.length === 0) {
-    return <p>No alerts on node {nodeAgent.jsonData.spec.nodeName}.</p>;
+  function setNodeAgentAlerts(nodeName: string, lines: NodeAgentLogLine[]) {
+    nodeAlerts.current.set(nodeName, lines);
+    const all = Array.from(nodeAlerts.current.values()).flatMap(lines => lines);
+    setAlerts(all);
   }
 
   return (
     <>
-      <SectionBox title={`Alerts ${nodeAgent.jsonData.spec.nodeName}`}>
+      <SectionBox title="Alerts">
+        {nodeAgents.map((nodeAgent: KubeObject) => (
+          <NodeLog
+            nodeAgent={nodeAgent}
+            setNodeAgentAlerts={setNodeAgentAlerts}
+            workload={workload}
+          />
+        ))}
         <HeadlampTable
-          data={nodeAgentAlerts}
+          data={alerts}
           columns={[
             {
               id: 'time',
               header: 'Time',
               accessorKey: 'time',
-              gridTemplate: '2fr',
+              gridTemplate: '1fr',
               Cell: ({ cell }: any) => {
                 const startOfToday = new Date().setUTCHours(0, 0, 0, 0);
                 if (new Date(cell.getValue()) < new Date(startOfToday)) {
@@ -222,24 +210,29 @@ function NodeLog(props: { nodeAgent: KubeObject }) {
               },
             },
             {
+              header: 'Message',
+              accessorKey: 'message',
+              gridTemplate: '2fr',
+            },
+            {
               header: 'Pod',
               accessorKey: 'RuntimeK8sDetails.podName',
-              gridTemplate: '2fr',
+              gridTemplate: '1fr',
             },
             {
               header: 'Workload',
               accessorKey: 'RuntimeK8sDetails.workloadName',
-              gridTemplate: '2fr',
+              gridTemplate: '1fr',
             },
             {
               header: 'Namespace',
               accessorKey: 'RuntimeK8sDetails.workloadNamespace',
-              gridTemplate: '2fr',
+              gridTemplate: '1fr',
             },
             {
-              header: 'Message',
-              accessorKey: 'message',
-              gridTemplate: '2fr',
+              header: 'Node',
+              accessorKey: 'nodeName',
+              gridTemplate: '1fr',
             },
             {
               header: 'Fix',
@@ -272,12 +265,43 @@ function NodeLog(props: { nodeAgent: KubeObject }) {
   );
 }
 
-// chunks are just blocks from the log stream
-// in each call to this method we get all the log chunks
-function parseLogChunks(logChunks: string[]) {
+function NodeLog(props: { nodeAgent: KubeObject; setNodeAgentAlerts: any; workload: string }) {
+  const { nodeAgent, setNodeAgentAlerts, workload } = props;
+
+  useEffect(() => {
+    let callback: any = null;
+    const nodeName = nodeAgent.jsonData.metadata.name;
+
+    function setlogChunks(lines: string[]) {
+      const nodeAgentAlerts = parseLogChunks(nodeName, workload, lines).filter(
+        line => line.BaseRuntimeMetadata
+      );
+
+      setNodeAgentAlerts(nodeName, nodeAgentAlerts);
+    }
+
+    callback = nodeAgent.getLogs('node-agent', setlogChunks, {
+      tailLines: 200,
+    });
+
+    return function cleanup() {
+      if (callback) {
+        console.log('Cleanup callback for ' + nodeAgent.jsonData.spec.nodeName);
+        callback();
+      }
+    };
+  }, [nodeAgent]);
+
+  return <></>;
+}
+
+// chunks are just blocks from the log stream.
+// in each call to this method we get all the log chunks, this is how nodeAgent.getLogs() works
+function parseLogChunks(nodeName: string, workload: string, logChunks: string[]) {
   const nodeAgentLogLines: NodeAgentLogLine[] = [];
-  const logFile = logChunks.join('');
-  const lines = logFile.split('\n');
+
+  // join the chunks and split on newline
+  const lines = logChunks.join('').split('\n');
 
   lines.map(line => {
     // throw away lines which are non-json
@@ -287,9 +311,12 @@ function parseLogChunks(logChunks: string[]) {
 
     try {
       const jsonLine: NodeAgentLogLine = JSON.parse(line);
-      nodeAgentLogLines.push(jsonLine);
+      jsonLine.nodeName = nodeName;
+      if (jsonLine.RuntimeK8sDetails.workloadName === workload) {
+        nodeAgentLogLines.push(jsonLine);
+      }
     } catch (e) {
-      //console.log(e);
+      // ignore, the last chunk might not be complete
     }
   });
 
