@@ -1,5 +1,5 @@
 import { Icon } from '@iconify/react';
-import { K8s, KubeObject } from '@kinvolk/headlamp-plugin/lib';
+import { ApiProxy, K8s, KubeObject } from '@kinvolk/headlamp-plugin/lib';
 import {
   NameValueTable,
   SectionBox,
@@ -72,21 +72,35 @@ function PodList(props: { profile: ApplicationProfile }) {
   const workloadKind = profile.metadata.labels['kubescape.io/workload-kind'];
   const namespace = profile.metadata.namespace;
   const [selectedPod, setSelectedPod] = useState(null);
+  const [deployment, setDeployment] = useState<KubeObject>(null);
+  const [pods, setPods] = useState<any[]>([]);
 
-  const [deployment] = K8s.ResourceClasses[workloadKind].useGet(
+  // first we need to get the matchLabels from the deployment
+  K8s.ResourceClasses[workloadKind].useApiGet(
+    setDeployment,
     profile.metadata.labels['kubescape.io/workload-name'],
     namespace
   );
 
-  const [pods]: [KubeObject[]] = K8s.ResourceClasses.Pod.useList({
-    namespace: namespace,
-    labelSelector: 'app=' + deployment?.jsonData?.spec?.selector?.matchLabels?.app,
-  });
+  // Use the matchLabels to get the pods
+  useEffect(() => {
+    if (deployment) {
+      const labelSelector = Object.entries(deployment.jsonData.spec.selector.matchLabels)
+        .map(entry => `${encodeURIComponent(entry[0])}=${encodeURIComponent(entry[1] as string)}`)
+        .join(',');
+
+      ApiProxy.request(`/api/v1/namespaces/${namespace}/pods?labelSelector=${labelSelector}`).then(
+        (result: any) => {
+          setPods(result.items);
+        }
+      );
+    }
+  }, [deployment]);
 
   return (
     <SectionBox title="Pods">
       <Stack direction="column">
-        {pods?.map(pod => (
+        {pods.map(pod => (
           <Box key={pod.metadata.name}>
             <Tooltip
               title={`Open terminal in pod ${pod.metadata.name}`}
@@ -100,7 +114,7 @@ function PodList(props: { profile: ApplicationProfile }) {
                 <Icon icon="mdi:console" />
               </IconButton>
             </Tooltip>
-            {pod.jsonData.metadata.name}
+            {pod.metadata.name}
           </Box>
         ))}
       </Stack>
