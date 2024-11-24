@@ -29,6 +29,8 @@ export namespace RoutingPath {
   export const KubescapeNetworkPolicyDiagram = '/kubescape/networkpolicies/:namespace/:name';
   export const KubescapeSBOMDetails = '/kubescape/sbom/:name';
   export const VAP = '/kubescape/vap';
+  export const ApplicationProfiles = '/kubescape/applicationprofiles';
+  export const RuntimeDetection = '/kubescape/runtimedetection/:namespace/:name';
 }
 
 // Kubescape main sidebar
@@ -66,6 +68,13 @@ registerSidebarEntry({
   name: 'vap-policies',
   label: 'Policy Playground',
   url: RoutingPath.VAP,
+});
+
+registerSidebarEntry({
+  parent: kubescape,
+  name: 'runtime-detection',
+  label: 'Runtime Detection',
+  url: RoutingPath.ApplicationProfiles,
 });
 
 import ComplianceView from './compliance/Compliance';
@@ -220,6 +229,28 @@ registerRoute({
   component: () => <ValidatingAdmissionPolicyEditor />,
   exact: true,
   name: 'Validation Admission Policies',
+});
+
+import { ApplicationProfiles } from './runtimedetection/ApplicationProfiles';
+
+registerRoute({
+  path: RoutingPath.ApplicationProfiles,
+  parent: kubescape,
+  sidebar: 'runtime-detection',
+  component: () => <ApplicationProfiles />,
+  exact: true,
+  name: 'Runtime Detection',
+});
+
+import { RuntimeDetection } from './runtimedetection/RuntimeDetection';
+
+registerRoute({
+  path: RoutingPath.RuntimeDetection,
+  parent: kubescape,
+  sidebar: 'runtime-detection',
+  component: () => <RuntimeDetection />,
+  exact: true,
+  name: 'Application Profile',
 });
 
 // Detail panel for workloads

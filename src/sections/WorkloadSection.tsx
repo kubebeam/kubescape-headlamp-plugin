@@ -27,10 +27,10 @@ export default function addKubescapeWorkloadSection(
     return sections;
   }
 
-  // if (resource.kind !== 'Deployment') {
-  //   // Return early if we're not on a Deployment page
-  //   return sections;
-  // }
+  if (resource.kind !== 'Deployment') {
+    // Return early if we're not on a Deployment page
+    return sections;
+  }
 
   // Check if we already have added our custom section (this function may be called multiple times).
   const customSectionId = 'kubescape-resources';
