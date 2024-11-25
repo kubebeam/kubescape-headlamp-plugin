@@ -1,7 +1,6 @@
 import { Icon } from '@iconify/react';
 import Editor from '@monaco-editor/react';
-import { Popper } from '@mui/base/Popper';
-import { AppBar, Box, IconButton, Toolbar, Typography } from '@mui/material';
+import { IconButton, Popover, Toolbar, Typography } from '@mui/material';
 import { useState } from 'react';
 
 export function AlertMessagePopup(props: { content: string }) {
@@ -20,19 +19,16 @@ export function AlertMessagePopup(props: { content: string }) {
       <IconButton aria-describedby={id} onClick={handleClick}>
         <Icon icon="mdi:message-alert" />
       </IconButton>
-      <Popper id={id} style={{ zIndex: 10000 }} open={open} anchorEl={anchorEl}>
-        <Box sx={{ flexGrow: 1 }}>
-          <AppBar>
-            <Toolbar>
-              <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-                Alert details
-              </Typography>
-              <IconButton aria-describedby={id} onClick={handleClick}>
-                <Icon icon="mdi:close-box-outline" />
-              </IconButton>
-            </Toolbar>
-          </AppBar>
-        </Box>
+      <Popover id={id} style={{ zIndex: 10000 }} open={open} anchorEl={anchorEl}>
+        <Toolbar>
+          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+            Alert details
+          </Typography>
+          <IconButton aria-describedby={id} onClick={handleClick}>
+            <Icon icon="mdi:close-box-outline" />
+          </IconButton>
+        </Toolbar>
+
         <Editor
           language={'json'}
           theme={localStorage.headlampThemePreference === 'dark' ? 'vs-dark' : ''}
@@ -46,7 +42,7 @@ export function AlertMessagePopup(props: { content: string }) {
             minimap: { enabled: false },
           }}
         />
-      </Popper>
+      </Popover>
     </>
   );
 }
