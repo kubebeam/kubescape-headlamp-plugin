@@ -91,7 +91,8 @@ function CVEListView(props: { workloadScans: WorkloadScan[] | null }) {
   const cveList = getCVEList(workloadScans);
 
   let cveListFiltered = cveList;
-  if (isRelevantCVESwitchChecked) cveListFiltered = cveListFiltered.filter(cve => cve.relevant);
+  if (isRelevantCVESwitchChecked)
+    cveListFiltered = cveListFiltered.filter(cve => cve.relevant === undefined || cve.relevant);
   if (isFixedCVESwitchChecked) cveListFiltered = cveListFiltered.filter(cve => cve.fixed);
 
   return (
