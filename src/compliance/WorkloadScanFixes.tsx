@@ -7,6 +7,7 @@ import { createRouteURL } from '@kinvolk/headlamp-plugin/lib/Router';
 import { DiffEditor } from '@monaco-editor/react';
 import { Link } from '@mui/material';
 import * as yaml from 'js-yaml';
+import { cloneDeep } from 'lodash';
 import { useEffect, useState } from 'react';
 import { getURLSegments } from '../common/url';
 import { RoutingPath } from '../index';
@@ -156,7 +157,7 @@ function Fix(props: {
   useEffect(() => {
     const kubeObjectClass = K8s.ResourceClasses[kind];
     if (!kubeObjectClass) {
-      console.log('Fix is not supported yet for:' + kind);
+      console.log('Fix view is not supported yet for:' + kind);
       return;
     }
 
@@ -186,7 +187,7 @@ function Fix(props: {
 
   const original = yaml.dump(strippedResource);
 
-  const fixedYAML = fixResource(strippedResource, control, rulePathPrefix ?? '');
+  const fixedYAML = fixResource(cloneDeep(strippedResource), control, rulePathPrefix ?? '');
   const lines = fixedYAML.match(/\n/g)?.length ?? 10;
 
   return (
@@ -194,7 +195,7 @@ function Fix(props: {
       {/* <Editor theme="vs-dark" language="yaml" value={yaml.dump(control)} height={500} /> */}
 
       <DiffEditor
-        theme="vs-dark"
+        theme={localStorage.headlampThemePreference === 'dark' ? 'vs-dark' : ''}
         language="yaml"
         original={original}
         modified={fixedYAML}
