@@ -62,9 +62,10 @@ readme: |
   - Vulnerabilities overview with views on CVEs, resources and images.
   - Generated Network policies viewer.
   - Playground for Validation Admission Policies.
-  - The standard Headlamp pages for Namespace and Deployment provide a summary of configuration issues and vulnerabilities
+  - eBPF-based runtime threat detection
 
   The queries to the Kubescape database use Headlamps feature for `Allowed namespaces`, supporting multi tenant clusters. Configuration of this setting is done per user in Settings/Cluster.
+
 install: |
   Desktop Headlamp 
   - Install Headlamp (https://headlamp.dev/docs/latest/installation/desktop/)

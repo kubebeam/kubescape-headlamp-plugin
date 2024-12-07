@@ -29,7 +29,7 @@ The plugin has been tested with Headlamp v0.25.0 (browser and desktop) and kubes
 - Vulnerabilities overview with views on CVEs, resources and images.
 - Generated Network policies viewer.
 - Playground for Validation Admission Policies.
-- The standard Headlamp pages for Namespace and Deployment provide a summary of configuration issues and vulnerabilities
+- eBPF-based runtime threat detection
 
 The queries to the Kubescape database use Headlamps feature for `Allowed namespaces`, supporting multi tenant clusters. Configuration of this setting is done per user in Settings/Cluster.
 
@@ -48,6 +48,38 @@ The queries to the Kubescape database use Headlamps feature for `Allowed namespa
 - Install Headlamp (https://headlamp.dev/docs/latest/installation/in-cluster/)
 - The installation files can be found on the release page in github. Here you can download the tarball. Add an initContainer to the headlamp install to download the plugin files. See [example helm values](https://github.com/Kubebeam/kubescape-headlamp-plugin/blob/main/examples/headlamp-helm-values.yaml).
 - Alternatively follow the guidance from headlamp to create a container image with the plugin artifacts: https://headlamp.dev/blog/2022/10/20/best-practices-for-deploying-headlamp-with-plugins/.
+
+## Quick test
+
+You can perform a quick test using a kind cluster.
+
+### Create kind cluster
+
+Install [kind](https://kind.sigs.k8s.io/docs/user/quick-start/) and create a new kind cluster.
+
+### Install Kubescape operator
+
+Install kubescape with helm:
+
+```
+helm repo add kubescape https://kubescape.github.io/helm-charts/
+helm upgrade --install kubescape kubescape/kubescape-operator -n kubescape --create-namespace --set capabilities.runtimeDetection=enable --set alertCRD.installDefault=true --set nodeAgent.config.maxLearningPeriod=10m --set capabilities.continuousScan=enable
+```
+
+Note we set a short learning period. For a thorough training 24 hours would be recommended.
+
+Wait a few moments for Kubescape to install. Check `kubectl get pods -n kubescape`.
+
+### Test deployments
+
+Install test deployments.
+
+- Nginx `kubectl apply -f https://k8s.io/examples/application/deployment.yaml -n default`
+- Emojivoto `kubectl apply -k github.com/BuoyantIO/emojivoto/kustomize/deployment`
+
+### Headlamp desktop
+
+Now start headlamp desktop, load the kubeconfig from the kind cluster. For the runtime scanning you need to wait 10 minutes, the learning period.
 
 ## Docs
 
