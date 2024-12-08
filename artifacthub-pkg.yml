@@ -1,7 +1,7 @@
-version: v0.3.1-beta
+version: v0.4.0-beta
 name: headlamp_kubescape
 displayName: Kubescape Headlamp Plugin
-createdAt: '2024-11-10T21:00:39Z'
+createdAt: '2024-12-08T21:20:00Z'
 description: Kubescape compliance and vulnerabilities in Headlamp.
 homeURL: https://github.com/Kubebeam/kubescape-headlamp-plugin
 logoURL: https://avatars.githubusercontent.com/u/100554170
@@ -16,8 +16,8 @@ screenshots:
   - title: Vulnerabilities
     url: https://raw.githubusercontent.com/kubebeam/kubescape-headlamp-plugin/693d664b433f3f3c03e7a8337cd665eb4be32b8e/demo/vulnerabilities.png
 annotations:
-  headlamp/plugin/archive-url: https://github.com/kubebeam/kubescape-headlamp-plugin/releases/download/v0.3.1-beta/kubescape-headlamp-plugin-v0.3.1-beta.tar.gz
-  headlamp/plugin/archive-checksum: SHA256:9ef6002a057bf0cd880c88513ea20c775ee7e11fd0b50417fc0f91a08f32fea2
+  headlamp/plugin/archive-url: https://github.com/kubebeam/kubescape-headlamp-plugin/releases/download/v0.4.0-beta/kubescape-headlamp-plugin-v0.4.0-beta.tar.gz
+  headlamp/plugin/archive-checksum: SHA256:d00938b5435710a5b9670ffdb213aee6f61ba69701489066dd0c347812850e39
   headlamp/plugin/version-compat: '>=0.25'
   headlamp/plugin/distro-compat: in-cluster,web,docker-desktop,desktop
 readme: |
@@ -65,7 +65,6 @@ readme: |
   - eBPF-based runtime threat detection
 
   The queries to the Kubescape database use Headlamps feature for `Allowed namespaces`, supporting multi tenant clusters. Configuration of this setting is done per user in Settings/Cluster.
-
 install: |
   Desktop Headlamp 
   - Install Headlamp (https://headlamp.dev/docs/latest/installation/desktop/)
