@@ -143,7 +143,7 @@ function ConfigurationScanningListView(props: {
                   <div>{cell.getValue()}</div>
                 </Link>
               ),
-              gridTemplate: 'min-content',
+              gridTemplate: 'auto',
             },
             {
               header: 'Control Name',

@@ -2,6 +2,8 @@
 
 Kubescape provides several reporting objects that can be retrieved via the K8s API server.
 
+### Vulnerabilty scan
+
 ```mermaid
 
  classDiagram
@@ -17,6 +19,11 @@ Kubescape provides several reporting objects that can be retrieved via the K8s A
         spec.matches
     }
 
+     class VulnerabilityManifestRelevant {
+        metadata
+        spec.matches
+    }
+
     class VulnerabilitySummary {
         metadata
         spec.vulnerabilitiesRef: []VulnerabilityManifestSummary
@@ -27,13 +34,30 @@ Kubescape provides several reporting objects that can be retrieved via the K8s A
         syft: SBOMSyft.Syft
     }
 
+     class SBOMSyftFiltered {
+        metadata
+        syft: SBOMSyft.Syft
+    }
+
     VulnerabilityManifestSummary --> VulnerabilityManifest
+    VulnerabilityManifestSummary --> VulnerabilityManifestRelevant
     VulnerabilitySummary --> VulnerabilityManifestSummary
     VulnerabilityManifest --> SBOMSyft
+    VulnerabilityManifestRelevant --> SBOMSyftFiltered
+    SBOMSyftFiltered --> SBOMSyft
 
     K8sNamespace --> VulnerabilitySummary
-    K8sWorkload --> VulnerabilityManifest
+    K8sWorkload --> ContainerImage
+    ContainerImage --> SBOMSyft
     K8sWorkload --> VulnerabilityManifestSummary
+    K8sWorkload --> SBOMSyftFiltered
+```
+
+### Configuration scan
+
+```mermaid
+
+classDiagram
 
     class ConfigurationScanSummary {
         metadata
@@ -52,11 +76,14 @@ Kubescape provides several reporting objects that can be retrieved via the K8s A
     }
 
     K8sNamespace --> ConfigurationScanSummary
-    K8sWorkload --> WorkloadConfigurationScan
     K8sWorkload --> WorkloadConfigurationScanSummary
     ConfigurationScanSummary --> WorkloadConfigurationScanSummary
     WorkloadConfigurationScanSummary --> WorkloadConfigurationScan
 
+    class ApplicationProfile{
+        metadata
+        spec.containers: []Container
+    }
 ```
 
 ### Notes
