@@ -52,9 +52,9 @@ export default function NamespaceView(props: {
           },
           {
             header: 'Passed',
-            accessorFn: (namespaceResult: NamespaceResult) => {
-              return <progress value={namespaceResult.passed / namespaceResult.total} />;
-            },
+            accessorFn: (namespaceResult: NamespaceResult) =>
+              namespaceResult.passed / namespaceResult.total,
+            Cell: ({ cell }: any) => <progress value={cell.getValue()} />,
           },
           {
             header: 'Critical',
