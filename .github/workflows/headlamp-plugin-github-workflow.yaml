@@ -75,4 +75,4 @@ jobs:
         with:
           context: .
           push: true
-          tags: kubescape-plugin:latest
+          tags: kubebeam/kubescape-headlamp-plugin:latest
