@@ -18,9 +18,10 @@ env:
 
 jobs:
   build:
+    name: Create Release
     permissions:
       contents: write
-    name: Create Release
+      packages: write
     runs-on: ubuntu-latest
 
     defaults:
@@ -45,7 +46,7 @@ jobs:
         with:
           go-version: ${{ matrix.go-version }}
 
-      - name: Download WASM and KubeScape files
+      - name: Download WASM and Kubescape files
         run: |
           mkdir -p dist 
           make download
@@ -105,3 +106,18 @@ jobs:
           prerelease: true
           files: ${{ env.RELEASE_TAR }}
           token: ${{ github.token }}
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and Push image with plugin tar.
+        id: push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ghcr.io/kubebeam/kubescape-headlamp-plugin:${{ github.event.inputs.releaseName }}
