@@ -83,10 +83,9 @@ export default function KubescapeWorkloadConfigurationScanList(props: {
                 const passedCount = Object.values(workloadScan.spec.controls).filter(
                   scan => scan.status.status === WorkloadConfigurationScanSummary.Status.Passed
                 ).length;
-                return (
-                  <progress value={passedCount / Object.keys(workloadScan.spec.controls).length} />
-                );
+                return passedCount / Object.keys(workloadScan.spec.controls).length;
               },
+              Cell: ({ cell }: any) => <progress value={cell.getValue()} />,
               gridTemplate: 'auto',
             },
             {
