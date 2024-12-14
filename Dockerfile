@@ -1,3 +1,3 @@
 FROM scratch 
 
-ADD kubescape-plugin/*.gz /
+ADD *.gz /
