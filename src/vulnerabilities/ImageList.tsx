@@ -29,12 +29,13 @@ export default function ImageListView(props: { workloadScans: WorkloadScan[] | n
             {
               header: 'Image',
               accessorKey: 'manifestName',
-              Cell: ({ cell }: any) => {
+              Cell: ({ cell, row }: any) => {
                 return (
                   <HeadlampLink
                     routeName={RoutingPath.ImageVulnerabilityDetails}
                     params={{
                       name: cell.getValue(),
+                      namespace: row.original.namespace,
                     }}
                   >
                     {cell.getValue().split('@sha')[0]}

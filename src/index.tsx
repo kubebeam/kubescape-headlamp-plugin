@@ -23,7 +23,7 @@ export namespace RoutingPath {
   export const KubescapeVulnerabilityDetails =
     '/kubescape/vulnerabilities/namespaces/:namespace/:name';
   export const KubescapeCVEResults = '/kubescape/vulnerabilities/cves/:cve';
-  export const ImageVulnerabilityDetails = '/kubescape/vulnerabilities/images/:name';
+  export const ImageVulnerabilityDetails = '/kubescape/vulnerabilities/images/:namespace/:name';
   export const KubescapeVulnerabilities = '/kubescape/vulnerabilities';
   export const KubescapeNetworkPolicies = '/kubescape/networkpolicies';
   export const KubescapeNetworkPolicyDiagram = '/kubescape/networkpolicies/:namespace/:name';

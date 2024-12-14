@@ -12,42 +12,44 @@ import { createRouteURL } from '@kinvolk/headlamp-plugin/lib/Router';
 import { Link } from '@mui/material';
 import { useState } from 'react';
 import makeSeverityLabel from '../common/SeverityLabel';
-import { getLastURLSegment } from '../common/url';
+import { getURLSegments } from '../common/url';
 import { RoutingPath } from '../index';
 import { vulnerabilityManifestClass } from '../model';
 import { VulnerabilityManifest } from '../softwarecomposition/VulnerabilityManifest';
 
 export default function ImageVulnerabilityDetails() {
-  const name = getLastURLSegment();
+  const [name, namespace] = getURLSegments(-1, -2);
   const [manifestVulnerability, setVulnerabilityManifest] = useState<KubeObject | null>(null);
 
-  vulnerabilityManifestClass.useApiGet(setVulnerabilityManifest, name, 'kubescape');
+  vulnerabilityManifestClass.useApiGet(setVulnerabilityManifest, name, namespace);
 
-  return (
-    manifestVulnerability && (
-      <>
-        <SectionBox
-          title="Image Vulnerabilities"
-          backLink={createRouteURL(RoutingPath.KubescapeVulnerabilities)}
-        >
-          <NameValueTable
-            rows={[
-              {
-                name: 'Image',
-                value: manifestVulnerability.metadata.annotations['kubescape.io/image-tag'],
-              },
-              {
-                name: 'Last scan',
-                value: manifestVulnerability.metadata.creationTimestamp,
-              },
-            ]}
-          />
-        </SectionBox>
+  if (manifestVulnerability) {
+    return (
+      manifestVulnerability && (
+        <>
+          <SectionBox
+            title="Image Vulnerabilities"
+            backLink={createRouteURL(RoutingPath.KubescapeVulnerabilities)}
+          >
+            <NameValueTable
+              rows={[
+                {
+                  name: 'Image',
+                  value: manifestVulnerability.metadata.annotations['kubescape.io/image-tag'],
+                },
+                {
+                  name: 'Last scan',
+                  value: manifestVulnerability.metadata.creationTimestamp,
+                },
+              ]}
+            />
+          </SectionBox>
 
-        <Matches manifestVulnerability={manifestVulnerability.jsonData} />
-      </>
-    )
-  );
+          <Matches manifestVulnerability={manifestVulnerability.jsonData} />
+        </>
+      )
+    );
+  }
 }
 
 function Matches(props: { manifestVulnerability: VulnerabilityManifest }) {

@@ -19,6 +19,7 @@ export interface WorkloadScan {
 // ImageScan is derived from VulnerabilityManifest
 export interface ImageScan {
   manifestName: string;
+  namespace: string;
   imageName: string;
   creationTimestamp: string;
   matches: VulnerabilityManifest.Match[];
@@ -35,6 +36,7 @@ export async function fetchVulnerabilityManifests(): Promise<any> {
   const imageScans = vulnerabilityManifests.map(v => {
     const imageScan: ImageScan = {
       manifestName: v.metadata.name,
+      namespace: v.metadata.namespace,
       imageName: v.metadata.annotations['kubescape.io/image-tag'],
       creationTimestamp: v.metadata.creationTimestamp,
       matches: v.spec.payload.matches ?? [],
