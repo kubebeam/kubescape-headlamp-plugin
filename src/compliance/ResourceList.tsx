@@ -90,8 +90,9 @@ export default function KubescapeWorkloadConfigurationScanList(props: {
             },
             {
               header: 'Failed Controls',
+              Cell: ({ row }: any) => resultStack(row.original),
               accessorFn: (workloadScan: WorkloadConfigurationScanSummary) =>
-                resultStack(workloadScan),
+                countResourceScans(workloadScan).join('.'),
               gridTemplate: 'auto',
             },
           ]}
@@ -169,6 +170,22 @@ function resultStack(workloadScan: WorkloadConfigurationScanSummary) {
       {box('yellow', 'Low')}
     </Stack>
   );
+}
+
+function countResourceScans(workloadScan: WorkloadConfigurationScanSummary) {
+  const counters: number[] = [];
+  const severities = ['Critical', 'High', 'Medium', 'Low'];
+
+  severities.map(severity => {
+    const count = Object.values(workloadScan.spec.controls).filter(
+      scan =>
+        scan.status.status === WorkloadConfigurationScanSummary.Status.Failed &&
+        scan.severity.severity === severity
+    ).length;
+    counters.push(count);
+  });
+
+  return counters;
 }
 
 function getWorkloadsWithFindings(
