@@ -6,6 +6,7 @@ on:
 
 permissions:
   contents: write
+  packages: write
 
 jobs:
   build:
@@ -47,7 +48,7 @@ jobs:
       - run: npx @kinvolk/headlamp-plugin test .
       - run: npx @kinvolk/headlamp-plugin build .
 
-      - name: create-archive
+      - name: Create Plugin Archive
         run: |
           mkdir -p kubescape-plugin
           cp package.json dist/*.js dist/*.wasm dist/*.yaml kubescape-plugin
@@ -69,7 +70,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build image with plugin tar.
+      - name: Build and Push image with plugin tar.
         id: push
         uses: docker/build-push-action@v6
         with:
