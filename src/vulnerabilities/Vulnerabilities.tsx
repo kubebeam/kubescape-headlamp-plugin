@@ -8,12 +8,15 @@ import {
   Table as HeadlampTable,
   Tabs as HeadlampTabs,
 } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
+import { getAllowedNamespaces } from '@kinvolk/headlamp-plugin/lib/k8s/cluster';
 import { createRouteURL } from '@kinvolk/headlamp-plugin/lib/Router';
-import { Box, FormControlLabel, Switch } from '@mui/material';
+import { Box, Button, FormControlLabel, Stack, Switch, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { RotatingLines } from 'react-loader-spinner';
+import { VulnerabilityManifestSummary } from 'src/softwarecomposition/VulnerabilityManifestSummary';
 import makeSeverityLabel from '../common/SeverityLabel';
 import { RoutingPath } from '../index';
+import { fetchVulnerabilityManifestSummaries } from '../model';
 import { fetchVulnerabilityManifests, WorkloadScan } from './fetch-vulnerabilities';
 import ImageListView from './ImageList';
 import WorkloadScanListView from './ResourceList';
@@ -32,21 +35,41 @@ interface CVEScan {
 
 // workloadScans are cached in global scope because it is an expensive query for the API server
 export let globalWorkloadScans: WorkloadScan[] | null = null;
-export let currentClusterURL = '';
+let currentClusterURL = '';
+let summaries: VulnerabilityManifestSummary[] = [];
+let indexSummary = 0;
+const summaryFetchItems = 20;
+let allowedNamespaces: string[] = [];
 
 export default function KubescapeVulnerabilities() {
   const [workloadScans, setWorkloadScans] = useState<WorkloadScan[] | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+
+  const arraysEqual = (a: string[], b: string[]) =>
+    a.length === b.length && a.every((element, index) => element === b[index]);
 
   useEffect(() => {
     if (
       globalWorkloadScans === null ||
-      currentClusterURL !== createRouteURL(RoutingPath.KubescapeVulnerabilities) // check if user switched to another cluster
+      currentClusterURL !== createRouteURL(RoutingPath.KubescapeVulnerabilities) || // check if user switched to another cluster
+      !arraysEqual(getAllowedNamespaces(), allowedNamespaces) // check if user changed namespace selection
     ) {
-      fetchVulnerabilityManifests().then(response => {
-        globalWorkloadScans = response;
+      const fetchData = async () => {
+        summaries = await fetchVulnerabilityManifestSummaries();
         currentClusterURL = createRouteURL(RoutingPath.KubescapeVulnerabilities);
-        setWorkloadScans(response);
-      });
+        allowedNamespaces = getAllowedNamespaces();
+
+        indexSummary = summaryFetchItems > summaries.length ? summaries.length : summaryFetchItems;
+
+        fetchVulnerabilityManifests(summaries.slice(0, indexSummary)).then(response => {
+          globalWorkloadScans = response;
+
+          setWorkloadScans(globalWorkloadScans);
+          setLoading(false);
+        });
+      };
+
+      fetchData().catch(console.error);
     } else {
       setWorkloadScans(globalWorkloadScans);
     }
@@ -55,11 +78,23 @@ export default function KubescapeVulnerabilities() {
   return (
     <>
       <h1>Vulnerabilities</h1>
+      <Stack direction="row" spacing={2}>
+        <Typography variant="body1" component="div" sx={{ flexGrow: 1 }}>
+          Reading {indexSummary} of {summaries.length} scans
+        </Typography>
+        <MoreButton setLoading={setLoading} setWorkloadScans={setWorkloadScans} title="Read more" />
+        <MoreButton
+          setLoading={setLoading}
+          setWorkloadScans={setWorkloadScans}
+          title="All"
+          readToEnd
+        />
+      </Stack>
       <HeadlampTabs
         tabs={[
           {
             label: 'CVEs',
-            component: <CVEListView workloadScans={workloadScans} />,
+            component: <CVEListView loading={loading} workloadScans={workloadScans} />,
           },
           {
             label: 'Resources',
@@ -76,12 +111,12 @@ export default function KubescapeVulnerabilities() {
   );
 }
 
-function CVEListView(props: { workloadScans: WorkloadScan[] | null }) {
-  const { workloadScans } = props;
+function CVEListView(props: { loading: boolean; workloadScans: WorkloadScan[] | null }) {
+  const { loading, workloadScans } = props;
   const [isRelevantCVESwitchChecked, setIsRelevantCVESwitchChecked] = useState(false);
   const [isFixedCVESwitchChecked, setIsFixedCVESwitchChecked] = useState(false);
 
-  if (!workloadScans)
+  if (loading || !workloadScans)
     return (
       <Box sx={{ padding: 2 }}>
         <RotatingLines />
@@ -250,4 +285,46 @@ function getCVEList(workloadScans: WorkloadScan[]): CVEScan[] {
   }
 
   return vulnerabilityList;
+}
+
+function MoreButton(props: {
+  setLoading: any;
+  setWorkloadScans: any;
+  title: string;
+  readToEnd?: boolean;
+}) {
+  const { setLoading, setWorkloadScans, title, readToEnd } = props;
+
+  return (
+    <Button
+      disabled={indexSummary === summaries.length}
+      onClick={() => {
+        const currentIndex = indexSummary;
+        if (readToEnd) {
+          indexSummary = summaries.length;
+        } else {
+          indexSummary =
+            currentIndex + summaryFetchItems > summaries.length
+              ? summaries.length
+              : currentIndex + summaryFetchItems;
+        }
+
+        setLoading(true);
+        setTimeout(() =>
+          fetchVulnerabilityManifests(summaries.slice(currentIndex, indexSummary)).then(
+            response => {
+              if (!globalWorkloadScans) globalWorkloadScans = response;
+              else globalWorkloadScans = globalWorkloadScans?.concat(response);
+
+              setWorkloadScans(globalWorkloadScans);
+              setLoading(false);
+            }
+          )
+        );
+      }}
+      variant="contained"
+    >
+      {title}
+    </Button>
+  );
 }

@@ -7,14 +7,18 @@ import {
   SectionBox,
   Table as HeadlampTable,
 } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
+import { KubeObject } from '@kinvolk/headlamp-plugin/lib/lib/k8s/cluster';
 import { Box, Stack, Tooltip } from '@mui/material';
+import { useState } from 'react';
 import { makeNamespaceLink } from '../common/Namespace';
 import { RoutingPath } from '../index';
 import { WorkloadScan } from './fetch-vulnerabilities';
 
 export default function WorkloadScanListView(props: { workloadScans: WorkloadScan[] | null }) {
   // Get the Kubescape pods to detect the installed namespace
-  const [kubescapePods] = K8s.ResourceClasses.Pod.useList({
+  const [kubescapePods, setKubescapePods] = useState<KubeObject[]>([]);
+
+  K8s.ResourceClasses.Pod.useApiList(setKubescapePods, {
     labelSelector: 'app.kubernetes.io/component=kubescape,app.kubernetes.io/instance=kubescape',
   });
 
@@ -97,20 +101,21 @@ export default function WorkloadScanListView(props: { workloadScans: WorkloadSca
               header: 'SBOM',
               accessorFn: (workloadScan: WorkloadScan) => {
                 if (workloadScan.imageScan?.manifestName) {
-                  return (
-                    <Link
-                      routeName={RoutingPath.KubescapeSBOMDetails}
-                      params={{
-                        name:
-                          workloadScan.relevant?.manifestName ??
-                          workloadScan.imageScan?.manifestName,
-                        namespace: kubescapePods[0].jsonData.metadata.namespace, //  namespace in vulnerabilitiesRef is wrong in refering to workload namespace
-                      }}
-                      search={workloadScan.relevant ? '?filtered' : ''}
-                    >
-                      SBOM
-                    </Link>
-                  );
+                  if (kubescapePods.length > 0)
+                    return (
+                      <Link
+                        routeName={RoutingPath.KubescapeSBOMDetails}
+                        params={{
+                          name:
+                            workloadScan.relevant?.manifestName ??
+                            workloadScan.imageScan?.manifestName,
+                          namespace: kubescapePods[0].jsonData.metadata.namespace, //  namespace in vulnerabilitiesRef is wrong in refering to workload namespace
+                        }}
+                        search={workloadScan.relevant ? '?filtered' : ''}
+                      >
+                        SBOM
+                      </Link>
+                    );
                 }
               },
               gridTemplate: 'min-content',

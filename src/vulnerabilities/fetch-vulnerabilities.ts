@@ -2,8 +2,12 @@
   Query vulnerabilty data and rework data into VulnerabilityModel for easier processing in the views. 
 */
 
-import { deepListQuery } from '../model';
+import {
+  fetchVulnerabilityManifest,
+  fetchVulnerabilityManifestSummary,
+} from '../model';
 import { VulnerabilityManifest } from '../softwarecomposition/VulnerabilityManifest';
+import { VulnerabilityManifestSummary } from '../softwarecomposition/VulnerabilityManifestSummary';
 
 // WorkloadScan is derived from VulnerabilityManifestSummary
 export interface WorkloadScan {
@@ -25,15 +29,10 @@ export interface ImageScan {
   matches: VulnerabilityManifest.Match[];
 }
 
-// Query vulnerabilitymanifestsummaries and vulnerabilitymanifests
-// Convert the retrieved data to WorkloadScan and ImageScan
-export async function fetchVulnerabilityManifests(): Promise<any> {
-  const vulnerabilityManifestSummaries = await deepListQuery('vulnerabilitymanifestsummaries');
-  const vulnerabilityManifests: VulnerabilityManifest[] = await deepListQuery(
-    'vulnerabilitymanifests'
-  );
+async function fetchImageScan(name: string): Promise<ImageScan | undefined> {
+  try {
+    const v = await fetchVulnerabilityManifest(name, 'kubescape');
 
-  const imageScans = vulnerabilityManifests.map(v => {
     const imageScan: ImageScan = {
       manifestName: v.metadata.name,
       namespace: v.metadata.namespace,
@@ -41,30 +40,41 @@ export async function fetchVulnerabilityManifests(): Promise<any> {
       creationTimestamp: v.metadata.creationTimestamp,
       matches: v.spec.payload.matches ?? [],
     };
-
     return imageScan;
-  });
+  } catch (e) {
+    console.log('Missing manifest ' + name);
+    return Promise.resolve(undefined);
+  }
+}
 
-  return vulnerabilityManifestSummaries.map(summary => {
-    // vulnerabilitiesRef.all field refers to the manifest
-    const imageScanAll: ImageScan | undefined = imageScans.find(
-      element => element.manifestName === summary.spec.vulnerabilitiesRef?.all?.name
-    );
+// Query vulnerabilitymanifestsummaries and vulnerabilitymanifests
+// Convert the retrieved data to WorkloadScan and ImageScan
+export async function fetchVulnerabilityManifests(
+  summaries: VulnerabilityManifestSummary[]
+): Promise<any> {
+  return await Promise.all(
+    summaries.map(async (summary: VulnerabilityManifestSummary) => {
+      const detailedSummary = await fetchVulnerabilityManifestSummary(
+        summary.metadata.name,
+        summary.metadata.namespace
+      );
+      const w: WorkloadScan = {
+        manifestName: detailedSummary.metadata.name,
+        name: detailedSummary.metadata.labels['kubescape.io/workload-name'],
+        namespace: detailedSummary.metadata.labels['kubescape.io/workload-namespace'],
+        container: detailedSummary.metadata.labels['kubescape.io/workload-container-name'],
+        kind: detailedSummary.metadata.labels['kubescape.io/workload-kind'],
+        imageScan: undefined,
+        relevant: undefined,
+      };
+      if (detailedSummary.spec.vulnerabilitiesRef?.all?.name) {
+        w.imageScan = await fetchImageScan(detailedSummary.spec.vulnerabilitiesRef.all.name);
+      }
+      if (detailedSummary.spec.vulnerabilitiesRef?.relevant?.name) {
+        w.relevant = await fetchImageScan(detailedSummary.spec.vulnerabilitiesRef.relevant.name);
+      }
 
-    const imageScanRelevant: ImageScan | undefined = imageScans.find(
-      element => element.manifestName === summary.spec.vulnerabilitiesRef?.relevant?.name
-    );
-
-    const w: WorkloadScan = {
-      manifestName: summary.metadata.name,
-      name: summary.metadata.labels['kubescape.io/workload-name'],
-      namespace: summary.metadata.labels['kubescape.io/workload-namespace'],
-      container: summary.metadata.labels['kubescape.io/workload-container-name'],
-      kind: summary.metadata.labels['kubescape.io/workload-kind'],
-      imageScan: imageScanAll,
-      relevant: imageScanRelevant,
-    };
-
-    return w;
-  });
+      return w;
+    })
+  );
 }
