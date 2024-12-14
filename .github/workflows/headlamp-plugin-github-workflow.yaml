@@ -34,7 +34,7 @@ jobs:
         with:
           go-version: ${{ matrix.go-version }}
 
-      - name: Download WASM and KubeScape files
+      - name: Download WASM and Kubescape files
         run: |
           mkdir -p dist 
           make download
@@ -76,4 +76,4 @@ jobs:
         with:
           context: .
           push: true
-          tags: kubebeam/kubescape-headlamp-plugin:latest
+          tags: latest
