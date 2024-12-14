@@ -1,6 +1,7 @@
 /* 
   Show workload configuration scans. This view is part of the main Vulnerabilities page.  
 */
+import { K8s } from '@kinvolk/headlamp-plugin/lib';
 import {
   Link,
   SectionBox,
@@ -12,8 +13,13 @@ import { RoutingPath } from '../index';
 import { WorkloadScan } from './fetch-vulnerabilities';
 
 export default function WorkloadScanListView(props: { workloadScans: WorkloadScan[] | null }) {
+  // Get the Kubescape pods to detect the installed namespace
+  const [kubescapePods] = K8s.ResourceClasses.Pod.useList({
+    labelSelector: 'app.kubernetes.io/component=kubescape,app.kubernetes.io/instance=kubescape',
+  });
+
   const { workloadScans } = props;
-  if (!workloadScans) {
+  if (!workloadScans || !kubescapePods) {
     return <></>;
   }
   return (
@@ -98,6 +104,7 @@ export default function WorkloadScanListView(props: { workloadScans: WorkloadSca
                         name:
                           workloadScan.relevant?.manifestName ??
                           workloadScan.imageScan?.manifestName,
+                        namespace: kubescapePods[0].jsonData.metadata.namespace, //  namespace in vulnerabilitiesRef is wrong in refering to workload namespace
                       }}
                       search={workloadScan.relevant ? '?filtered' : ''}
                     >

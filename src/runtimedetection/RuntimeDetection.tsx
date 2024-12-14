@@ -1,8 +1,5 @@
 import { KubeObject } from '@kinvolk/headlamp-plugin/lib';
-import {
-  NameValueTable,
-  SectionBox,
-} from '@kinvolk/headlamp-plugin/lib/CommonComponents';
+import { NameValueTable, SectionBox } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import Editor from '@monaco-editor/react';
 import * as yaml from 'js-yaml';
 import { useState } from 'react';

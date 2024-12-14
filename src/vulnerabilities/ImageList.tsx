@@ -75,6 +75,7 @@ export default function ImageListView(props: { workloadScans: WorkloadScan[] | n
                     routeName={RoutingPath.KubescapeSBOMDetails}
                     params={{
                       name: imageScan.manifestName,
+                      namespace: imageScan.namespace,
                     }}
                   >
                     SBOM

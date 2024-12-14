@@ -10,14 +10,14 @@ import { sbomSyftClass, sbomSyftFilteredClass } from '../model';
 import { SBOMSyft } from '../softwarecomposition/SBOMSyft';
 
 export default function SBOMDetail() {
-  const [name] = getURLSegments(-1);
+  const [name, namespace] = getURLSegments(-1, -2);
   const urlParams = new URLSearchParams(window.location.search);
   const filtered = urlParams.has('filtered');
 
   const [sbomSyftObject, setSbomSyftObject] = useState<KubeObject | null>(null);
 
   const sbomClass = filtered ? sbomSyftFilteredClass : sbomSyftClass;
-  sbomClass.useApiGet(setSbomSyftObject, name, 'kubescape');
+  sbomClass.useApiGet(setSbomSyftObject, name, namespace);
 
   if (!sbomSyftObject) {
     return <></>;

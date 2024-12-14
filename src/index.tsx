@@ -27,7 +27,7 @@ export namespace RoutingPath {
   export const KubescapeVulnerabilities = '/kubescape/vulnerabilities';
   export const KubescapeNetworkPolicies = '/kubescape/networkpolicies';
   export const KubescapeNetworkPolicyDiagram = '/kubescape/networkpolicies/:namespace/:name';
-  export const KubescapeSBOMDetails = '/kubescape/sbom/:name';
+  export const KubescapeSBOMDetails = '/kubescape/sbom/:namespace/:name';
   export const VAP = '/kubescape/vap';
   export const ApplicationProfiles = '/kubescape/applicationprofiles';
   export const RuntimeDetection = '/kubescape/runtimedetection/:namespace/:name';
