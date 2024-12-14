@@ -1,3 +1,3 @@
 FROM busybox:latest
 
-ADD *.gz /
+COPY kubescape-plugin /plugins/kubescape-plugin/
