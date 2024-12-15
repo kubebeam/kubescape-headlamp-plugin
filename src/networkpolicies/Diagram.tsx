@@ -6,12 +6,14 @@ import './style.css';
 import dagre from '@dagrejs/dagre';
 import { SectionBox, Tabs as HeadlampTabs } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import { KubeObject } from '@kinvolk/headlamp-plugin/lib/lib/k8s/cluster';
+import { createRouteURL } from '@kinvolk/headlamp-plugin/lib/Router';
 import Editor from '@monaco-editor/react';
 import { Box } from '@mui/material';
 import { Edge, MarkerType, Node, ReactFlow, ReactFlowInstance } from '@xyflow/react';
 import * as yaml from 'js-yaml';
 import { useEffect, useState } from 'react';
 import { getURLSegments } from '../common/url';
+import { RoutingPath } from '../index';
 import { generatedNetworkPolicyClass } from '../model';
 import { GeneratedNetworkPolicy } from '../softwarecomposition/GeneratedNetworkPolicy';
 import { nodeTypes } from './nodes';
@@ -27,28 +29,34 @@ export default function KubescapeNetworkPolicyDiagram() {
   }
   return (
     <>
-      <h1>Generated Network Policy</h1>
-      <HeadlampTabs
-        tabs={[
-          {
-            label: 'Diagram',
-            component: (
-              <NetworkPolicyDiagram generatedNetworkPolicy={networkPolicyObject.jsonData} />
-            ),
-          },
-          {
-            label: 'NetworkPolicy',
-            component: <NetworkPolicyEditor yaml={yaml.dump(networkPolicyObject.jsonData.spec)} />,
-          },
-          {
-            label: 'IP Lookup',
-            component: (
-              <NetworkPolicyEditor yaml={yaml.dump(networkPolicyObject.jsonData.policyRef)} />
-            ),
-          },
-        ]}
-        ariaLabel="Navigation Tabs"
-      />
+      <SectionBox
+        title="Generated Network Policy"
+        backLink={createRouteURL(RoutingPath.KubescapeNetworkPolicies)}
+      >
+        <HeadlampTabs
+          tabs={[
+            {
+              label: 'Diagram',
+              component: (
+                <NetworkPolicyDiagram generatedNetworkPolicy={networkPolicyObject.jsonData} />
+              ),
+            },
+            {
+              label: 'NetworkPolicy',
+              component: (
+                <NetworkPolicyEditor yaml={yaml.dump(networkPolicyObject.jsonData.spec)} />
+              ),
+            },
+            {
+              label: 'IP Lookup',
+              component: (
+                <NetworkPolicyEditor yaml={yaml.dump(networkPolicyObject.jsonData.policyRef)} />
+              ),
+            },
+          ]}
+          ariaLabel="Navigation Tabs"
+        />
+      </SectionBox>
     </>
   );
 }

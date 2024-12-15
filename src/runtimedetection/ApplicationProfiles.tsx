@@ -8,7 +8,7 @@ import {
 import { localeDate } from '@kinvolk/headlamp-plugin/lib/Utils';
 import { Typography } from '@mui/material';
 import { useEffect, useRef, useState } from 'react';
-import { RoutingPath } from '..';
+import { RoutingPath } from '../index';
 import { applicationProfileClass } from '../model';
 import { ApplicationProfile } from '../softwarecomposition/ApplicationProfile';
 import { AlertMessagePopup } from './AlertMessagePopup';

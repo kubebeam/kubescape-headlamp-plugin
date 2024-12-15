@@ -41,6 +41,7 @@ type VulnerabilityContext = {
   indexSummary: number;
   summaryFetchItems: number;
   allowedNamespaces: string[];
+  selectedTab: number;
 };
 
 export const vulnerabilityContext: VulnerabilityContext = {
@@ -50,6 +51,7 @@ export const vulnerabilityContext: VulnerabilityContext = {
   indexSummary: 0,
   summaryFetchItems: 20,
   allowedNamespaces: [],
+  selectedTab: 0,
 };
 
 export default function KubescapeVulnerabilities() {
@@ -110,6 +112,8 @@ export default function KubescapeVulnerabilities() {
         />
       </Stack>
       <HeadlampTabs
+        defaultIndex={vulnerabilityContext.selectedTab}
+        onTabChanged={tabIndex => (vulnerabilityContext.selectedTab = tabIndex)}
         tabs={[
           {
             label: 'CVEs',

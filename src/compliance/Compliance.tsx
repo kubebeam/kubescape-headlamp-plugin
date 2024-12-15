@@ -38,6 +38,7 @@ type ConfigurationScanContext = {
   indexSummary: number;
   summaryFetchItems: number;
   allowedNamespaces: string[];
+  selectedTab: number;
 };
 
 export const configurationScanContext: ConfigurationScanContext = {
@@ -47,6 +48,7 @@ export const configurationScanContext: ConfigurationScanContext = {
   indexSummary: 0,
   summaryFetchItems: 20,
   allowedNamespaces: [],
+  selectedTab: 0,
 };
 
 export default function ComplianceView() {
@@ -110,6 +112,8 @@ export default function ComplianceView() {
         />
       </Stack>
       <HeadlampTabs
+        defaultIndex={configurationScanContext.selectedTab}
+        onTabChanged={tabIndex => (configurationScanContext.selectedTab = tabIndex)}
         tabs={[
           {
             label: 'Controls',

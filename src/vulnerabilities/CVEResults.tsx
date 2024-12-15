@@ -7,6 +7,7 @@ import {
   SectionBox,
   Table as HeadlampTable,
 } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
+import { createRouteURL } from '@kinvolk/headlamp-plugin/lib/Router';
 import { Link } from '@mui/material';
 import { getURLSegments } from '../common/url';
 import { RoutingPath } from '../index';
@@ -34,28 +35,26 @@ export default function KubescapeCVEResults() {
   }
   return (
     <>
-      <h1>{cve}</h1>
-      {/* <SectionBox title="Details">
-        <pre>{YAML.stringify(firstCVE)}</pre>
-      </SectionBox> */}
-      <NameValueTable
-        rows={[
-          {
-            name: 'CVE ID',
-            value: <Link href={firstCVE.vulnerability.dataSource}>{cve}</Link>,
-          },
-          {
-            name: 'Severity',
-            value: firstCVE.vulnerability.severity,
-          },
-          {
-            name: 'Description',
-            value: firstCVE.vulnerability.description,
-          },
-        ]}
-      />
+      <SectionBox title={cve} backLink={createRouteURL(RoutingPath.KubescapeVulnerabilities)}>
+        <NameValueTable
+          rows={[
+            {
+              name: 'CVE ID',
+              value: <Link href={firstCVE.vulnerability.dataSource}>{cve}</Link>,
+            },
+            {
+              name: 'Severity',
+              value: firstCVE.vulnerability.severity,
+            },
+            {
+              name: 'Description',
+              value: firstCVE.vulnerability.description,
+            },
+          ]}
+        />
 
-      <Workloads cve={cve} workloads={workloadScansFiltered} />
+        <Workloads cve={cve} workloads={workloadScansFiltered} />
+      </SectionBox>
     </>
   );
 }
