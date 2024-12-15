@@ -46,8 +46,7 @@ The queries to the Kubescape database use Headlamps feature for `Allowed namespa
 #### In-cluster Headlamp
 
 - Install Headlamp (https://headlamp.dev/docs/latest/installation/in-cluster/)
-- The installation files can be found on the release page in github. Here you can download the tarball. Add an initContainer to the headlamp install to download the plugin files. See [example helm values](https://github.com/Kubebeam/kubescape-headlamp-plugin/blob/main/examples/headlamp-helm-values.yaml).
-- Alternatively follow the guidance from headlamp to create a container image with the plugin artifacts: https://headlamp.dev/blog/2022/10/20/best-practices-for-deploying-headlamp-with-plugins/.
+- Add an initContainer to the headlamp deployment to download the kubescape-plugin files. See [example helm values](https://github.com/kubebeam/kubescape-headlamp-plugin/blob/main/examples/headlamp-helm-values.yaml).
 
 ## Quick test
 
@@ -79,7 +78,7 @@ Install test deployments.
 
 ### Headlamp desktop
 
-Now start headlamp desktop, load the kubeconfig from the kind cluster. For the runtime scanning you need to wait 10 minutes, the learning period.
+Start headlamp desktop, load the kubeconfig from the kind cluster. For the runtime scanning you need to wait 10 minutes, the learning period.
 
 ## Docs
 
@@ -90,14 +89,12 @@ Now start headlamp desktop, load the kubeconfig from the kind cluster. For the r
 - The plugin depends on documentation of configuration scanning in [Kubescape User Hub](https://hub.armosec.io/docs/controls).
 - The plugin depends on JSON documentation in the [kubescape regolibrary](https://github.com/kubescape/regolibrary/releases/download/v2/controls/). The [control libary](./src/ConfigurationScanning/controlLibrary.js) is copied for use in the plugin code.
 
-## Contributing
+## Contributing and Feedback
+
+For any questions or feedback, please open an issue on the GitHub repository.
 
 Contributions are welcome! Please fork the repository and submit a pull request.
 
 ## License
 
 This project is licensed under the Apache-2.0 License. See the LICENSE file for details.
-
-## Contact
-
-For any questions or feedback, please open an issue on the GitHub repository.
