@@ -55,7 +55,8 @@ const ConnectedNode = (props: NodeProps<ConnectedNode>) => {
         </div>
         <div className="text">{namespaceSelector(data.peer)}</div>
         <div className="text">{podSelector(data.peer)}</div>
-        <div className="text">{ipSelector(data.policy, data.peer)}</div>
+        <div className="text">{dnsSelector(data.policy, data.peer)}</div>
+        <div className="text">{ipSelector(data.peer)}</div>
         <div className="text">{portsToString(data.ports)}</div>
         {type === 'sourceNode' ? sourceHandle : targetHandle}
       </Box>
@@ -108,16 +109,18 @@ function namespaceSelector(peer: NetworkPolicy.Peer): string {
   return text;
 }
 
-function ipSelector(policy: GeneratedNetworkPolicy, peer: NetworkPolicy.Peer): string {
-  let text = '';
+function ipSelector(peer: NetworkPolicy.Peer): string {
+  return peer.ipBlock ? peer.ipBlock.cidr : '';
+}
+
+function dnsSelector(policy: GeneratedNetworkPolicy, peer: NetworkPolicy.Peer): string {
   if (peer.ipBlock) {
     const ref = policy.policyRef?.find(ref => ref.ipBlock === peer.ipBlock?.cidr);
     if (ref) {
-      text += ref.dns;
+      return ref.dns;
     }
-    text += peer.ipBlock.cidr;
   }
-  return text;
+  return '';
 }
 
 function isSingleNamespaceSelector(labels: NetworkPolicy.LabelSelector): boolean {
@@ -146,7 +149,11 @@ function peerOrigin(peer: NetworkPolicy.Peer): string {
       return Object.values(labels)[0];
     }
   }
-  if (peer.ipBlock?.cidr && !peer.ipBlock.cidr.startsWith('10.')) {
+  if (
+    peer.ipBlock?.cidr &&
+    !peer.ipBlock.cidr.startsWith('10.') &&
+    !peer.ipBlock.cidr.startsWith('172.')
+  ) {
     return 'Internet';
   }
 

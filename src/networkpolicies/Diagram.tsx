@@ -37,9 +37,13 @@ export default function KubescapeNetworkPolicyDiagram() {
             ),
           },
           {
-            label: 'Editor',
+            label: 'NetworkPolicy',
+            component: <NetworkPolicyEditor yaml={yaml.dump(networkPolicyObject.jsonData.spec)} />,
+          },
+          {
+            label: 'IP Lookup',
             component: (
-              <NetworkPolicyEditor generatedNetworkPolicy={networkPolicyObject.jsonData} />
+              <NetworkPolicyEditor yaml={yaml.dump(networkPolicyObject.jsonData.policyRef)} />
             ),
           },
         ]}
@@ -49,16 +53,15 @@ export default function KubescapeNetworkPolicyDiagram() {
   );
 }
 
-function NetworkPolicyEditor(props: { generatedNetworkPolicy: GeneratedNetworkPolicy }) {
-  const { generatedNetworkPolicy } = props;
+function NetworkPolicyEditor(props: { yaml: string }) {
+  const { yaml } = props;
 
-  const policyYaml = yaml.dump(generatedNetworkPolicy.spec);
   return (
     <Box paddingTop={2} height="100%">
       <Editor
         language={'yaml'}
         theme={localStorage.headlampThemePreference === 'dark' ? 'vs-dark' : ''}
-        value={policyYaml}
+        value={yaml}
         height={window.innerHeight * 0.8}
       />
     </Box>
