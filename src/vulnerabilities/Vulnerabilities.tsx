@@ -9,7 +9,7 @@ import {
   Tabs as HeadlampTabs,
 } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import { getAllowedNamespaces } from '@kinvolk/headlamp-plugin/lib/k8s/cluster';
-import { createRouteURL } from '@kinvolk/headlamp-plugin/lib/Router';
+import { getCluster } from '@kinvolk/headlamp-plugin/lib/Utils';
 import { Box, Button, FormControlLabel, Stack, Switch, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { RotatingLines } from 'react-loader-spinner';
@@ -36,7 +36,7 @@ interface CVEScan {
 // workloadScans are cached in global scope because it is an expensive query for the API server
 type VulnerabilityContext = {
   workloadScans: WorkloadScan[];
-  currentClusterURL: string;
+  currentCluster: string | null;
   summaries: VulnerabilityManifestSummary[];
   indexSummary: number;
   summaryFetchItems: number;
@@ -46,7 +46,7 @@ type VulnerabilityContext = {
 
 export const vulnerabilityContext: VulnerabilityContext = {
   workloadScans: [],
-  currentClusterURL: '',
+  currentCluster: '',
   summaries: [],
   indexSummary: 0,
   summaryFetchItems: 20,
@@ -63,15 +63,12 @@ export default function KubescapeVulnerabilities() {
       a.length === b.length && a.every((element, index) => element === b[index]);
 
     if (
-      vulnerabilityContext.currentClusterURL !==
-        createRouteURL(RoutingPath.KubescapeVulnerabilities) || // check if user switched to another cluster
+      vulnerabilityContext.currentCluster !== getCluster() || // check if user switched to another cluster
       !arraysEqual(getAllowedNamespaces(), vulnerabilityContext.allowedNamespaces) // check if user changed namespace selection
     ) {
       const fetchData = async () => {
         vulnerabilityContext.summaries = await listQuery(vulnerabilityManifestSummaryClass);
-        vulnerabilityContext.currentClusterURL = createRouteURL(
-          RoutingPath.KubescapeVulnerabilities
-        );
+        vulnerabilityContext.currentCluster = getCluster();
         vulnerabilityContext.allowedNamespaces = getAllowedNamespaces();
 
         vulnerabilityContext.indexSummary =

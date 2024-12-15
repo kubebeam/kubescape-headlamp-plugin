@@ -8,7 +8,7 @@ import {
   Tabs as HeadlampTabs,
 } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import { getAllowedNamespaces } from '@kinvolk/headlamp-plugin/lib/k8s/cluster';
-import { createRouteURL } from '@kinvolk/headlamp-plugin/lib/Router';
+import { getCluster } from '@kinvolk/headlamp-plugin/lib/Utils';
 import {
   Box,
   Button,
@@ -33,7 +33,7 @@ import KubescapeWorkloadConfigurationScanList from './ResourceList';
 // workloadScans are cached in global scope because it is an expensive query for the API server
 type ConfigurationScanContext = {
   workloadScans: WorkloadConfigurationScanSummary[];
-  currentClusterURL: string;
+  currentCluster: string | null;
   summaries: WorkloadConfigurationScanSummary[];
   indexSummary: number;
   summaryFetchItems: number;
@@ -43,7 +43,7 @@ type ConfigurationScanContext = {
 
 export const configurationScanContext: ConfigurationScanContext = {
   workloadScans: [],
-  currentClusterURL: '',
+  currentCluster: '',
   summaries: [],
   indexSummary: 0,
   summaryFetchItems: 20,
@@ -62,12 +62,12 @@ export default function ComplianceView() {
       a.length === b.length && a.every((element, index) => element === b[index]);
 
     if (
-      configurationScanContext.currentClusterURL !== createRouteURL(RoutingPath.ComplianceView) || // check if user switched to another cluster
+      configurationScanContext.currentCluster !== getCluster() || // check if user switched to another cluster
       !arraysEqual(getAllowedNamespaces(), configurationScanContext.allowedNamespaces) // check if user changed namespace selection
     ) {
       const fetchData = async () => {
         configurationScanContext.summaries = await listQuery(workloadConfigurationScanSummaryClass);
-        configurationScanContext.currentClusterURL = createRouteURL(RoutingPath.ComplianceView);
+        configurationScanContext.currentCluster = getCluster();
         configurationScanContext.allowedNamespaces = getAllowedNamespaces();
 
         configurationScanContext.indexSummary =
