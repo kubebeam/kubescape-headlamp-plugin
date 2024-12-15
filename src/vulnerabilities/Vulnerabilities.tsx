@@ -229,6 +229,16 @@ function CVEListView(props: { loading: boolean; workloadScans: WorkloadScan[] | 
             {
               header: 'Workloads',
               accessorFn: (item: CVEScan) => item.workloads.size,
+              Cell: ({ cell, row }: any) => (
+                <HeadlampLink
+                  routeName={RoutingPath.KubescapeCVEResults}
+                  params={{
+                    cve: row.original.CVE,
+                  }}
+                >
+                  {cell.getValue()}
+                </HeadlampLink>
+              ),
               gridTemplate: 'min-content',
             },
             {
