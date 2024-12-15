@@ -83,6 +83,7 @@ function Controls(props: { workloadConfigurationScan: WorkloadConfigurationScan 
         data={entries}
         columns={[
           {
+            id: 'Status',
             header: 'Status',
             accessorKey: 'status.status',
             Cell: ({ row }: any) => makeStatusLabel(row.original),
@@ -160,6 +161,14 @@ function Controls(props: { workloadConfigurationScan: WorkloadConfigurationScan 
             gridTemplate: 'min-content',
           },
         ]}
+        initialState={{
+          sorting: [
+            {
+              id: 'Status',
+              desc: false,
+            },
+          ],
+        }}
       />
     </SectionBox>
   );
