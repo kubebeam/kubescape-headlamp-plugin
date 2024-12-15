@@ -37,6 +37,7 @@ export default function NamespaceView(props: {
         data={getNamespaceResults(workloadScanData)}
         columns={[
           {
+            id: 'Namespace',
             header: 'Namespace',
             accessorKey: 'namespace',
             Cell: ({ cell }: any) => (
@@ -87,6 +88,14 @@ export default function NamespaceView(props: {
             gridTemplate: 'min-content',
           },
         ]}
+        initialState={{
+          sorting: [
+            {
+              id: 'Namespace',
+              desc: false,
+            },
+          ],
+        }}
       />
     </SectionBox>
   );
