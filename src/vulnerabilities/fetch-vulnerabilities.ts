@@ -3,8 +3,9 @@
 */
 
 import {
-  fetchVulnerabilityManifest,
-  fetchVulnerabilityManifestSummary,
+  fetchObject,
+  vulnerabilityManifestClass,
+  vulnerabilityManifestSummaryClass,
 } from '../model';
 import { VulnerabilityManifest } from '../softwarecomposition/VulnerabilityManifest';
 import { VulnerabilityManifestSummary } from '../softwarecomposition/VulnerabilityManifestSummary';
@@ -31,7 +32,7 @@ export interface ImageScan {
 
 async function fetchImageScan(name: string): Promise<ImageScan | undefined> {
   try {
-    const v = await fetchVulnerabilityManifest(name, 'kubescape');
+    const v = await fetchObject(name, 'kubescape', vulnerabilityManifestClass);
 
     const imageScan: ImageScan = {
       manifestName: v.metadata.name,
@@ -54,9 +55,10 @@ export async function fetchVulnerabilityManifests(
 ): Promise<any> {
   return await Promise.all(
     summaries.map(async (summary: VulnerabilityManifestSummary) => {
-      const detailedSummary = await fetchVulnerabilityManifestSummary(
+      const detailedSummary = await fetchObject(
         summary.metadata.name,
-        summary.metadata.namespace
+        summary.metadata.namespace,
+        vulnerabilityManifestSummaryClass
       );
       const w: WorkloadScan = {
         manifestName: detailedSummary.metadata.name,

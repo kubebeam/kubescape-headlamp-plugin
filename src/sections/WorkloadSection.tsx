@@ -10,7 +10,11 @@ import { Link, NameValueTable, SectionBox } from '@kinvolk/headlamp-plugin/lib/C
 import { useEffect, useState } from 'react';
 import { getControlsSummary } from '../compliance/ControlsSummary';
 import { RoutingPath } from '../index';
-import { fetchVulnerabilityScanSummaries, workloadConfigurationScanSummaryClass } from '../model';
+import {
+  fetchObject,
+  vulnerabilityManifestSummaryClass,
+  workloadConfigurationScanSummaryClass,
+} from '../model';
 import { getCVESummary } from '../vulnerabilities/CVESummary';
 
 export default function addKubescapeWorkloadSection(
@@ -81,9 +85,9 @@ function KubescapeInfo(props: { resource: KubeObject }) {
     }
 
     useEffect(() => {
-      fetchVulnerabilityScanSummaries(namespace, manifestNames).then((results: any[]) =>
-        setVulnerabilityScans(results)
-      );
+      Promise.all(
+        manifestNames.map(name => fetchObject(name, namespace, vulnerabilityManifestSummaryClass))
+      ).then((results: any[]) => setVulnerabilityScans(results));
     }, []);
   }
 

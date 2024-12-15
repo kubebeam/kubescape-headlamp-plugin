@@ -7,50 +7,118 @@ import {
   Table,
   Tabs as HeadlampTabs,
 } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
+import { getAllowedNamespaces } from '@kinvolk/headlamp-plugin/lib/k8s/cluster';
 import { createRouteURL } from '@kinvolk/headlamp-plugin/lib/Router';
-import { Box, FormControlLabel, Link, Switch, Tooltip } from '@mui/material';
+import {
+  Box,
+  Button,
+  FormControlLabel,
+  Link,
+  Stack,
+  Switch,
+  Tooltip,
+  Typography,
+} from '@mui/material';
 import { useEffect, useState } from 'react';
 import { RotatingLines } from 'react-loader-spinner';
 import { StatusLabel, StatusLabelProps } from '../common/StatusLabel';
 import { RoutingPath } from '../index';
-import { deepListQuery } from '../model';
+import { fetchObject, listQuery } from '../model';
+import { workloadConfigurationScanSummaryClass } from '../model';
 import { WorkloadConfigurationScanSummary } from '../softwarecomposition/WorkloadConfigurationScanSummary';
 import { Control, controlLibrary } from './controlLibrary';
 import NamespaceView from './NamespaceView';
 import KubescapeWorkloadConfigurationScanList from './ResourceList';
 
 // workloadScans are cached in global scope because it is an expensive query for the API server
-export let globalWorkloadScanData: WorkloadConfigurationScanSummary[] | null = null;
-let currentClusterURL = '';
+type ConfigurationScanContext = {
+  workloadScans: WorkloadConfigurationScanSummary[];
+  currentClusterURL: string;
+  summaries: WorkloadConfigurationScanSummary[];
+  indexSummary: number;
+  summaryFetchItems: number;
+  allowedNamespaces: string[];
+};
+
+export const configurationScanContext: ConfigurationScanContext = {
+  workloadScans: [],
+  currentClusterURL: '',
+  summaries: [],
+  indexSummary: 0,
+  summaryFetchItems: 20,
+  allowedNamespaces: [],
+};
 
 export default function ComplianceView() {
   const [workloadScanData, setWorkloadScanData] = useState<
     WorkloadConfigurationScanSummary[] | null
   >(null);
+  const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
+    const arraysEqual = (a: string[], b: string[]) =>
+      a.length === b.length && a.every((element, index) => element === b[index]);
+
     if (
-      globalWorkloadScanData === null ||
-      currentClusterURL !== createRouteURL(RoutingPath.ComplianceView) // check if user switched to another cluster
+      configurationScanContext.currentClusterURL !== createRouteURL(RoutingPath.ComplianceView) || // check if user switched to another cluster
+      !arraysEqual(getAllowedNamespaces(), configurationScanContext.allowedNamespaces) // check if user changed namespace selection
     ) {
-      deepListQuery('workloadconfigurationscansummaries').then(response => {
-        globalWorkloadScanData = response;
-        currentClusterURL = createRouteURL(RoutingPath.ComplianceView);
-        setWorkloadScanData(response);
-      });
+      const fetchData = async () => {
+        configurationScanContext.summaries = await listQuery(workloadConfigurationScanSummaryClass);
+        configurationScanContext.currentClusterURL = createRouteURL(RoutingPath.ComplianceView);
+        configurationScanContext.allowedNamespaces = getAllowedNamespaces();
+
+        configurationScanContext.indexSummary =
+          configurationScanContext.summaryFetchItems > configurationScanContext.summaries.length
+            ? configurationScanContext.summaries.length
+            : configurationScanContext.summaryFetchItems;
+
+        fetchConfigurationScanSummaries(
+          configurationScanContext.summaries.slice(0, configurationScanContext.indexSummary)
+        ).then(response => {
+          configurationScanContext.workloadScans = response;
+
+          setWorkloadScanData(configurationScanContext.workloadScans);
+          setLoading(false);
+        });
+      };
+
+      fetchData().catch(console.error);
     } else {
-      setWorkloadScanData(globalWorkloadScanData);
+      setWorkloadScanData(configurationScanContext.workloadScans);
     }
   }, []);
 
   return (
     <>
       <h1>Compliance</h1>
+      <Stack direction="row" spacing={2}>
+        <Typography variant="body1" component="div" sx={{ flexGrow: 1 }}>
+          Reading {configurationScanContext.indexSummary} of{' '}
+          {configurationScanContext.summaries.length} scans
+        </Typography>
+        <MoreButton
+          setLoading={setLoading}
+          setWorkloadScans={setWorkloadScanData}
+          title="Read more"
+        />
+        <MoreButton
+          setLoading={setLoading}
+          setWorkloadScans={setWorkloadScanData}
+          title="All"
+          readToEnd
+        />
+      </Stack>
       <HeadlampTabs
         tabs={[
           {
             label: 'Controls',
-            component: <ConfigurationScanningListView workloadScanData={workloadScanData} />,
+            component: (
+              <ConfigurationScanningListView
+                loading={loading}
+                workloadScanData={workloadScanData}
+              />
+            ),
           },
           {
             label: 'Resources',
@@ -70,10 +138,11 @@ export default function ComplianceView() {
 }
 
 function ConfigurationScanningListView(props: {
+  loading: boolean;
   workloadScanData: WorkloadConfigurationScanSummary[] | null;
 }) {
-  const { workloadScanData } = props;
-  if (!workloadScanData)
+  const { loading, workloadScanData } = props;
+  if (loading || !workloadScanData)
     return (
       <Box sx={{ padding: 2 }}>
         <RotatingLines />
@@ -266,4 +335,67 @@ function countFailedScans(workloadScanData: WorkloadConfigurationScanSummary[]):
   return workloadScanData
     .flatMap(w => Object.values(w.spec.controls))
     .filter(scan => scan.status.status === 'failed').length;
+}
+
+export async function fetchConfigurationScanSummaries(
+  summaries: WorkloadConfigurationScanSummary[]
+): Promise<any> {
+  return await Promise.all(
+    summaries.map(async (summary: WorkloadConfigurationScanSummary) => {
+      return await fetchObject(
+        summary.metadata.name,
+        summary.metadata.namespace,
+        workloadConfigurationScanSummaryClass
+      );
+    })
+  );
+}
+
+function MoreButton(props: {
+  setLoading: any;
+  setWorkloadScans: any;
+  title: string;
+  readToEnd?: boolean;
+}) {
+  const { setLoading, setWorkloadScans, title, readToEnd } = props;
+
+  return (
+    <Button
+      disabled={configurationScanContext.indexSummary === configurationScanContext.summaries.length}
+      onClick={() => {
+        const currentIndex = configurationScanContext.indexSummary;
+        if (readToEnd) {
+          configurationScanContext.indexSummary = configurationScanContext.summaries.length;
+        } else {
+          configurationScanContext.indexSummary =
+            currentIndex + configurationScanContext.summaryFetchItems >
+            configurationScanContext.summaries.length
+              ? configurationScanContext.summaries.length
+              : currentIndex + configurationScanContext.summaryFetchItems;
+        }
+
+        setLoading(true);
+        setTimeout(() =>
+          fetchConfigurationScanSummaries(
+            configurationScanContext.summaries.slice(
+              currentIndex,
+              configurationScanContext.indexSummary
+            )
+          ).then(response => {
+            if (!configurationScanContext.workloadScans)
+              configurationScanContext.workloadScans = response;
+            else
+              configurationScanContext.workloadScans =
+                configurationScanContext.workloadScans?.concat(response);
+
+            setWorkloadScans(configurationScanContext.workloadScans);
+            setLoading(false);
+          })
+        );
+      }}
+      variant="contained"
+    >
+      {title}
+    </Button>
+  );
 }

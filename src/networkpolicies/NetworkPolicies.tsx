@@ -10,8 +10,7 @@ import {
 } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import { useEffect, useState } from 'react';
 import { RoutingPath } from '../index';
-import { deepListQuery, generatedNetworkPolicyClass } from '../model';
-import { listQuery } from '../model';
+import { deepListQuery, generatedNetworkPolicyClass, knownServersClass, listQuery } from '../model';
 import { GeneratedNetworkPolicy } from '../softwarecomposition/GeneratedNetworkPolicy';
 import { KnownServer } from '../softwarecomposition/KnownServer';
 
@@ -40,13 +39,12 @@ function NetworkPolicyList() {
   const [networkPolicies, setNetworkPolicies] = useState<GeneratedNetworkPolicy[]>([]);
 
   useEffect(() => {
-    listQuery(
-      generatedNetworkPolicyClass.apiEndpoint.apiInfo[0].group,
-      generatedNetworkPolicyClass.apiEndpoint.apiInfo[0].version,
-      'generatednetworkpolicies'
-    ).then((result: any) => {
-      setNetworkPolicies(result.items);
-    });
+    const fetchData = async () => {
+      listQuery(generatedNetworkPolicyClass).then((result: any) => {
+        setNetworkPolicies(result);
+      });
+    };
+    fetchData().catch(console.error);
   }, []);
 
   if (!networkPolicies) {
@@ -111,7 +109,7 @@ function KnownServerList() {
   const [knownServers, setKnownServers]: [KnownServer[], any] = useState<KnownServer[]>([]);
 
   useEffect(() => {
-    deepListQuery('knownservers').then((result: any) => {
+    deepListQuery(knownServersClass).then((result: any) => {
       setKnownServers(result);
     });
   }, []);

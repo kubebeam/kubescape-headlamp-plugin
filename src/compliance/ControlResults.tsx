@@ -13,7 +13,7 @@ import { makeNamespaceLink } from '../common/Namespace';
 import { getLastURLSegment } from '../common/url';
 import { RoutingPath } from '../index';
 import { WorkloadConfigurationScanSummary } from '../softwarecomposition/WorkloadConfigurationScanSummary';
-import { globalWorkloadScanData } from './Compliance';
+import { configurationScanContext } from './Compliance';
 import controlLibrary from './controlLibrary';
 
 export default function KubescapeControlResults() {
@@ -25,7 +25,7 @@ export default function KubescapeControlResults() {
   }
 
   const resourceList =
-    globalWorkloadScanData?.filter(w =>
+    configurationScanContext.workloadScans?.filter(w =>
       Object.values(w.spec.controls).some(scan => scan.controlID === controlID)
     ) ?? [];
 

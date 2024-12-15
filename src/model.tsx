@@ -2,7 +2,7 @@
   Kubescape definitions for resources with basic methods for querying. 
 */
 import { ApiProxy, KubeObject } from '@kinvolk/headlamp-plugin/lib';
-import { getAllowedNamespaces } from '@kinvolk/headlamp-plugin/lib/k8s/cluster';
+import { getAllowedNamespaces, KubeObjectClass } from '@kinvolk/headlamp-plugin/lib/k8s/cluster';
 import { makeCustomResourceClass } from '@kinvolk/headlamp-plugin/lib/lib/k8s/crd';
 
 const spdxGroup = 'spdx.softwarecomposition.kubescape.io';
@@ -42,6 +42,13 @@ export const workloadConfigurationScanSummaryClass = makeCustomResourceClass({
   isNamespaced: true,
   singularName: 'workloadconfigurationscansummary',
   pluralName: 'workloadconfigurationscansummaries',
+});
+
+export const workloadConfigurationScanClass = makeCustomResourceClass({
+  apiInfo: spdxGroupVersions,
+  isNamespaced: true,
+  singularName: 'workloadconfigurationscan',
+  pluralName: 'workloadconfigurationscans',
 });
 
 export const configurationScanSummariesClass = makeCustomResourceClass({
@@ -86,62 +93,12 @@ export const applicationProfileClass = makeCustomResourceClass({
   pluralName: 'applicationprofiles',
 });
 
-// List methods for spdx.softwarecomposition.kubescape.io do not retrieve info in the spec.
-// As a workaround, deepListQuery() will fetch each item individually.
-export async function deepListQuery(type: string): Promise<any[]> {
-  let namespaces: string[] = [];
-
-  // method getAllowedNamespaces may not be released yet
-  if (getAllowedNamespaces !== undefined) {
-    namespaces = getAllowedNamespaces();
-  }
-
-  let items: any = [];
-
-  // If we have namespaces set, make an API call for each namespace
-  if (namespaces.length > 0) {
-    // always include kubescape because some objects are saved in this namespace
-    if (!namespaces.some(n => n === 'kubescape')) {
-      namespaces.push('kubescape');
-    }
-    const listOfLists: any[] = await Promise.all(
-      namespaces.map(namespace =>
-        ApiProxy.request(`/apis/${spdxGroup}/${spdxVersion}/namespaces/${namespace}/${type}`)
-      )
-    );
-
-    items = listOfLists.flatMap(list => list.items);
-  } else {
-    const overviewList = await ApiProxy.request(`/apis/${spdxGroup}/${spdxVersion}/${type}`);
-
-    items = overviewList.items;
-  }
-
-  const detailList = await Promise.all(
-    items.map((scan: KubeObject) => {
-      const namespaceCondition = scan.metadata.namespace
-        ? `/namespaces/${scan.metadata.namespace}`
-        : '';
-      return ApiProxy.request(
-        `/apis/${spdxGroup}/${spdxVersion}${namespaceCondition}/${type}/${scan.metadata.name}`
-      );
-    })
-  );
-
-  return detailList;
-}
-
-export async function fetchVulnerabilityScanSummaries(namespace: string, manifestNames: string[]) {
-  return Promise.all(
-    manifestNames.map(name =>
-      proxyRequest(name, namespace, spdxGroup, spdxVersion, 'vulnerabilitymanifestsummaries')
-    )
-  );
-}
-
-export function fetchWorkloadConfigurationScan(name: string, namespace: string): Promise<any> {
-  return proxyRequest(name, namespace, spdxGroup, spdxVersion, 'workloadconfigurationscans');
-}
+export const knownServersClass = makeCustomResourceClass({
+  apiInfo: spdxGroupVersions,
+  isNamespaced: true,
+  singularName: 'knownserver',
+  pluralName: 'knownservers',
+});
 
 export function proxyRequest(
   name: string,
@@ -156,6 +113,47 @@ export function proxyRequest(
   );
 }
 
-export function listQuery(group: string, version: string, pluralName: string): Promise<any> {
-  return ApiProxy.request(`/apis/${group}/${version}/${pluralName}`);
+export async function listQuery(objectClass: KubeObjectClass): Promise<any> {
+  const namespaces = getAllowedNamespaces();
+  const group = objectClass.apiEndpoint.apiInfo[0].group;
+  const version = objectClass.apiEndpoint.apiInfo[0].version;
+  const pluralName = objectClass.pluralName;
+
+  if (namespaces?.length > 0) {
+    const listOfLists: any[] = await Promise.all(
+      namespaces.map(namespace =>
+        ApiProxy.request(`/apis/${group}/${version}/namespaces/${namespace}/${pluralName}`)
+      )
+    );
+    return listOfLists.flatMap(list => list.items);
+  } else {
+    const overviewList = await ApiProxy.request(`/apis/${group}/${version}/${pluralName}`);
+
+    return overviewList.items;
+  }
+}
+
+export function fetchObject(
+  name: string,
+  namespace: string,
+  objectClass: KubeObjectClass
+): Promise<any> {
+  const group = objectClass.apiEndpoint.apiInfo[0].group;
+  const version = objectClass.apiEndpoint.apiInfo[0].version;
+
+  return proxyRequest(name, namespace, group, version, objectClass.pluralName);
+}
+
+// List methods for spdx.softwarecomposition.kubescape.io do not retrieve info in the spec.
+// As a workaround, deepListQuery() will fetch each item individually.
+export async function deepListQuery(objectClass: KubeObjectClass): Promise<any[]> {
+  const items = await listQuery(objectClass);
+
+  const detailList = await Promise.all(
+    items.map((object: KubeObject) =>
+      fetchObject(object.metadata.name, object.metadata.namespace, objectClass)
+    )
+  );
+
+  return detailList;
 }

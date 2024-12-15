@@ -11,7 +11,7 @@ import { cloneDeep } from 'lodash';
 import { useEffect, useState } from 'react';
 import { getURLSegments } from '../common/url';
 import { RoutingPath } from '../index';
-import { fetchWorkloadConfigurationScan, proxyRequest } from '../model';
+import { fetchObject, proxyRequest, workloadConfigurationScanClass } from '../model';
 import { WorkloadConfigurationScan } from '../softwarecomposition/WorkloadConfigurationScan';
 import controlLibrary from './controlLibrary';
 
@@ -23,9 +23,11 @@ export default function KubescapeWorkloadConfigurationScanFixes() {
   const control = controlLibrary.find(element => element.controlID === controlID);
 
   useEffect(() => {
-    fetchWorkloadConfigurationScan(name, namespace).then((result: WorkloadConfigurationScan) => {
-      setWorkloadConfigurationScan(result);
-    });
+    fetchObject(name, namespace, workloadConfigurationScanClass).then(
+      (result: WorkloadConfigurationScan) => {
+        setWorkloadConfigurationScan(result);
+      }
+    );
   }, []);
 
   if (!workloadConfigurationScan) {

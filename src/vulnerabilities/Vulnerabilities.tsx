@@ -13,10 +13,10 @@ import { createRouteURL } from '@kinvolk/headlamp-plugin/lib/Router';
 import { Box, Button, FormControlLabel, Stack, Switch, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { RotatingLines } from 'react-loader-spinner';
-import { VulnerabilityManifestSummary } from 'src/softwarecomposition/VulnerabilityManifestSummary';
 import makeSeverityLabel from '../common/SeverityLabel';
 import { RoutingPath } from '../index';
-import { fetchVulnerabilityManifestSummaries } from '../model';
+import { listQuery, vulnerabilityManifestSummaryClass } from '../model';
+import { VulnerabilityManifestSummary } from '../softwarecomposition/VulnerabilityManifestSummary';
 import { fetchVulnerabilityManifests, WorkloadScan } from './fetch-vulnerabilities';
 import ImageListView from './ImageList';
 import WorkloadScanListView from './ResourceList';
@@ -35,7 +35,7 @@ interface CVEScan {
 
 // workloadScans are cached in global scope because it is an expensive query for the API server
 type VulnerabilityContext = {
-  workloadScans: WorkloadScan[] | null;
+  workloadScans: WorkloadScan[];
   currentClusterURL: string;
   summaries: VulnerabilityManifestSummary[];
   indexSummary: number;
@@ -61,13 +61,12 @@ export default function KubescapeVulnerabilities() {
       a.length === b.length && a.every((element, index) => element === b[index]);
 
     if (
-      vulnerabilityContext.workloadScans === null ||
       vulnerabilityContext.currentClusterURL !==
         createRouteURL(RoutingPath.KubescapeVulnerabilities) || // check if user switched to another cluster
       !arraysEqual(getAllowedNamespaces(), vulnerabilityContext.allowedNamespaces) // check if user changed namespace selection
     ) {
       const fetchData = async () => {
-        vulnerabilityContext.summaries = await fetchVulnerabilityManifestSummaries();
+        vulnerabilityContext.summaries = await listQuery(vulnerabilityManifestSummaryClass);
         vulnerabilityContext.currentClusterURL = createRouteURL(
           RoutingPath.KubescapeVulnerabilities
         );
