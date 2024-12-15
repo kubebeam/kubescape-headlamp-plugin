@@ -89,6 +89,7 @@ export default function KubescapeWorkloadConfigurationScanList(props: {
               gridTemplate: 'auto',
             },
             {
+              id: 'Failed Controls',
               header: 'Failed Controls',
               Cell: ({ row }: any) => resultStack(row.original),
               accessorFn: (workloadScan: WorkloadConfigurationScanSummary) =>
@@ -96,6 +97,14 @@ export default function KubescapeWorkloadConfigurationScanList(props: {
               gridTemplate: 'auto',
             },
           ]}
+          initialState={{
+            sorting: [
+              {
+                id: 'Failed Controls',
+                desc: true,
+              },
+            ],
+          }}
         />
       </Box>
     </>

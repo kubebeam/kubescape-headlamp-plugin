@@ -64,8 +64,10 @@ export default function ImageListView(props: { workloadScans: WorkloadScan[] | n
               gridTemplate: 'max-content',
             },
             {
+              id: 'Vulnerabilities',
               header: 'Vulnerabilities',
-              accessorFn: (imageScan: ImageScan) => resultStack(imageScan),
+              accessorFn: (imageScan: ImageScan) => countImageScans(imageScan).join('.'),
+              Cell: ({ row }: any) => resultStack(row.original),
             },
             {
               header: 'SBOM',
@@ -85,6 +87,14 @@ export default function ImageListView(props: { workloadScans: WorkloadScan[] | n
               gridTemplate: 'min-content',
             },
           ]}
+          initialState={{
+            sorting: [
+              {
+                id: 'Vulnerabilities',
+                desc: true,
+              },
+            ],
+          }}
         />
       </SectionBox>
     </>
@@ -122,6 +132,20 @@ function resultStack(imageScan: ImageScan) {
       {box('yellow', 'Low')}
     </Stack>
   );
+}
+
+function countImageScans(imageScan: ImageScan) {
+  const counters: number[] = [];
+  const severities = ['Critical', 'High', 'Medium', 'Low'];
+
+  severities.map(severity => {
+    const count = imageScan.matches.filter(
+      match => match.vulnerability.severity === severity
+    ).length;
+    counters.push(count);
+  });
+
+  return counters;
 }
 
 function cveList(imageScan: ImageScan, severity: string) {

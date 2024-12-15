@@ -84,7 +84,8 @@ function Controls(props: { workloadConfigurationScan: WorkloadConfigurationScan 
         columns={[
           {
             header: 'Status',
-            accessorFn: (control: WorkloadConfigurationScan.Control) => makeStatusLabel(control),
+            accessorKey: 'status.status',
+            Cell: ({ row }: any) => makeStatusLabel(row.original),
             gridTemplate: 'min-content',
           },
           {

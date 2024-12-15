@@ -72,8 +72,11 @@ export default function WorkloadScanListView(props: { workloadScans: WorkloadSca
               accessorFn: (workloadScan: WorkloadScan) => workloadScan.imageScan?.imageName,
             },
             {
+              id: 'CVE',
               header: 'CVE',
-              accessorFn: (workloadScan: WorkloadScan) => resultStack(workloadScan),
+              Cell: ({ row }: any) => resultStack(row.original),
+              accessorFn: (workloadScan: WorkloadScan) =>
+                countResourceScans(workloadScan).join('.'),
             },
             {
               header: 'Relevant',
@@ -121,6 +124,14 @@ export default function WorkloadScanListView(props: { workloadScans: WorkloadSca
               gridTemplate: 'min-content',
             },
           ]}
+          initialState={{
+            sorting: [
+              {
+                id: 'CVE',
+                desc: true,
+              },
+            ],
+          }}
         />
       </SectionBox>
     </>
@@ -172,4 +183,16 @@ function resultStack(workloadScan: WorkloadScan) {
       {box('yellow', 'Low')}
     </Stack>
   );
+}
+
+function countResourceScans(workloadScan: WorkloadScan) {
+  const counters: number[] = [];
+  const severities = ['Critical', 'High', 'Medium', 'Low'];
+
+  severities.map(severity => {
+    const count = countScans(workloadScan, severity);
+    counters.push(count);
+  });
+
+  return counters;
 }
