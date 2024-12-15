@@ -34,44 +34,63 @@ interface CVEScan {
 }
 
 // workloadScans are cached in global scope because it is an expensive query for the API server
-export let globalWorkloadScans: WorkloadScan[] | null = null;
-let currentClusterURL = '';
-let summaries: VulnerabilityManifestSummary[] = [];
-let indexSummary = 0;
-const summaryFetchItems = 20;
-let allowedNamespaces: string[] = [];
+type VulnerabilityContext = {
+  workloadScans: WorkloadScan[] | null;
+  currentClusterURL: string;
+  summaries: VulnerabilityManifestSummary[];
+  indexSummary: number;
+  summaryFetchItems: number;
+  allowedNamespaces: string[];
+};
+
+export const vulnerabilityContext: VulnerabilityContext = {
+  workloadScans: [],
+  currentClusterURL: '',
+  summaries: [],
+  indexSummary: 0,
+  summaryFetchItems: 20,
+  allowedNamespaces: [],
+};
 
 export default function KubescapeVulnerabilities() {
   const [workloadScans, setWorkloadScans] = useState<WorkloadScan[] | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
 
-  const arraysEqual = (a: string[], b: string[]) =>
-    a.length === b.length && a.every((element, index) => element === b[index]);
-
   useEffect(() => {
+    const arraysEqual = (a: string[], b: string[]) =>
+      a.length === b.length && a.every((element, index) => element === b[index]);
+
     if (
-      globalWorkloadScans === null ||
-      currentClusterURL !== createRouteURL(RoutingPath.KubescapeVulnerabilities) || // check if user switched to another cluster
-      !arraysEqual(getAllowedNamespaces(), allowedNamespaces) // check if user changed namespace selection
+      vulnerabilityContext.workloadScans === null ||
+      vulnerabilityContext.currentClusterURL !==
+        createRouteURL(RoutingPath.KubescapeVulnerabilities) || // check if user switched to another cluster
+      !arraysEqual(getAllowedNamespaces(), vulnerabilityContext.allowedNamespaces) // check if user changed namespace selection
     ) {
       const fetchData = async () => {
-        summaries = await fetchVulnerabilityManifestSummaries();
-        currentClusterURL = createRouteURL(RoutingPath.KubescapeVulnerabilities);
-        allowedNamespaces = getAllowedNamespaces();
+        vulnerabilityContext.summaries = await fetchVulnerabilityManifestSummaries();
+        vulnerabilityContext.currentClusterURL = createRouteURL(
+          RoutingPath.KubescapeVulnerabilities
+        );
+        vulnerabilityContext.allowedNamespaces = getAllowedNamespaces();
 
-        indexSummary = summaryFetchItems > summaries.length ? summaries.length : summaryFetchItems;
+        vulnerabilityContext.indexSummary =
+          vulnerabilityContext.summaryFetchItems > vulnerabilityContext.summaries.length
+            ? vulnerabilityContext.summaries.length
+            : vulnerabilityContext.summaryFetchItems;
 
-        fetchVulnerabilityManifests(summaries.slice(0, indexSummary)).then(response => {
-          globalWorkloadScans = response;
+        fetchVulnerabilityManifests(
+          vulnerabilityContext.summaries.slice(0, vulnerabilityContext.indexSummary)
+        ).then(response => {
+          vulnerabilityContext.workloadScans = response;
 
-          setWorkloadScans(globalWorkloadScans);
+          setWorkloadScans(vulnerabilityContext.workloadScans);
           setLoading(false);
         });
       };
 
       fetchData().catch(console.error);
     } else {
-      setWorkloadScans(globalWorkloadScans);
+      setWorkloadScans(vulnerabilityContext.workloadScans);
     }
   }, []);
 
@@ -80,7 +99,8 @@ export default function KubescapeVulnerabilities() {
       <h1>Vulnerabilities</h1>
       <Stack direction="row" spacing={2}>
         <Typography variant="body1" component="div" sx={{ flexGrow: 1 }}>
-          Reading {indexSummary} of {summaries.length} scans
+          Reading {vulnerabilityContext.indexSummary} of {vulnerabilityContext.summaries.length}{' '}
+          scans
         </Typography>
         <MoreButton setLoading={setLoading} setWorkloadScans={setWorkloadScans} title="Read more" />
         <MoreButton
@@ -297,29 +317,32 @@ function MoreButton(props: {
 
   return (
     <Button
-      disabled={indexSummary === summaries.length}
+      disabled={vulnerabilityContext.indexSummary === vulnerabilityContext.summaries.length}
       onClick={() => {
-        const currentIndex = indexSummary;
+        const currentIndex = vulnerabilityContext.indexSummary;
         if (readToEnd) {
-          indexSummary = summaries.length;
+          vulnerabilityContext.indexSummary = vulnerabilityContext.summaries.length;
         } else {
-          indexSummary =
-            currentIndex + summaryFetchItems > summaries.length
-              ? summaries.length
-              : currentIndex + summaryFetchItems;
+          vulnerabilityContext.indexSummary =
+            currentIndex + vulnerabilityContext.summaryFetchItems >
+            vulnerabilityContext.summaries.length
+              ? vulnerabilityContext.summaries.length
+              : currentIndex + vulnerabilityContext.summaryFetchItems;
         }
 
         setLoading(true);
         setTimeout(() =>
-          fetchVulnerabilityManifests(summaries.slice(currentIndex, indexSummary)).then(
-            response => {
-              if (!globalWorkloadScans) globalWorkloadScans = response;
-              else globalWorkloadScans = globalWorkloadScans?.concat(response);
+          fetchVulnerabilityManifests(
+            vulnerabilityContext.summaries.slice(currentIndex, vulnerabilityContext.indexSummary)
+          ).then(response => {
+            if (!vulnerabilityContext.workloadScans) vulnerabilityContext.workloadScans = response;
+            else
+              vulnerabilityContext.workloadScans =
+                vulnerabilityContext.workloadScans?.concat(response);
 
-              setWorkloadScans(globalWorkloadScans);
-              setLoading(false);
-            }
-          )
+            setWorkloadScans(vulnerabilityContext.workloadScans);
+            setLoading(false);
+          })
         );
       }}
       variant="contained"
