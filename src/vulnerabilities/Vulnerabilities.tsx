@@ -1,6 +1,7 @@
 /* 
   Overview page for vulnerability issues, workloads and images. 
 */
+import { ApiProxy } from '@kinvolk/headlamp-plugin/lib';
 import {
   Link as HeadlampLink,
   SectionBox,
@@ -42,6 +43,7 @@ type VulnerabilityContext = {
   summaryFetchItems: number;
   allowedNamespaces: string[];
   selectedTab: number;
+  kubescapeNamespace: string;
 };
 
 export const vulnerabilityContext: VulnerabilityContext = {
@@ -52,6 +54,7 @@ export const vulnerabilityContext: VulnerabilityContext = {
   summaryFetchItems: 20,
   allowedNamespaces: [],
   selectedTab: 0,
+  kubescapeNamespace: '',
 };
 
 export default function KubescapeVulnerabilities() {
@@ -67,9 +70,19 @@ export default function KubescapeVulnerabilities() {
       !arraysEqual(getAllowedNamespaces(), vulnerabilityContext.allowedNamespaces) // check if user changed namespace selection
     ) {
       const fetchData = async () => {
+        const kubescapePods: any[0] = await ApiProxy.request(
+          `/api/v1/pods?labelSelector=${encodeURI(
+            'app.kubernetes.io/component=kubescape,app.kubernetes.io/instance=kubescape'
+          )}`
+        );
+        if (kubescapePods?.items.length === 0) {
+          console.error('Could not find Kubescape operator in cluster');
+          return;
+        }
         vulnerabilityContext.summaries = await listQuery(vulnerabilityManifestSummaryClass);
         vulnerabilityContext.currentCluster = getCluster();
         vulnerabilityContext.allowedNamespaces = getAllowedNamespaces();
+        vulnerabilityContext.kubescapeNamespace = kubescapePods.items[0].metadata.namespace;
 
         vulnerabilityContext.indexSummary =
           vulnerabilityContext.summaryFetchItems > vulnerabilityContext.summaries.length
@@ -77,7 +90,8 @@ export default function KubescapeVulnerabilities() {
             : vulnerabilityContext.summaryFetchItems;
 
         fetchVulnerabilityManifests(
-          vulnerabilityContext.summaries.slice(0, vulnerabilityContext.indexSummary)
+          vulnerabilityContext.summaries.slice(0, vulnerabilityContext.indexSummary),
+          vulnerabilityContext.kubescapeNamespace
         ).then(response => {
           vulnerabilityContext.workloadScans = response;
 
@@ -343,7 +357,8 @@ function MoreButton(props: {
         setLoading(true);
         setTimeout(() =>
           fetchVulnerabilityManifests(
-            vulnerabilityContext.summaries.slice(currentIndex, vulnerabilityContext.indexSummary)
+            vulnerabilityContext.summaries.slice(currentIndex, vulnerabilityContext.indexSummary),
+            vulnerabilityContext.kubescapeNamespace
           ).then(response => {
             if (!vulnerabilityContext.workloadScans) vulnerabilityContext.workloadScans = response;
             else

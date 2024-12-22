@@ -30,9 +30,9 @@ export interface ImageScan {
   matches: VulnerabilityManifest.Match[];
 }
 
-async function fetchImageScan(name: string): Promise<ImageScan | undefined> {
+async function fetchImageScan(name: string, namespace: string): Promise<ImageScan | undefined> {
   try {
-    const v = await fetchObject(name, 'kubescape', vulnerabilityManifestClass);
+    const v = await fetchObject(name, namespace, vulnerabilityManifestClass);
 
     const imageScan: ImageScan = {
       manifestName: v.metadata.name,
@@ -51,7 +51,8 @@ async function fetchImageScan(name: string): Promise<ImageScan | undefined> {
 // Query vulnerabilitymanifestsummaries and vulnerabilitymanifests
 // Convert the retrieved data to WorkloadScan and ImageScan
 export async function fetchVulnerabilityManifests(
-  summaries: VulnerabilityManifestSummary[]
+  summaries: VulnerabilityManifestSummary[],
+  kubescapeNamespace: string
 ): Promise<any> {
   return await Promise.all(
     summaries.map(async (summary: VulnerabilityManifestSummary) => {
@@ -70,10 +71,16 @@ export async function fetchVulnerabilityManifests(
         relevant: undefined,
       };
       if (detailedSummary.spec.vulnerabilitiesRef?.all?.name) {
-        w.imageScan = await fetchImageScan(detailedSummary.spec.vulnerabilitiesRef.all.name);
+        w.imageScan = await fetchImageScan(
+          detailedSummary.spec.vulnerabilitiesRef.all.name,
+          kubescapeNamespace
+        );
       }
       if (detailedSummary.spec.vulnerabilitiesRef?.relevant?.name) {
-        w.relevant = await fetchImageScan(detailedSummary.spec.vulnerabilitiesRef.relevant.name);
+        w.relevant = await fetchImageScan(
+          detailedSummary.spec.vulnerabilitiesRef.relevant.name,
+          kubescapeNamespace
+        );
       }
 
       return w;
