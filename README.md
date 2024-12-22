@@ -38,8 +38,8 @@ The queries to the Kubescape database use Headlamps feature for `Allowed namespa
 #### Desktop Headlamp
 
 - Install Headlamp (https://headlamp.dev/docs/latest/installation/desktop/)
-- Configure Settings/Plugins/Plugin Catalog and make sure "Display only Official Plugins" is unchecked.
 - Open Plugin Catalog
+- Turn off "Only Official" (Kubescape plugin has status Verified, not yet Official)
 - Select the KubeScape Headlamp plugin and click the install button
 - After install you may need to restart Headlamp
 
