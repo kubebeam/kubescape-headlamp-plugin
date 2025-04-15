@@ -1,3 +1,7 @@
+#
+# MOVED TO https://github.com/kubescape/headlamp-plugin
+#
+
 # Kubescape Headlamp Plugin
 
 The Kubescape Headlamp plugin provides an open source plugin for Headlamp. It builds upon the work of [Kubescape](https://kubescape.io/) and [Headlamp](https://github.com/headlamp-k8s/headlamp).
